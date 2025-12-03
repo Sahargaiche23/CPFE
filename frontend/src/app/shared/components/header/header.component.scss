@@ -1,0 +1,15 @@
+.nav-link {
+  @apply flex items-center text-gray-700 hover:text-cnss-primary font-medium transition-colors duration-200;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.dropdown-item {
+  @apply flex items-center space-x-2 px-4 py-2 hover:bg-gray-100 transition-colors duration-200;
+  
+  .material-icons {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,143 @@
+<app-main-layout>
+  <div class="fade-in">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-cnss-primary to-cnss-secondary rounded-2xl p-8 mb-8 text-white shadow-xl">
+      <h1 class="text-3xl font-bold mb-2">Tableau de Bord</h1>
+      <p class="text-lg opacity-90">Bienvenue dans le système de gestion de la coopération technique</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Employers -->
+      <div class="card hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-semibold mb-2">Total Employeurs</p>
+            <h3 class="text-3xl font-bold text-cnss-primary">{{ stats.totalEmployers }}</h3>
+          </div>
+          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-purple-600">business</span>
+          </div>
+        </div>
+        <a routerLink="/employer" class="text-cnss-primary text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          Voir détails
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Total Affiliations -->
+      <div class="card hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-semibold mb-2">Total Affiliations</p>
+            <h3 class="text-3xl font-bold text-cnss-secondary">{{ stats.totalAffiliations }}</h3>
+          </div>
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-green-600">person_add</span>
+          </div>
+        </div>
+        <a routerLink="/affiliation" class="text-cnss-secondary text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          Voir détails
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Pending Debits -->
+      <div class="card hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-semibold mb-2">Débits en attente</p>
+            <h3 class="text-3xl font-bold text-orange-600">{{ stats.pendingDebits }}</h3>
+          </div>
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-orange-600">receipt</span>
+          </div>
+        </div>
+        <a routerLink="/debit" class="text-orange-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          Voir détails
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Total Payments -->
+      <div class="card hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-semibold mb-2">Total Paiements</p>
+            <h3 class="text-3xl font-bold text-blue-600">{{ stats.totalPayments }}</h3>
+          </div>
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-blue-600">payment</span>
+          </div>
+        </div>
+        <a routerLink="/payment" class="text-blue-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          Voir détails
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Activities & Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Recent Activities -->
+      <div class="lg:col-span-2 card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2">notifications</span>
+          Activités récentes
+        </h2>
+        
+        <div *ngIf="loading" class="flex justify-center py-8">
+          <div class="spinner"></div>
+        </div>
+
+        <div *ngIf="!loading" class="space-y-4">
+          <div *ngFor="let activity of recentActivities" 
+               class="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-4 shadow">
+              <span class="material-icons {{ activity.color }}">{{ activity.icon }}</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-800 font-medium">{{ activity.description }}</p>
+              <p class="text-sm text-gray-500 mt-1">{{ activity.time }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2">flash_on</span>
+          Actions rapides
+        </h2>
+        
+        <div class="space-y-3">
+          <a routerLink="/employer/new" class="quick-action-btn bg-purple-50 hover:bg-purple-100 text-purple-700">
+            <span class="material-icons">business</span>
+            <span>Nouvel Employeur</span>
+          </a>
+          
+          <a routerLink="/affiliation/new" class="quick-action-btn bg-green-50 hover:bg-green-100 text-green-700">
+            <span class="material-icons">person_add</span>
+            <span>Nouvelle Affiliation</span>
+          </a>
+          
+          <a routerLink="/debit/generate" class="quick-action-btn bg-orange-50 hover:bg-orange-100 text-orange-700">
+            <span class="material-icons">receipt</span>
+            <span>Générer Débit</span>
+          </a>
+          
+          <a routerLink="/payment/new" class="quick-action-btn bg-blue-50 hover:bg-blue-100 text-blue-700">
+            <span class="material-icons">payment</span>
+            <span>Nouveau Paiement</span>
+          </a>
+          
+          <a routerLink="/salary/convert" class="quick-action-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-700">
+            <span class="material-icons">currency_exchange</span>
+            <span>Convertir Salaire</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-main-layout>

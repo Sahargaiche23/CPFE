@@ -1,0 +1,180 @@
+<app-main-layout>
+  <div class="fade-in">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-cnss-dark">Gestion des Employeurs</h1>
+        <p class="text-gray-600 mt-2">Liste des employeurs régime 500 et 510</p>
+      </div>
+      <a routerLink="/employer/new" class="btn-primary">
+        <span class="material-icons mr-2">add</span>
+        Nouvel Employeur
+      </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Recherche</label>
+          <input type="text" placeholder="Nom ou numéro..." 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Régime</label>
+          <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
+            <option value="">Tous</option>
+            <option value="500">Régime 500</option>
+            <option value="510">Régime 510</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Statut</label>
+          <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
+            <option value="">Tous</option>
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button class="w-full px-6 py-2 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all">
+            <span class="material-icons text-sm mr-1">search</span>
+            Rechercher
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="card bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Total Employeurs</p>
+            <h3 class="text-3xl font-bold">{{ employers.length }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">business</span>
+        </div>
+      </div>
+      
+      <div class="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Régime 500</p>
+            <h3 class="text-3xl font-bold">{{ getRegimeCount('500') }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">apartment</span>
+        </div>
+      </div>
+      
+      <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Régime 510</p>
+            <h3 class="text-3xl font-bold">{{ getRegimeCount('510') }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">domain</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employers Table -->
+    <div class="card">
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="spinner"></div>
+      </div>
+
+      <div *ngIf="!loading" class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Numéro</th>
+              <th>Nom Commercial</th>
+              <th>Régime</th>
+              <th>Pays</th>
+              <th>Affiliations</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let employer of employers" class="hover:bg-gray-50">
+              <td class="font-mono text-sm">{{ employer.employerNumber }}</td>
+              <td>
+                <div class="font-semibold text-gray-900">{{ employer.tradeName }}</div>
+                <div class="text-sm text-gray-500">{{ employer.legalName }}</div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-blue-100 text-blue-800': employer.regime === '500',
+                  'bg-green-100 text-green-800': employer.regime === '510'
+                }">
+                  Régime {{ employer.regime }}
+                </span>
+              </td>
+              <td>{{ employer.country }}</td>
+              <td class="text-center">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                  <span class="material-icons text-sm mr-1">people</span>
+                  {{ employer.affiliationsCount || 0 }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-green-100 text-green-800': employer.active,
+                  'bg-red-100 text-red-800': !employer.active
+                }">
+                  {{ employer.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <div class="flex items-center space-x-2">
+                  <a [routerLink]="['/employer', employer.id]" 
+                     class="text-blue-600 hover:text-blue-800" title="Détails">
+                    <span class="material-icons text-xl">visibility</span>
+                  </a>
+                  <a [routerLink]="['/employer/edit', employer.id]" 
+                     class="text-green-600 hover:text-green-800" title="Modifier">
+                    <span class="material-icons text-xl">edit</span>
+                  </a>
+                  <button class="text-red-600 hover:text-red-800" title="Supprimer">
+                    <span class="material-icons text-xl">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            
+            <tr *ngIf="employers.length === 0">
+              <td colspan="7" class="text-center py-12 text-gray-500">
+                <span class="material-icons text-6xl mb-4 block text-gray-300">business_center</span>
+                <p class="text-lg font-semibold">Aucun employeur trouvé</p>
+                <p class="text-sm mt-2">Commencez par créer votre premier employeur</p>
+                <a routerLink="/employer/new" class="btn-primary mt-4 inline-flex items-center">
+                  <span class="material-icons mr-2">add</span>
+                  Créer un employeur
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="employers.length > 0" class="flex items-center justify-between mt-6 pt-6 border-t">
+        <div class="text-sm text-gray-600">
+          Affichage de <span class="font-semibold">1</span> à <span class="font-semibold">{{ employers.length }}</span> 
+          sur <span class="font-semibold">{{ employers.length }}</span> résultats
+        </div>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50" disabled>
+            Précédent
+          </button>
+          <button class="px-3 py-1 bg-cnss-primary text-white rounded">1</button>
+          <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50" disabled>
+            Suivant
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-main-layout>
