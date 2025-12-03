@@ -1,0 +1,200 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║        🏛️  SYSTÈME CNSS COOPÉRATION TECHNIQUE - DÉMARRAGE RAPIDE 🏛️         ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 PRÉREQUIS
+═════════════
+✓ Oracle XE 21c démarré (docker start oracle-xe) ✅
+✓ RabbitMQ démarré (port 5672) ✅
+✓ Redis démarré (port 6379) ✅
+✓ Java 17+ installé
+✓ Maven 3.8+ installé
+✓ Docker & Docker Compose installés
+
+
+🚀 DÉMARRAGE EN 4 ÉTAPES
+═════════════════════════
+
+📌 ÉTAPE 1: Initialiser la Base de Données Oracle (UNE SEULE FOIS)
+───────────────────────────────────────────────────────────────────
+cd /home/sahar/Bureau/CNSS/CascadeProjects/windsurf-project
+./scripts/init-oracle.sh
+
+Cela va créer:
+  • Utilisateur COPT
+  • Tables (DOSSIER_COP, SALAIRE_ETRANGER, AFFILIATION, etc.)
+  • Séquences
+  • Utilisateurs de test (admin/admin123)
+
+
+📌 ÉTAPE 2: Compiler les Microservices
+───────────────────────────────────────
+mvn clean install -DskipTests
+
+Temps estimé: 5-10 minutes
+
+
+📌 ÉTAPE 3: Démarrer les Services
+──────────────────────────────────
+
+Option A - Automatique (Docker Compose):
+  ./scripts/start-services.sh
+
+Option B - Manuel (développement):
+  cd eureka-server && mvn spring-boot:run &
+  cd gateway-service && mvn spring-boot:run &
+  cd auth-service && mvn spring-boot:run &
+  # ... etc
+
+
+📌 ÉTAPE 4: Tester le Workflow
+───────────────────────────────
+./scripts/test-workflow.sh
+
+
+🌐 URLS IMPORTANTES
+════════════════════
+• Eureka Dashboard:    http://localhost:8761
+• API Gateway:         http://localhost:8080
+• RabbitMQ Management: http://localhost:15672 (guest/guest)
+• Health Check:        http://localhost:8080/actuator/health
+
+
+🧪 TEST RAPIDE (avec curl)
+═══════════════════════════
+
+1️⃣ Login:
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+2️⃣ Créer un Dossier:
+curl -X POST http://localhost:8080/api/employer/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matricule": 500380,
+    "cle": 54,
+    "regime": "500",
+    "dateDepotCnss": "2025-01-03",
+    "dateEffet": "2024-03-01",
+    "nomPrenom": "AHMED MOHAMED",
+    "paysDetachement": "Qatar"
+  }'
+
+3️⃣ Convertir Salaire:
+curl -X POST http://localhost:8080/api/salary/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matricule": 500380,
+    "dernierSalaireTN": 4500,
+    "nouveauSalaireEtranger": 2000,
+    "devise": "EUR",
+    "dateDetachement": "2024-03-01"
+  }'
+
+
+📂 ARCHITECTURE
+════════════════
+
+11 Microservices:
+├── eureka-server (8761)         → Service Discovery
+├── gateway-service (8080)       → API Gateway
+├── auth-service (8089)          → Authentification JWT
+├── employer-service (8081)      → Gestion Employeur
+├── salary-service (8082)        → Conversion Salaire
+├── regime-service (8083)        → Détermination Régime
+├── affiliation-service (8084)   → Affiliation
+├── debit-service (8085)         → Débit Trimestriel
+├── payment-service (8086)       → Paiements
+├── notification-service (8087)  → Emails
+└── file-service (8088)          → Gestion Fichiers
+
+
+🔍 VÉRIFIER L'ÉTAT
+═══════════════════
+docker-compose ps                 # État des containers
+docker-compose logs -f            # Logs en temps réel
+curl http://localhost:8761        # Eureka
+curl http://localhost:8089/auth/health  # Auth service
+
+
+🛑 ARRÊTER LES SERVICES
+════════════════════════
+docker-compose down               # Arrêter tous les services
+docker-compose down -v            # Arrêter + supprimer volumes
+
+
+📚 DOCUMENTATION COMPLÈTE
+═══════════════════════════
+1. README.md              → Vue d'ensemble
+2. GUIDE_DEMARRAGE.md     → Guide détaillé avec exemples
+3. BUILD.md               → Compilation et déploiement
+4. PROJET_COMPLET.md      → Architecture complète
+5. NEXT_STEPS.md          → Roadmap et améliorations
+
+
+🐛 PROBLÈMES COURANTS
+══════════════════════
+
+❌ Port déjà utilisé
+   → lsof -i :8080
+   → kill -9 <PID>
+
+❌ Oracle connection refused
+   → docker start oracle-xe
+   → Attendre 30 secondes
+
+❌ Eureka n'enregistre pas les services
+   → Attendre 1-2 minutes après démarrage
+   → Vérifier logs: docker-compose logs -f [service]
+
+
+👤 COMPTES DE TEST
+═══════════════════
+• admin / admin123 (ADMIN)
+• agent / admin123 (AGENT_COOP_TECH)
+
+
+📞 COMMANDES UTILES
+═══════════════════
+# Maven
+mvn clean install                 # Build complet
+mvn clean install -DskipTests     # Build sans tests
+cd [service] && mvn spring-boot:run  # Run un service
+
+# Docker
+docker-compose build              # Build images
+docker-compose up -d              # Démarrer
+docker-compose down               # Arrêter
+docker-compose logs -f [service]  # Logs
+
+# Oracle
+docker exec -it oracle-xe sqlplus COPT/copt123@XEPDB1
+
+
+✅ CHECKLIST DÉMARRAGE
+═══════════════════════
+□ Oracle XE démarré
+□ RabbitMQ démarré
+□ Redis démarré
+□ Base de données initialisée (scripts/init-oracle.sh)
+□ Services compilés (mvn clean install)
+□ Services démarrés (./scripts/start-services.sh)
+□ Eureka accessible (http://localhost:8761)
+□ Tests passés (./scripts/test-workflow.sh)
+
+
+🎉 PROJET CRÉÉ AVEC SUCCÈS!
+═══════════════════════════
+
+Auteur: CNSS - Sahar Gaiche
+Version: 1.0.0-SNAPSHOT
+Date: Décembre 2025
+
+Pour toute question, consulter la documentation dans le dossier.
+
+Bon développement! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,177 @@
+version: '3.8'
+
+services:
+  # RabbitMQ déjà existant - on l'utilise
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  
+  # Redis déjà existant
+  # redis:
+  #   image: redis:7
+  #   ports:
+  #     - "6379:6379"
+  
+  # Oracle XE déjà démarré manuellement
+  # oracle-xe est déjà en cours d'exécution
+
+  # Eureka Server
+  eureka-server:
+    build: ./eureka-server
+    container_name: cooperation-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - cooperation-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Gateway Service
+  gateway-service:
+    build: ./gateway-service
+    container_name: cooperation-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_REDIS_HOST=redis
+
+  # Auth Service
+  auth-service:
+    build: ./auth-service
+    container_name: cooperation-auth
+    ports:
+      - "8089:8089"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Employer Service
+  employer-service:
+    build: ./employer-service
+    container_name: cooperation-employer
+    ports:
+      - "8081:8081"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+      - SPRING_RABBITMQ_HOST=rabbitmq
+
+  # Salary Service
+  salary-service:
+    build: ./salary-service
+    container_name: cooperation-salary
+    ports:
+      - "8082:8082"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Regime Service
+  regime-service:
+    build: ./regime-service
+    container_name: cooperation-regime
+    ports:
+      - "8083:8083"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Affiliation Service
+  affiliation-service:
+    build: ./affiliation-service
+    container_name: cooperation-affiliation
+    ports:
+      - "8084:8084"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Debit Service
+  debit-service:
+    build: ./debit-service
+    container_name: cooperation-debit
+    ports:
+      - "8085:8085"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Payment Service
+  payment-service:
+    build: ./payment-service
+    container_name: cooperation-payment
+    ports:
+      - "8086:8086"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-xe:1521/XEPDB1
+
+  # Notification Service
+  notification-service:
+    build: ./notification-service
+    container_name: cooperation-notification
+    ports:
+      - "8087:8087"
+    networks:
+      - cooperation-network
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  # File Service
+  file-service:
+    build: ./file-service
+    container_name: cooperation-file
+    ports:
+      - "8088:8088"
+    networks:
+      - cooperation-network
+    volumes:
+      - file-storage:/var/cnss/uploads
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+networks:
+  cooperation-network:
+    driver: bridge
+
+volumes:
+  file-storage:

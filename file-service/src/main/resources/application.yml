@@ -1,0 +1,21 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: file-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+file:
+  upload-dir: /var/cnss/uploads
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html

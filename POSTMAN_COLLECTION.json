@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "cnss-cooperation-technique",
+		"name": "CNSS Coopération Technique",
+		"description": "Collection de tests pour le système de gestion de la coopération technique CNSS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", jsonData.token);",
+									"    pm.environment.set(\"user_id\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Agent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"agent\",\n  \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employer Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/employer/health",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["employer", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Créer Dossier",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"matricule\": 500380,\n  \"cle\": 54,\n  \"regime\": \"500\",\n  \"dateDepotCnss\": \"2025-01-03\",\n  \"dateEffet\": \"2024-03-01\",\n  \"dateNaissance\": \"1980-05-15\",\n  \"nomPrenom\": \"AHMED MOHAMED\",\n  \"paysDetachement\": \"Qatar\",\n  \"periodeDebut\": \"2024-03-01\",\n  \"periodeFin\": \"2026-03-01\",\n  \"matriculeEntreprise\": \"1378\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/employer/create",
+							"host": ["{{base_url}}"],
+							"path": ["employer", "create"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher Dossier",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/employer?matricule=500380&regime=500&dateEffet=2024-03-01",
+							"host": ["{{base_url}}"],
+							"path": ["employer"],
+							"query": [
+								{
+									"key": "matricule",
+									"value": "500380"
+								},
+								{
+									"key": "regime",
+									"value": "500"
+								},
+								{
+									"key": "dateEffet",
+									"value": "2024-03-01"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Salary Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/salary/health",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8082",
+							"path": ["salary", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Convertir Salaire",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"matricule\": 500380,\n  \"cle\": 54,\n  \"dernierSalaireTN\": 4500.000,\n  \"nouveauSalaireEtranger\": 2000.000,\n  \"devise\": \"EUR\",\n  \"dateDetachement\": \"2024-03-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/salary/convert",
+							"host": ["{{base_url}}"],
+							"path": ["salary", "convert"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Regime Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/regime/health",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8083",
+							"path": ["regime", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Déterminer Régime",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dernierSalaire\": 4500.000,\n  \"nouveauSalaireTND\": 6500.000,\n  \"pays\": \"Qatar\",\n  \"societePublique\": true,\n  \"dateDetachement\": \"2024-03-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/regime/determine",
+							"host": ["{{base_url}}"],
+							"path": ["regime", "determine"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Actuator Endpoints",
+			"item": [
+				{
+					"name": "Auth Health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8089/actuator/health",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8089",
+							"path": ["actuator", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth Info",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8089/actuator/info",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8089",
+							"path": ["actuator", "info"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
