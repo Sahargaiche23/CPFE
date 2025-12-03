@@ -7,16 +7,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
   selector: 'app-affiliation-form',
   standalone: true,
   imports: [CommonModule, RouterLink, MainLayoutComponent],
-  template: `
-    <app-main-layout>
-      <div class="fade-in">
-        <h1 class="text-3xl font-bold text-cnss-dark mb-8">Nouvelle Affiliation</h1>
-        <div class="card">
-          <p class="text-gray-600">Formulaire d'affiliation en cours de développement...</p>
-        </div>
-      </div>
-    </app-main-layout>
-  `,
+  templateUrl: './affiliation-form.component.html',
   styles: []
 })
 export class AffiliationFormComponent {}

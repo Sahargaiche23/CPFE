@@ -2,72 +2,58 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
-import { EmployerService, Employer } from '../../../core/services/employer.service';
 
 @Component({
   selector: 'app-employer-list',
   standalone: true,
   imports: [CommonModule, RouterLink, MainLayoutComponent],
-  template: `
-    <app-main-layout>
-      <div class="fade-in">
-        <div class="flex justify-between items-center mb-8">
-          <h1 class="text-3xl font-bold text-cnss-dark">Gestion des Employeurs</h1>
-          <a routerLink="/employer/new" class="btn-primary">
-            <span class="material-icons mr-2">add</span>
-            Nouvel Employeur
-          </a>
-        </div>
-
-        <div class="card">
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>N° Employeur</th>
-                  <th>Raison Sociale</th>
-                  <th>Email</th>
-                  <th>Téléphone</th>
-                  <th>Régime</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let employer of employers">
-                  <td class="font-semibold text-cnss-primary">{{ employer.numeroEmployeur }}</td>
-                  <td>{{ employer.raisonSociale }}</td>
-                  <td>{{ employer.email }}</td>
-                  <td>{{ employer.tel }}</td>
-                  <td><span class="badge badge-info">{{ employer.regimeCode }}</span></td>
-                  <td><span class="badge badge-success">{{ employer.status }}</span></td>
-                  <td>
-                    <a [routerLink]="['/employer', employer.id]" class="text-cnss-primary hover:underline">
-                      Détails
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </app-main-layout>
-  `,
+  templateUrl: './employer-list.component.html',
   styles: []
 })
 export class EmployerListComponent implements OnInit {
-  employers: Employer[] = [];
-
-  constructor(private employerService: EmployerService) {}
+  loading = true;
+  employers: any[] = [];
 
   ngOnInit() {
-    this.loadEmployers();
+    // Simulate API call with test data
+    setTimeout(() => {
+      this.employers = [
+        {
+          id: 1,
+          employerNumber: '500-2024-001',
+          legalName: 'Entreprise Test SARL',
+          tradeName: 'Test Company France',
+          regime: '500',
+          country: 'France',
+          active: true,
+          affiliationsCount: 5
+        },
+        {
+          id: 2,
+          employerNumber: '510-2024-002',
+          legalName: 'International Corporation GmbH',
+          tradeName: 'IntCorp Deutschland',
+          regime: '510',
+          country: 'Allemagne',
+          active: true,
+          affiliationsCount: 12
+        },
+        {
+          id: 3,
+          employerNumber: '500-2024-003',
+          legalName: 'Tech Solutions SARL',
+          tradeName: 'TechSol France',
+          regime: '500',
+          country: 'France',
+          active: false,
+          affiliationsCount: 3
+        }
+      ];
+      this.loading = false;
+    }, 800);
   }
 
-  loadEmployers() {
-    this.employerService.getAll().subscribe(employers => {
-      this.employers = employers;
-    });
+  getRegimeCount(regime: string): number {
+    return this.employers.filter(e => e.regime === regime).length;
   }
 }

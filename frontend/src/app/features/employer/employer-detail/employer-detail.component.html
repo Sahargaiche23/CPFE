@@ -1,0 +1,218 @@
+<app-main-layout>
+  <div class="fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+      <a routerLink="/employer" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
+        <span class="material-icons mr-1">arrow_back</span>
+        Retour à la liste
+      </a>
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-cnss-dark">Détails de l'Employeur</h1>
+          <p class="text-gray-600 mt-2">Informations complètes de l'employeur</p>
+        </div>
+        <div class="flex space-x-3">
+          <button class="px-4 py-2 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all flex items-center">
+            <span class="material-icons mr-2">edit</span>
+            Modifier
+          </button>
+          <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-opacity-90 transition-all flex items-center">
+            <span class="material-icons mr-2">delete</span>
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Info Card -->
+    <div class="card mb-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <div class="flex items-center mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
+              <span class="material-icons text-3xl text-white">business</span>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-cnss-dark">Entreprise Example SARL</h2>
+              <p class="text-gray-600">Commercial Trade Name Ltd.</p>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Numéro Employeur</p>
+              <p class="font-mono font-bold text-cnss-primary">500-2024-001</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Régime</p>
+              <span class="badge bg-blue-100 text-blue-800">Régime 500</span>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Pays</p>
+              <p class="font-semibold">France</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Statut</p>
+              <span class="badge bg-green-100 text-green-800">Actif</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Details Column -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Company Information -->
+        <div class="card">
+          <h3 class="text-lg font-bold text-cnss-dark mb-4 flex items-center">
+            <span class="material-icons mr-2 text-cnss-primary">business</span>
+            Informations de l'Entreprise
+          </h3>
+          <div class="space-y-3">
+            <div class="flex border-b pb-3">
+              <span class="text-gray-600 w-40">Raison Sociale:</span>
+              <span class="font-semibold flex-1">Entreprise Example SARL</span>
+            </div>
+            <div class="flex border-b pb-3">
+              <span class="text-gray-600 w-40">Nom Commercial:</span>
+              <span class="font-semibold flex-1">Commercial Trade Name Ltd.</span>
+            </div>
+            <div class="flex border-b pb-3">
+              <span class="text-gray-600 w-40">Forme Juridique:</span>
+              <span class="font-semibold flex-1">SARL</span>
+            </div>
+            <div class="flex pb-3">
+              <span class="text-gray-600 w-40">Date de Création:</span>
+              <span class="font-semibold flex-1">15/03/2020</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card">
+          <h3 class="text-lg font-bold text-cnss-dark mb-4 flex items-center">
+            <span class="material-icons mr-2 text-cnss-primary">contact_mail</span>
+            Coordonnées
+          </h3>
+          <div class="space-y-3">
+            <div class="flex items-start border-b pb-3">
+              <span class="material-icons text-gray-400 mr-3">location_on</span>
+              <div class="flex-1">
+                <p class="text-gray-600 text-sm">Adresse</p>
+                <p class="font-semibold">123 Avenue des Champs-Élysées<br>75008 Paris, France</p>
+              </div>
+            </div>
+            <div class="flex items-center border-b pb-3">
+              <span class="material-icons text-gray-400 mr-3">phone</span>
+              <div class="flex-1">
+                <p class="text-gray-600 text-sm">Téléphone</p>
+                <p class="font-semibold">+33 1 23 45 67 89</p>
+              </div>
+            </div>
+            <div class="flex items-center pb-3">
+              <span class="material-icons text-gray-400 mr-3">email</span>
+              <div class="flex-1">
+                <p class="text-gray-600 text-sm">Email</p>
+                <p class="font-semibold">contact@example.fr</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Affiliations -->
+        <div class="card">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-cnss-dark flex items-center">
+              <span class="material-icons mr-2 text-cnss-primary">people</span>
+              Affiliations (5)
+            </h3>
+            <button class="text-cnss-primary hover:underline text-sm flex items-center">
+              <span class="material-icons text-sm mr-1">add</span>
+              Ajouter
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+              <div>
+                <p class="font-semibold">Dupont Jean</p>
+                <p class="text-sm text-gray-600">Actif depuis: 01/01/2023</p>
+              </div>
+              <span class="badge bg-green-100 text-green-800">Actif</span>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+              <div>
+                <p class="font-semibold">Martin Sophie</p>
+                <p class="text-sm text-gray-600">Actif depuis: 15/03/2023</p>
+              </div>
+              <span class="badge bg-green-100 text-green-800">Actif</span>
+            </div>
+            <div class="text-center py-4">
+              <a href="#" class="text-cnss-primary hover:underline">Voir toutes les affiliations →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Stats -->
+        <div class="card bg-gradient-to-br from-cnss-primary to-cnss-secondary text-white">
+          <h3 class="text-lg font-bold mb-4">Statistiques</h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="opacity-90">Affiliations</span>
+              <span class="text-2xl font-bold">5</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="opacity-90">Débits</span>
+              <span class="text-2xl font-bold">12</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="opacity-90">Paiements</span>
+              <span class="text-2xl font-bold">28</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <h3 class="text-lg font-bold text-cnss-dark mb-4">Actions Rapides</h3>
+          <div class="space-y-2">
+            <button class="w-full px-4 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg flex items-center transition-all">
+              <span class="material-icons mr-3">person_add</span>
+              <span class="font-semibold">Nouvelle Affiliation</span>
+            </button>
+            <button class="w-full px-4 py-3 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg flex items-center transition-all">
+              <span class="material-icons mr-3">receipt</span>
+              <span class="font-semibold">Générer Débit</span>
+            </button>
+            <button class="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg flex items-center transition-all">
+              <span class="material-icons mr-3">payment</span>
+              <span class="font-semibold">Nouveau Paiement</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Legal Info -->
+        <div class="card">
+          <h3 class="text-lg font-bold text-cnss-dark mb-4">Informations Légales</h3>
+          <div class="space-y-3 text-sm">
+            <div>
+              <p class="text-gray-600">SIRET</p>
+              <p class="font-mono font-semibold">123 456 789 00012</p>
+            </div>
+            <div>
+              <p class="text-gray-600">Créé le</p>
+              <p class="font-semibold">15/03/2020</p>
+            </div>
+            <div>
+              <p class="text-gray-600">Dernière MAJ</p>
+              <p class="font-semibold">28/11/2024</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-main-layout>
