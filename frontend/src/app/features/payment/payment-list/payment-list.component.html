@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center mb-8">
       <div>
         <h1 class="text-3xl font-bold text-cnss-dark">Gestion des Paiements</h1>
-        <p class="text-gray-600 mt-2">Liste des paiements enregistrés</p>
+        <p class="text-gray-600 mt-2">Liste des paiements enregistrés et leur statut</p>
       </div>
       <a routerLink="/payment/new" class="btn-primary">
         <span class="material-icons mr-2">add</span>
@@ -11,12 +11,103 @@
       </a>
     </div>
 
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Total Paiements</p>
+            <h3 class="text-3xl font-bold">{{ payments.length }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">payment</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Validés</p>
+            <h3 class="text-3xl font-bold">{{ getValidatedCount() }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">check_circle</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">En attente</p>
+            <h3 class="text-3xl font-bold">{{ getPendingCount() }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">pending</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Montant Total</p>
+            <h3 class="text-2xl font-bold">{{ getTotalAmount() | number:'1.0-0' }} TND</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">account_balance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
     <div class="card">
-      <p class="text-center py-12 text-gray-500">
-        <span class="material-icons text-6xl mb-4 block text-gray-300">payment</span>
-        <span class="text-lg font-semibold">Liste des paiements</span><br>
-        <span class="text-sm">Module en cours de développement</span>
-      </p>
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="spinner"></div>
+      </div>
+
+      <div *ngIf="!loading" class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Référence</th>
+              <th>Employeur</th>
+              <th>Débit</th>
+              <th>Date Paiement</th>
+              <th>Montant (TND)</th>
+              <th>Mode</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let payment of payments" class="hover:bg-gray-50">
+              <td class="font-mono text-sm">{{ payment.reference }}</td>
+              <td>
+                <div class="font-semibold">{{ payment.employerName }}</div>
+                <div class="text-sm text-gray-500">{{ payment.employerNumber }}</div>
+              </td>
+              <td class="font-mono text-xs">{{ payment.debitNumber }}</td>
+              <td>{{ payment.paymentDate }}</td>
+              <td class="font-bold text-green-600">{{ payment.amount | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge bg-gray-100 text-gray-800">
+                  {{ payment.paymentMode }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-green-100 text-green-800': payment.status === 'validated',
+                  'bg-yellow-100 text-yellow-800': payment.status === 'pending'
+                }">
+                  {{ payment.statusLabel }}
+                </span>
+              </td>
+              <td>
+                <div class="flex items-center space-x-2">
+                  <button class="text-blue-600 hover:text-blue-800" title="Voir">
+                    <span class="material-icons text-xl">visibility</span>
+                  </button>
+                  <button class="text-green-600 hover:text-green-800" title="Reçu">
+                    <span class="material-icons text-xl">receipt_long</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </app-main-layout>

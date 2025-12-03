@@ -2,21 +2,107 @@
   <div class="fade-in">
     <div class="flex justify-between items-center mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-cnss-dark">Gestion des Débits</h1>
-        <p class="text-gray-600 mt-2">Liste des débits trimestriels</p>
+        <h1 class="text-3xl font-bold text-cnss-dark">Gestion des Débits Trimestriels</h1>
+        <p class="text-gray-600 mt-2">Liste des débits générés et leur statut</p>
       </div>
       <a routerLink="/debit/generate" class="btn-primary">
         <span class="material-icons mr-2">add</span>
-        Générer Débit
+        Générer un Débit
       </a>
     </div>
 
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="card bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Total Débits</p>
+            <h3 class="text-3xl font-bold">{{ debits.length }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">receipt</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Validés</p>
+            <h3 class="text-3xl font-bold">{{ getValidatedCount() }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">check_circle</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">En attente</p>
+            <h3 class="text-3xl font-bold">{{ getPendingCount() }}</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">pending</span>
+        </div>
+      </div>
+      <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm opacity-90 mb-1">Montant Total</p>
+            <h3 class="text-2xl font-bold">{{ getTotalAmount() | number:'1.0-0' }} TND</h3>
+          </div>
+          <span class="material-icons text-5xl opacity-80">account_balance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
     <div class="card">
-      <p class="text-center py-12 text-gray-500">
-        <span class="material-icons text-6xl mb-4 block text-gray-300">receipt</span>
-        <span class="text-lg font-semibold">Liste des débits</span><br>
-        <span class="text-sm">Module en cours de développement</span>
-      </p>
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="spinner"></div>
+      </div>
+
+      <div *ngIf="!loading" class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Numéro</th>
+              <th>Employeur</th>
+              <th>Période</th>
+              <th>Date Génération</th>
+              <th>Montant (TND)</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let debit of debits" class="hover:bg-gray-50">
+              <td class="font-mono text-sm">{{ debit.number }}</td>
+              <td>
+                <div class="font-semibold">{{ debit.employerName }}</div>
+                <div class="text-sm text-gray-500">{{ debit.employerNumber }}</div>
+              </td>
+              <td>{{ debit.quarter }} {{ debit.year }}</td>
+              <td>{{ debit.generatedDate }}</td>
+              <td class="font-bold text-cnss-primary">{{ debit.amount | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-green-100 text-green-800': debit.status === 'validated',
+                  'bg-yellow-100 text-yellow-800': debit.status === 'pending',
+                  'bg-blue-100 text-blue-800': debit.status === 'paid'
+                }">
+                  {{ debit.statusLabel }}
+                </span>
+              </td>
+              <td>
+                <div class="flex items-center space-x-2">
+                  <button class="text-blue-600 hover:text-blue-800" title="Voir">
+                    <span class="material-icons text-xl">visibility</span>
+                  </button>
+                  <button class="text-green-600 hover:text-green-800" title="Télécharger">
+                    <span class="material-icons text-xl">download</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </app-main-layout>

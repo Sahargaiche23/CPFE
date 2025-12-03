@@ -5,16 +5,91 @@
         <span class="material-icons mr-1">arrow_back</span>
         Retour à la liste
       </a>
-      <h1 class="text-3xl font-bold text-cnss-dark">Nouveau Paiement</h1>
-      <p class="text-gray-600 mt-2">Enregistrement d'un nouveau paiement</p>
+      <h1 class="text-3xl font-bold text-cnss-dark">Enregistrer un Paiement</h1>
+      <p class="text-gray-600 mt-2">Enregistrement d'un nouveau paiement de cotisations</p>
     </div>
 
-    <div class="card">
-      <p class="text-center py-12 text-gray-500">
-        <span class="material-icons text-6xl mb-4 block text-gray-300">attach_money</span>
-        <span class="text-lg font-semibold">Formulaire de paiement</span><br>
-        <span class="text-sm">Module en cours de développement</span>
-      </p>
-    </div>
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      
+      <!-- Debit Selection -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">receipt</span>
+          Sélection du Débit
+        </h2>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Débit à Payer <span class="text-red-500">*</span>
+          </label>
+          <select formControlName="debitId" class="form-field">
+            <option value="">Sélectionner un débit</option>
+            <option value="1">DEB-2024-Q1-001 - Test Company (12,500.50 TND)</option>
+            <option value="2">DEB-2024-Q3-003 - Test Company (13,200.00 TND)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">payment</span>
+          Informations du Paiement
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Date de Paiement <span class="text-red-500">*</span>
+            </label>
+            <input type="date" formControlName="paymentDate" class="form-field">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Montant (TND) <span class="text-red-500">*</span>
+            </label>
+            <input type="number" formControlName="amount" class="form-field" placeholder="0.00">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Mode de Paiement <span class="text-red-500">*</span>
+            </label>
+            <select formControlName="paymentMode" class="form-field">
+              <option value="Virement">Virement Bancaire</option>
+              <option value="Cheque">Chèque</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Référence de Transaction
+            </label>
+            <input type="text" formControlName="transactionRef" class="form-field" placeholder="Ex: TRX-123456">
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Notes / Commentaires
+            </label>
+            <textarea formControlName="notes" rows="3" class="form-field" placeholder="Informations complémentaires..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex items-center justify-between pt-6 border-t">
+        <button type="button" routerLink="/payment" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-semibold">
+          Annuler
+        </button>
+        <button type="submit" [disabled]="paymentForm.invalid || loading" class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+          <span *ngIf="loading" class="spinner-sm mr-2"></span>
+          <span class="material-icons mr-2" *ngIf="!loading">save</span>
+          {{ loading ? 'Enregistrement...' : 'Enregistrer le Paiement' }}
+        </button>
+      </div>
+    </form>
   </div>
 </app-main-layout>

@@ -1,13 +1,206 @@
 <app-main-layout>
   <div class="fade-in max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-cnss-dark mb-8">Convertisseur de Salaire</h1>
-    
-    <div class="card">
-      <p class="text-center py-12 text-gray-500">
-        <span class="material-icons text-6xl mb-4 block text-gray-300">currency_exchange</span>
-        <span class="text-lg font-semibold">Convertisseur de salaire</span><br>
-        <span class="text-sm">Module en cours de développement</span>
-      </p>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-cnss-dark">Convertisseur de Salaire</h1>
+      <p class="text-gray-600 mt-2">Conversion de salaire étranger en Dinars Tunisiens (TND) avec calcul des cotisations</p>
     </div>
+
+    <form [formGroup]="converterForm" class="space-y-6">
+      
+      <!-- Currency Selection -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">currency_exchange</span>
+          Conversion de Devise
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Devise Source <span class="text-red-500">*</span>
+            </label>
+            <select formControlName="sourceCurrency" (change)="updateRate()" class="form-field">
+              <option value="">Sélectionner une devise</option>
+              <option value="EUR">Euro (EUR)</option>
+              <option value="USD">Dollar US (USD)</option>
+              <option value="GBP">Livre Sterling (GBP)</option>
+              <option value="CHF">Franc Suisse (CHF)</option>
+              <option value="CAD">Dollar Canadien (CAD)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Taux de Change
+            </label>
+            <div class="relative">
+              <input type="number" formControlName="exchangeRate" 
+                     class="form-field bg-gray-50"
+                     step="0.0001"
+                     placeholder="0.0000">
+              <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">TND</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">1 {{ converterForm.get('sourceCurrency')?.value }} = {{ converterForm.get('exchangeRate')?.value || '0.0000' }} TND</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Montant en Devise Étrangère <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="number" formControlName="sourceAmount" 
+                     (input)="calculate()"
+                     class="form-field text-lg font-bold"
+                     placeholder="0.00">
+              <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 font-semibold">
+                {{ converterForm.get('sourceCurrency')?.value || '---' }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Montant en TND
+            </label>
+            <div class="relative">
+              <input type="number" 
+                     [value]="convertedAmount"
+                     class="form-field text-lg font-bold bg-green-50 text-green-700"
+                     readonly>
+              <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-700 font-semibold">TND</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversion Result -->
+      <div *ngIf="convertedAmount > 0" class="card bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-bold text-cnss-dark flex items-center">
+            <span class="material-icons mr-2 text-green-600 text-3xl">check_circle</span>
+            Résultat de la Conversion
+          </h2>
+        </div>
+        <div class="bg-white rounded-lg p-6">
+          <div class="text-center mb-6">
+            <p class="text-gray-600 text-lg mb-2">Salaire Mensuel Converti</p>
+            <p class="text-5xl font-bold text-green-600">{{ convertedAmount | number:'1.2-2' }} <span class="text-2xl">TND</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cotisation Calculation -->
+      <div *ngIf="convertedAmount > 0" class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">calculate</span>
+          Calcul des Cotisations
+        </h2>
+        
+        <div class="space-y-4">
+          <!-- Employee Contribution -->
+          <div class="p-4 bg-blue-50 rounded-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-semibold text-gray-700">Cotisation Salariale ({{ employeeRate }}%)</p>
+                <p class="text-xs text-gray-500">Part à la charge de l'employé</p>
+              </div>
+              <p class="text-2xl font-bold text-blue-600">{{ employeeContribution | number:'1.2-2' }} TND</p>
+            </div>
+          </div>
+
+          <!-- Employer Contribution -->
+          <div class="p-4 bg-purple-50 rounded-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-semibold text-gray-700">Cotisation Patronale ({{ employerRate }}%)</p>
+                <p class="text-xs text-gray-500">Part à la charge de l'employeur</p>
+              </div>
+              <p class="text-2xl font-bold text-purple-600">{{ employerContribution | number:'1.2-2' }} TND</p>
+            </div>
+          </div>
+
+          <!-- Total Contribution -->
+          <div class="p-4 bg-gradient-to-r from-cnss-primary to-cnss-secondary text-white rounded-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-semibold">Cotisation Totale</p>
+                <p class="text-xs opacity-90">Salariale + Patronale</p>
+              </div>
+              <p class="text-3xl font-bold">{{ totalContribution | number:'1.2-2' }} TND</p>
+            </div>
+          </div>
+
+          <!-- Net Salary -->
+          <div class="p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-semibold text-gray-700">Salaire Net</p>
+                <p class="text-xs text-gray-500">Après déduction cotisation salariale</p>
+              </div>
+              <p class="text-3xl font-bold text-green-600">{{ netSalary | number:'1.2-2' }} TND</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Table -->
+      <div *ngIf="convertedAmount > 0" class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">receipt_long</span>
+          Récapitulatif
+        </h2>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Élément</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Montant (TND)</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Salaire Brut</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold">{{ convertedAmount | number:'1.2-2' }}</td>
+              </tr>
+              <tr class="bg-blue-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">- Cotisation Salariale</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-blue-600 font-semibold">{{ employeeContribution | number:'1.2-2' }}</td>
+              </tr>
+              <tr class="bg-green-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">= Salaire Net</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600 text-lg">{{ netSalary | number:'1.2-2' }}</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">+ Cotisation Patronale</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-purple-600 font-semibold">{{ employerContribution | number:'1.2-2' }}</td>
+              </tr>
+              <tr class="bg-cnss-light border-t-2 border-cnss-primary">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-cnss-dark">= Coût Total Employeur</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-cnss-primary text-lg">{{ totalCost | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t">
+        <button type="button" 
+                (click)="reset()"
+                class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-semibold">
+          <span class="material-icons mr-2 text-sm">refresh</span>
+          Réinitialiser
+        </button>
+        
+        <button type="button" 
+                *ngIf="convertedAmount > 0"
+                (click)="print()"
+                class="px-8 py-3 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold flex items-center">
+          <span class="material-icons mr-2">print</span>
+          Imprimer le Récapitulatif
+        </button>
+      </div>
+    </form>
   </div>
 </app-main-layout>

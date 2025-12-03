@@ -1,20 +1,55 @@
 <app-main-layout>
-  <div class="fade-in max-w-4xl mx-auto">
+  <div class="fade-in max-w-3xl mx-auto">
     <div class="mb-8">
       <a routerLink="/debit" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
         <span class="material-icons mr-1">arrow_back</span>
         Retour à la liste
       </a>
-      <h1 class="text-3xl font-bold text-cnss-dark">Générer un Débit</h1>
-      <p class="text-gray-600 mt-2">Génération d'un débit trimestriel</p>
+      <h1 class="text-3xl font-bold text-cnss-dark">Générer un Débit Trimestriel</h1>
+      <p class="text-gray-600 mt-2">Création d'un nouveau débit pour un employeur</p>
     </div>
 
-    <div class="card">
-      <p class="text-center py-12 text-gray-500">
-        <span class="material-icons text-6xl mb-4 block text-gray-300">receipt_long</span>
-        <span class="text-lg font-semibold">Génération de débit</span><br>
-        <span class="text-sm">Module en cours de développement</span>
-      </p>
-    </div>
+    <form [formGroup]="debitForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6">Informations du Débit</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Employeur <span class="text-red-500">*</span></label>
+            <select formControlName="employerId" class="form-field">
+              <option value="">Sélectionner un employeur</option>
+              <option value="1">Test Company France (500-2024-001)</option>
+              <option value="2">IntCorp Deutschland (510-2024-002)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Trimestre <span class="text-red-500">*</span></label>
+              <select formControlName="quarter" class="form-field">
+                <option value="Q1">T1 (Janvier - Mars)</option>
+                <option value="Q2">T2 (Avril - Juin)</option>
+                <option value="Q3">T3 (Juillet - Septembre)</option>
+                <option value="Q4">T4 (Octobre - Décembre)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Année <span class="text-red-500">*</span></label>
+              <input type="number" formControlName="year" class="form-field" value="2024">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between pt-6 border-t">
+        <button type="button" routerLink="/debit" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+          Annuler
+        </button>
+        <button type="submit" [disabled]="debitForm.invalid || loading" class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
+          <span *ngIf="loading" class="spinner-sm mr-2"></span>
+          {{ loading ? 'Génération...' : 'Générer le Débit' }}
+        </button>
+      </div>
+    </form>
   </div>
 </app-main-layout>
