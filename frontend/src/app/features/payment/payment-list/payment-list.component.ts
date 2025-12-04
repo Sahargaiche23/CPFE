@@ -58,6 +58,9 @@ export class PaymentListComponent implements OnInit {
       payments: this.paymentService.getAll()
     }).subscribe({
       next: (result) => {
+        console.log('Debits bruts:', result.debits);
+        console.log('Payments bruts:', result.payments);
+        
         // Mapper les employeurs
         this.employers = result.employers.map(e => ({
           id: `${e.empMat}-${e.empCle}`,
@@ -65,18 +68,21 @@ export class PaymentListComponent implements OnInit {
           name: e.nomCommercial || `Employeur ${e.empMat}`
         }));
         
-        // Mapper les débits
+        // Mapper les débits - stocker aussi engNum comme référence
         this.debits = result.debits.map((d: any) => ({
           id: d.engNum || d.id,
+          engNum: d.engNum,
           empMat: d.empMat,
           empCle: d.empCle,
           employerId: `${d.empMat}-${d.empCle}`,
           montant: d.enoMontantEcheance || 0
         }));
         
+        console.log('Debits mappés:', this.debits);
+        
         // Mapper les paiements avec les relations
         this.payments = result.payments.map((p: Payment) => {
-          // numAffiliation peut être "566859" (empMat) ou "566859-1" (empMat-empCle)
+          // numAffiliation peut être "566859" (empMat) ou "566859-1" (empMat-empCle) ou engNum
           const numAff = p.numAffiliation || '';
           
           // Trouver l'employeur par empMat ou par id complet
@@ -84,10 +90,20 @@ export class PaymentListComponent implements OnInit {
             e.empMat?.toString() === numAff || e.id === numAff
           );
           
-          // Trouver le débit par empMat ou par employerId
-          const debit = this.debits.find(d => 
-            d.empMat?.toString() === numAff || d.employerId === numAff
-          );
+          // Trouver le débit par engNum (numAffiliation du paiement = engNum du débit)
+          const numAffNum = parseInt(numAff, 10);
+          const debit = this.debits.find(d => {
+            const match = d.engNum === numAffNum || 
+                          String(d.engNum) === numAff ||
+                          d.id === numAffNum ||
+                          String(d.id) === numAff;
+            return match;
+          });
+          
+          if (!debit) {
+            console.log(`Payment ${p.id} numAff=${numAff} - No matching debit found in:`, 
+              this.debits.map(d => ({ engNum: d.engNum, id: d.id })));
+          }
           
           return {
             id: p.id,
