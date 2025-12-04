@@ -1,44 +1,68 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Debit {
   id?: number;
-  numeroDebit?: string;
-  affiliationId: number;
-  periode: string; // Format: Q1-2024
-  montant: number;
-  dateEcheance: Date;
-  status?: string;
-  dateCreation?: Date;
+  numAffiliation: string;
+  trimestre: string;
+  dateEffet?: string;
+  montantCotisation: number;
+  paye?: boolean;
+  createdAt?: string;
+}
+
+export interface GenerateDebitRequest {
+  empMat: number;
+  empCle: number;
+  trimestre: number;
+  annee: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class DebitService {
-  private readonly API_URL = `${environment.apiUrl}/debit`;
+  private apiUrl = `${environment.apiUrl}/debits`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Debit[]> {
-    return this.http.get<Debit[]>(`${this.API_URL}/list`);
+  getAll(filters?: any): Observable<Debit[]> {
+    let params = new HttpParams();
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) params = params.set(key, filters[key]);
+      });
+    }
+    return this.http.get<Debit[]>(this.apiUrl, { params });
+  }
+
+  generate(request: GenerateDebitRequest): Observable<Debit> {
+    return this.http.post<Debit>(`${this.apiUrl}/generate`, request);
+  }
+
+  getByTrimestre(trimestre: number, annee: number): Observable<Debit[]> {
+    return this.http.get<Debit[]>(`${this.apiUrl}/trimestre/${trimestre}/${annee}`);
+  }
+
+  getByEmployer(empMat: number, empCle: number): Observable<Debit[]> {
+    return this.http.get<Debit[]>(`${this.apiUrl}/employer/${empMat}/${empCle}`);
+  }
+
+  validate(debitId: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${debitId}/validate`, {});
   }
 
   getById(id: number): Observable<Debit> {
-    return this.http.get<Debit>(`${this.API_URL}/${id}`);
+    return this.http.get<Debit>(`${this.apiUrl}/${id}`);
   }
 
-  getByAffiliation(affiliationId: number): Observable<Debit[]> {
-    return this.http.get<Debit[]>(`${this.API_URL}/affiliation/${affiliationId}`);
+  update(id: number, data: any): Observable<Debit> {
+    return this.http.put<Debit>(`${this.apiUrl}/${id}`, data);
   }
 
-  generateTrimestriel(affiliationId: number): Observable<Debit> {
-    return this.http.post<Debit>(`${this.API_URL}/generate-trimestriel`, { affiliationId });
-  }
-
-  validateDebit(id: number): Observable<Debit> {
-    return this.http.post<Debit>(`${this.API_URL}/${id}/validate`, {});
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

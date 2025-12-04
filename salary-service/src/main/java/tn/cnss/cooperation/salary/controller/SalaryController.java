@@ -33,13 +33,20 @@ public class SalaryController {
     }
     
     /**
-     * Récupérer le dernier salaire d'un assuré
-     * GET /salary/last/{matricule}
+     * Récupérer le dernier salaire d'un dossier
+     * GET /salary/last/{empMat}/{empCle}/{dateDebut}
      */
-    @GetMapping("/last/{matricule}")
-    public ResponseEntity<SalaryConversionResponse> getLastSalary(@PathVariable Long matricule) {
-        SalaryConversionResponse response = salaryService.getLastSalary(matricule);
-        return ResponseEntity.ok(response);
+    @GetMapping("/last/{empMat}/{empCle}/{dateDebut}")
+    public ResponseEntity<?> getLastSalary(
+            @PathVariable Long empMat,
+            @PathVariable Integer empCle,
+            @PathVariable String dateDebut) {
+        try {
+            var salaire = salaryService.getLastSalary(empMat, empCle, java.time.LocalDate.parse(dateDebut));
+            return ResponseEntity.ok(salaire);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
     
     @GetMapping("/health")

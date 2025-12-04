@@ -6,7 +6,7 @@
         <span class="material-icons mr-1">arrow_back</span>
         Retour à la liste
       </a>
-      <h1 class="text-3xl font-bold text-cnss-dark">Nouvel Employeur</h1>
+      <h1 class="text-3xl font-bold text-cnss-dark">{{ isEditMode ? 'Modifier Employeur' : 'Nouvel Employeur' }}</h1>
       <p class="text-gray-600 mt-2">Enregistrement d'un nouvel employeur régime 500 ou 510</p>
     </div>
 
@@ -60,10 +60,10 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Raison Sociale <span class="text-red-500">*</span>
             </label>
-            <input type="text" formControlName="legalName" 
+            <input type="text" formControlName="raisonSociale" 
                    class="form-field"
                    placeholder="Nom officiel de l'entreprise">
-            <div *ngIf="employerForm.get('legalName')?.invalid && employerForm.get('legalName')?.touched" 
+            <div *ngIf="employerForm.get('raisonSociale')?.invalid && employerForm.get('raisonSociale')?.touched" 
                  class="text-red-600 text-sm mt-1">
               La raison sociale est obligatoire
             </div>
@@ -73,7 +73,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Nom Commercial <span class="text-red-500">*</span>
             </label>
-            <input type="text" formControlName="tradeName" 
+            <input type="text" formControlName="nomCommercial" 
                    class="form-field"
                    placeholder="Nom commercial de l'entreprise">
           </div>
@@ -82,7 +82,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Pays <span class="text-red-500">*</span>
             </label>
-            <select formControlName="country" class="form-field">
+            <select formControlName="pays" class="form-field">
               <option value="">Sélectionner un pays</option>
               <option value="Tunisie">Tunisie</option>
               <option value="France">France</option>
@@ -122,7 +122,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Adresse <span class="text-red-500">*</span>
             </label>
-            <textarea formControlName="address" rows="3"
+            <textarea formControlName="adresse" rows="3"
                       class="form-field"
                       placeholder="Adresse complète"></textarea>
           </div>
@@ -149,7 +149,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Téléphone
             </label>
-            <input type="tel" formControlName="phone" 
+            <input type="tel" formControlName="telephone" 
                    class="form-field"
                    placeholder="+33 1 23 45 67 89">
           </div>

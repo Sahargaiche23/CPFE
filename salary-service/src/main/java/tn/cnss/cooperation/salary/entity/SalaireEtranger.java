@@ -1,79 +1,72 @@
 package tn.cnss.cooperation.salary.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
- * Table SALAIRE_ETRANGER basée sur slaire_etranger.sql
+ * Entité JPA pour la table SALAIRE_ETRANGER
+ * Représente un salaire étranger converti en TND
+ * PRIMARY KEY (EMP_MAT, EMP_CLE, DCO_DTDEB, SLE_DATE)
+ * 
+ * Structure exacte de la table Oracle:
+ * - emp_mat     NUMBER(8) not null
+ * - emp_cle     NUMBER(2) not null
+ * - dco_dtdeb   DATE not null
+ * - sle_date    DATE not null
+ * - sle_salaire NUMBER(15,3)
+ * - sle_agent   NUMBER(6)
  */
 @Entity
 @Table(name = "SALAIRE_ETRANGER", schema = "COPT")
+@IdClass(SalaireEtrangerId.class)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class SalaireEtranger {
     
+    // === Clé Primaire Composée ===
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "salaire_etr_seq")
-    @SequenceGenerator(name = "salaire_etr_seq", sequenceName = "SALAIRE_ETR_SEQ", allocationSize = 1)
-    @Column(name = "SLE_ID")
-    private Long id;
-    
     @Column(name = "EMP_MAT", nullable = false)
-    private Long matricule;
+    private Long empMat;
     
-    @Column(name = "EMP_CLE")
-    private Integer cle;
+    @Id
+    @Column(name = "EMP_CLE", nullable = false)
+    private Integer empCle;
     
+    @Id
     @Column(name = "DCO_DTDEB", nullable = false)
-    private LocalDate dateDebut;
+    private LocalDate dcoDateDebut;
     
+    @Id
     @Column(name = "SLE_DATE", nullable = false)
-    private LocalDate salaireDate;
+    private LocalDate sleDate;
     
-    // Salaire en devise étrangère
-    @Column(name = "SLE_SALAIRE_DEVISE", precision = 15, scale = 3)
-    private BigDecimal salaireDevise;
-    
-    // Code devise (EUR, USD, CAD, etc.)
-    @Column(name = "SLE_DEVISE", length = 3)
-    private String devise;
-    
-    // Taux de change BCT
-    @Column(name = "SLE_TAUX_CHANGE", precision = 10, scale = 6)
-    private BigDecimal tauxChange;
-    
-    // Salaire converti en TND (Dinar Tunisien)
+    // === Données ===
     @Column(name = "SLE_SALAIRE", precision = 15, scale = 3)
-    private BigDecimal salaireTND;
-    
-    // Salaire trimestriel (x3 mois)
-    @Column(name = "SLE_SALAIRE_TRIM", precision = 15, scale = 3)
-    private BigDecimal salaireTrimestriel;
+    private BigDecimal sleSalaire;  // Salaire en TND
     
     @Column(name = "SLE_AGENT")
-    private Long agentId;
+    private Long sleAgent;  // ID de l'agent qui a saisi
     
-    @Column(name = "CREATED_AT", updatable = false)
-    private LocalDateTime createdAt;
+    // === Méthodes Utilitaires ===
     
-    @Column(name = "UPDATED_AT")
-    private LocalDateTime updatedAt;
-    
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    /**
+     * Génère le matricule complet employeur
+     */
+    public String getEmployeurMatriculeComplet() {
+        return String.format("%d-%02d", empMat, empCle);
     }
     
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    /**
+     * Calcule le salaire trimestriel (x3 mois)
+     */
+    public BigDecimal getSalaireTrimestriel() {
+        if (sleSalaire != null) {
+            return sleSalaire.multiply(new BigDecimal("3"));
+        }
+        return BigDecimal.ZERO;
     }
 }

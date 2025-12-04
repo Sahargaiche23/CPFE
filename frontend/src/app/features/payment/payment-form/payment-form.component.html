@@ -23,9 +23,13 @@
           </label>
           <select formControlName="debitId" class="form-field">
             <option value="">Sélectionner un débit</option>
-            <option value="1">DEB-2024-Q1-001 - Test Company (12,500.50 TND)</option>
-            <option value="2">DEB-2024-Q3-003 - Test Company (13,200.00 TND)</option>
+            <option *ngFor="let debit of debits" [value]="debit.id">
+              {{ debit.label }}
+            </option>
           </select>
+          <p *ngIf="debits.length === 0" class="text-sm text-gray-500 mt-1">
+            Aucun débit disponible. Générez d'abord un débit.
+          </p>
         </div>
       </div>
 

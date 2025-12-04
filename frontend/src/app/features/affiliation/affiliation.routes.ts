@@ -8,5 +8,9 @@ export const AFFILIATION_ROUTES: Routes = [
   {
     path: 'new',
     loadComponent: () => import('./affiliation-form/affiliation-form.component').then(m => m.AffiliationFormComponent)
+  },
+  {
+    path: 'edit/:id',
+    loadComponent: () => import('./affiliation-form/affiliation-form.component').then(m => m.AffiliationFormComponent)
   }
 ];

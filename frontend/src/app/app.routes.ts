@@ -42,6 +42,16 @@ export const routes: Routes = [
     loadChildren: () => import('./features/payment/payment.routes').then(m => m.PAYMENT_ROUTES)
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+  },
+  {
+    path: 'settings',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
+  },
+  {
     path: '**',
     redirectTo: '/dashboard'
   }

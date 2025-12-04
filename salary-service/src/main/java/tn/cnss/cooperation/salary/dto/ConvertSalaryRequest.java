@@ -8,34 +8,39 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Requête de conversion salaire
- * Paramètres multiples (pas juste ID)
+ * Requête de conversion salaire étranger en TND
+ * Correspond à la table SALAIRE_ETRANGER
  */
 @Data
 public class ConvertSalaryRequest {
     
-    @NotNull(message = "Le matricule est obligatoire")
-    private Long matricule;
+    // === Clé composée ===
+    @NotNull(message = "Le matricule employeur est obligatoire")
+    private Long empMat;
     
-    private Integer cle;
+    @NotNull(message = "La clé employeur est obligatoire")
+    private Integer empCle;
     
-    // Dernier salaire tunisien (trimestre complet)
-    @Positive(message = "Le dernier salaire tunisien doit être positif")
-    private BigDecimal dernierSalaireTN;
+    @NotNull(message = "La date début dossier est obligatoire")
+    private LocalDate dcoDateDebut;
     
-    // Nouveau salaire à l'étranger (mensuel)
-    @NotNull(message = "Le salaire étranger est obligatoire")
-    @Positive(message = "Le salaire étranger doit être positif")
-    private BigDecimal nouveauSalaireEtranger;
+    // === Salaire ===
+    @NotNull(message = "Le montant en devise est obligatoire")
+    @Positive(message = "Le montant doit être positif")
+    private BigDecimal montantDevise;
     
-    // Code devise (EUR, USD, CAD, etc.)
     @NotNull(message = "La devise est obligatoire")
-    private String devise;
+    private String devise;  // EUR, USD, CAD, etc.
     
-    // Date de détachement (pour récupérer le cours BCT du 1er jour)
+    // === Conversion ===
     @NotNull(message = "La date de détachement est obligatoire")
     private LocalDate dateDetachement;
     
-    // Taux de change manuel (optionnel, sinon récupéré de BCT)
-    private BigDecimal tauxChangeManuel;
+    private BigDecimal tauxChangeManuel;  // Si null, récupéré de BCT
+    
+    // === Comparaison (optionnel) ===
+    private BigDecimal dernierSalaireTN;  // Pour déterminer régime recommandé
+    
+    // === Audit ===
+    private Long agentId;  // ID de l'agent qui fait la conversion
 }

@@ -9,9 +9,9 @@
           class="h-16 w-auto object-contain"
         />
         <div class="border-l-2 border-cnss-primary pl-4">
-          <h1 class="text-xl font-bold text-cnss-primary">République Tunisienne</h1>
-          <p class="text-sm text-cnss-secondary font-semibold">Caisse Nationale de Sécurité Sociale</p>
-          <p class="text-xs text-gray-600 mt-1">Système de Gestion - Coopération Technique</p>
+          <h1 class="text-xl font-bold text-cnss-primary">{{ i18n.t('header.republic') }}</h1>
+          <p class="text-sm text-cnss-secondary font-semibold">{{ i18n.t('header.cnss') }}</p>
+          <p class="text-xs text-gray-600 mt-1">{{ i18n.t('header.system') }}</p>
         </div>
       </div>
 
@@ -19,23 +19,23 @@
       <nav class="hidden md:flex items-center space-x-6">
         <a routerLink="/dashboard" class="nav-link">
           <span class="material-icons text-sm mr-1">dashboard</span>
-          Tableau de bord
+          {{ i18n.t('nav.dashboard') }}
         </a>
         <a routerLink="/employer" class="nav-link">
           <span class="material-icons text-sm mr-1">business</span>
-          Employeurs
+          {{ i18n.t('nav.employers') }}
         </a>
         <a routerLink="/affiliation" class="nav-link">
           <span class="material-icons text-sm mr-1">person_add</span>
-          Affiliations
+          {{ i18n.t('nav.affiliations') }}
         </a>
         <a routerLink="/debit" class="nav-link">
           <span class="material-icons text-sm mr-1">receipt</span>
-          Débits
+          {{ i18n.t('nav.debits') }}
         </a>
         <a routerLink="/payment" class="nav-link">
           <span class="material-icons text-sm mr-1">payment</span>
-          Paiements
+          {{ i18n.t('nav.payments') }}
         </a>
         
         <div class="relative" *ngIf="user$ | async as user">
@@ -48,16 +48,16 @@
           <div *ngIf="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
             <a routerLink="/profile" class="dropdown-item">
               <span class="material-icons text-sm">person</span>
-              Mon profil
+              {{ i18n.t('nav.profile') }}
             </a>
             <a routerLink="/settings" class="dropdown-item">
               <span class="material-icons text-sm">settings</span>
-              Paramètres
+              {{ i18n.t('nav.settings') }}
             </a>
             <hr class="my-2">
             <button (click)="logout()" class="dropdown-item text-red-600 w-full text-left">
               <span class="material-icons text-sm">logout</span>
-              Déconnexion
+              {{ i18n.t('nav.logout') }}
             </button>
           </div>
         </div>

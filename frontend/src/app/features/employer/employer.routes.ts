@@ -10,6 +10,10 @@ export const EMPLOYER_ROUTES: Routes = [
     loadComponent: () => import('./employer-form/employer-form.component').then(m => m.EmployerFormComponent)
   },
   {
+    path: 'edit/:id',
+    loadComponent: () => import('./employer-form/employer-form.component').then(m => m.EmployerFormComponent)
+  },
+  {
     path: ':id',
     loadComponent: () => import('./employer-detail/employer-detail.component').then(m => m.EmployerDetailComponent)
   }

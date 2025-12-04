@@ -6,6 +6,19 @@ spring:
     name: gateway-service
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
       discovery:
         locator:
           enabled: true
@@ -15,48 +28,46 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
             
         - id: employer-service
           uri: lb://employer-service
           predicates:
-            - Path=/api/employer/**
+            - Path=/api/employers/**
           filters:
             - StripPrefix=1
             
         - id: salary-service
           uri: lb://salary-service
           predicates:
-            - Path=/api/salary/**
+            - Path=/api/salaries/**
           filters:
             - StripPrefix=1
             
         - id: regime-service
           uri: lb://regime-service
           predicates:
-            - Path=/api/regime/**
+            - Path=/api/regimes/**
           filters:
             - StripPrefix=1
             
         - id: affiliation-service
           uri: lb://affiliation-service
           predicates:
-            - Path=/api/affiliation/**
+            - Path=/api/affiliations/**
           filters:
             - StripPrefix=1
             
         - id: debit-service
           uri: lb://debit-service
           predicates:
-            - Path=/api/debit/**
+            - Path=/api/debits/**
           filters:
             - StripPrefix=1
             
         - id: payment-service
           uri: lb://payment-service
           predicates:
-            - Path=/api/payment/**
+            - Path=/api/payments/**
           filters:
             - StripPrefix=1
             

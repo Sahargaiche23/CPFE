@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-header',
@@ -16,7 +17,8 @@ export class HeaderComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public i18n: I18nService
   ) {}
 
   toggleMenu() {

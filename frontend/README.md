@@ -264,7 +264,7 @@ Ce projet a été développé par l'équipe CNSS - Sahar Gaiche.
 
 ## 📝 License
 
-© 2024 CNSS - Caisse Nationale de Sécurité Sociale. Tous droits réservés.
+©  CNSS - Caisse Nationale de Sécurité Sociale. Tous droits réservés.
 
 ## 📞 Support
 

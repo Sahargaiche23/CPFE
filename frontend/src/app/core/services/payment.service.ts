@@ -1,46 +1,53 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Payment {
   id?: number;
-  numeroPaiement?: string;
-  debitId: number;
+  numAffiliation: string;
+  trimestre: string;
   montant: number;
   modePaiement: string;
-  datePaiement?: Date;
-  status?: string;
-  reference?: string;
+  paiementPartiel?: boolean;
+  createdAt?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
-  private readonly API_URL = `${environment.apiUrl}/payment`;
+  private apiUrl = `${environment.apiUrl}/payments`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Payment[]> {
-    return this.http.get<Payment[]>(`${this.API_URL}/list`);
+  getAll(filters?: any): Observable<Payment[]> {
+    let params = new HttpParams();
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) params = params.set(key, filters[key]);
+      });
+    }
+    return this.http.get<Payment[]>(this.apiUrl, { params });
   }
 
-  getById(id: number): Observable<Payment> {
-    return this.http.get<Payment>(`${this.API_URL}/${id}`);
+  create(payment: any): Observable<Payment> {
+    return this.http.post<Payment>(this.apiUrl, payment);
   }
 
-  create(payment: Payment): Observable<Payment> {
-    return this.http.post<Payment>(`${this.API_URL}/create`, payment);
+  getById(id: number | string): Observable<Payment> {
+    return this.http.get<Payment>(`${this.apiUrl}/${id}`);
   }
 
-  validatePayment(id: number): Observable<Payment> {
-    return this.http.post<Payment>(`${this.API_URL}/${id}/validate`, {});
+  validate(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/validate`, {});
   }
 
-  generateReceipt(id: number): Observable<Blob> {
-    return this.http.get(`${this.API_URL}/${id}/receipt`, {
-      responseType: 'blob'
-    });
+  update(id: number, payment: any): Observable<Payment> {
+    return this.http.put<Payment>(`${this.apiUrl}/${id}`, payment);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

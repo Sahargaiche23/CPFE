@@ -7,33 +7,38 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Réponse de conversion salaire
+ * Contient le salaire converti en TND et les calculs associés
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalaryConversionResponse {
-    private Long id;
-    private Long matricule;
-    private Integer cle;
     
-    // Salaire en devise
+    // === Identification ===
+    private Long empMat;
+    private Integer empCle;
+    private String matriculeComplet;  // Format: "MAT-CLE"
+    
+    // === Salaire source ===
     private BigDecimal salaireDevise;
     private String devise;
     
-    // Taux de change
+    // === Conversion ===
     private BigDecimal tauxChange;
     private LocalDate dateCoursDevise;
     
-    // Salaire converti en TND
-    private BigDecimal salaireTND;
+    // === Salaire converti ===
+    private BigDecimal salaireMensuelTND;      // Salaire mensuel en TND
+    private BigDecimal salaireTrimestrielTND;  // Salaire trimestriel (x3)
     
-    // Salaire trimestriel (x3)
-    private BigDecimal salaireTrimestriel;
-    
-    // Dernier salaire tunisien
+    // === Comparaison ===
     private BigDecimal dernierSalaireTN;
     
-    // Régime recommandé basé sur comparaison
-    private String regimeRecommande;
+    // === Recommandation ===
+    private String regimeRecommande;  // "500" ou "510"
     
+    // === Message ===
     private String message;
 }

@@ -11,12 +11,11 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   token: string;
-  type: string;
   userId: number;
   username: string;
-  email: string;
-  role: string;
-  bureauCode?: string;
+  identite: string;      // Nom complet de l'utilisateur
+  profil: string;        // Profil (ADMIN, USER, etc.)
+  burCod?: number;       // Code bureau (optionnel)
 }
 
 @Injectable({
@@ -45,9 +44,9 @@ export class AuthService {
         const user = {
           id: response.userId,
           username: response.username,
-          email: response.email,
-          role: response.role,
-          bureauCode: response.bureauCode
+          identite: response.identite,
+          profil: response.profil,
+          burCod: response.burCod
         };
         localStorage.setItem('user', JSON.stringify(user));
         this.currentUserSubject.next(user);

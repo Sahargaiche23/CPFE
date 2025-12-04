@@ -8,5 +8,9 @@ export const DEBIT_ROUTES: Routes = [
   {
     path: 'generate',
     loadComponent: () => import('./debit-generate/debit-generate.component').then(m => m.DebitGenerateComponent)
+  },
+  {
+    path: 'edit/:id',
+    loadComponent: () => import('./debit-generate/debit-generate.component').then(m => m.DebitGenerateComponent)
   }
 ];

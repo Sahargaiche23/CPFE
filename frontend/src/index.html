@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
 <head>
   <meta charset="utf-8">
   <title>CNSS - Système de Gestion de la Coopération Technique</title>
@@ -9,7 +9,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    /* RTL Support */
+    [dir="rtl"] { direction: rtl; text-align: right; }
+    [dir="rtl"] .flex-row-reverse-rtl { flex-direction: row-reverse; }
+    [dir="rtl"] .mr-2 { margin-left: 0.5rem; margin-right: 0; }
+    [dir="rtl"] .ml-2 { margin-right: 0.5rem; margin-left: 0; }
+    [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-right: 0.5rem; margin-left: 0; }
+    [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) { margin-right: 1rem; margin-left: 0; }
+    [dir="rtl"] .text-left { text-align: right; }
+    [dir="rtl"] .text-right { text-align: left; }
+    body[dir="rtl"] { font-family: 'Amiri', 'Inter', sans-serif; }
+  </style>
 </head>
 <body class="mat-typography">
   <app-root></app-root>

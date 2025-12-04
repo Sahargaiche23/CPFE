@@ -1,49 +1,55 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Employer {
-  id?: number;
-  numeroEmployeur?: string;
-  raisonSociale: string;
-  adresse: string;
-  tel: string;
-  email: string;
-  regimeCode: string;
-  status?: string;
-  dateCreation?: Date;
+  id?: string;
+  empMat: number;
+  empCle: number;
+  nomCommercial: string;
+  raisonSociale?: string;
+  regime: string;
+  pays: string;
+  adresse?: string;
+  telephone?: string;
+  email?: string;
+  affiliations: number;
+  statut: string;
+  dateCreation?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployerService {
-  private readonly API_URL = `${environment.apiUrl}/employer`;
+  private apiUrl = `${environment.apiUrl}/employers`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Employer[]> {
-    return this.http.get<Employer[]>(`${this.API_URL}/list`);
+  getAll(filters?: any): Observable<Employer[]> {
+    let params = new HttpParams();
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) params = params.set(key, filters[key]);
+      });
+    }
+    return this.http.get<Employer[]>(this.apiUrl, { params });
   }
 
-  getById(id: number): Observable<Employer> {
-    return this.http.get<Employer>(`${this.API_URL}/${id}`);
+  getById(empMat: number, empCle: number): Observable<Employer> {
+    return this.http.get<Employer>(`${this.apiUrl}/${empMat}/${empCle}`);
   }
 
-  create(employer: Employer): Observable<Employer> {
-    return this.http.post<Employer>(`${this.API_URL}/create`, employer);
+  create(employer: any): Observable<Employer> {
+    return this.http.post<Employer>(this.apiUrl, employer);
   }
 
-  update(id: number, employer: Employer): Observable<Employer> {
-    return this.http.put<Employer>(`${this.API_URL}/${id}`, employer);
+  update(empMat: number, empCle: number, employer: any): Observable<Employer> {
+    return this.http.put<Employer>(`${this.apiUrl}/${empMat}/${empCle}`, employer);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
-  }
-
-  generateNumero(regimeCode: string): Observable<string> {
-    return this.http.post<string>(`${this.API_URL}/generate-numero`, { regimeCode });
+  delete(empMat: number, empCle: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${empMat}/${empCle}`);
   }
 }

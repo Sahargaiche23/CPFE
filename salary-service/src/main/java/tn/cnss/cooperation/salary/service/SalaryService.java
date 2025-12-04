@@ -11,6 +11,8 @@ import tn.cnss.cooperation.salary.repository.SalaireEtrangerRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +27,12 @@ public class SalaryService {
      * Étape 2 du cahier des charges:
      * - Conversion devise → dinar tunisien à la date du détachement
      * - Calcul salaire trimestriel
-     * - Comparaison avec dernier salaire tunisien
+     * - Sauvegarde dans SALAIRE_ETRANGER
      */
     @Transactional
     public SalaryConversionResponse convertSalary(ConvertSalaryRequest request) {
-        log.info("Conversion salaire pour matricule: {}, devise: {}, montant: {}", 
-                request.getMatricule(), request.getDevise(), request.getNouveauSalaireEtranger());
+        log.info("Conversion salaire - EmpMat: {}-{}, devise: {}, montant: {}", 
+                request.getEmpMat(), request.getEmpCle(), request.getDevise(), request.getMontantDevise());
         
         // Récupérer taux de change BCT du 1er jour de détachement
         BigDecimal tauxChange = request.getTauxChangeManuel() != null 
@@ -41,7 +43,7 @@ public class SalaryService {
                 request.getDateDetachement(), tauxChange);
         
         // Conversion en TND (Dinar Tunisien)
-        BigDecimal salaireTND = request.getNouveauSalaireEtranger()
+        BigDecimal salaireTND = request.getMontantDevise()
                 .multiply(tauxChange)
                 .setScale(3, RoundingMode.HALF_UP);
         
@@ -49,35 +51,32 @@ public class SalaryService {
         BigDecimal salaireTrimestriel = salaireTND.multiply(BigDecimal.valueOf(3))
                 .setScale(3, RoundingMode.HALF_UP);
         
-        // Sauvegarder dans la base
+        // Sauvegarder dans SALAIRE_ETRANGER
         SalaireEtranger salaire = new SalaireEtranger();
-        salaire.setMatricule(request.getMatricule());
-        salaire.setCle(request.getCle());
-        salaire.setDateDebut(request.getDateDetachement());
-        salaire.setSalaireDate(request.getDateDetachement());
-        salaire.setSalaireDevise(request.getNouveauSalaireEtranger());
-        salaire.setDevise(request.getDevise());
-        salaire.setTauxChange(tauxChange);
-        salaire.setSalaireTND(salaireTND);
-        salaire.setSalaireTrimestriel(salaireTrimestriel);
+        salaire.setEmpMat(request.getEmpMat());
+        salaire.setEmpCle(request.getEmpCle());
+        salaire.setDcoDateDebut(request.getDateDetachement());
+        salaire.setSleDate(request.getDateDetachement());
+        salaire.setSleSalaire(salaireTND);  // Salaire mensuel en TND
+        salaire.setSleAgent(request.getAgentId());
         
         salaire = salaireEtrangerRepository.save(salaire);
         
-        log.info("Salaire converti: {} {} = {} TND (trimestre: {} TND)", 
-                request.getNouveauSalaireEtranger(), request.getDevise(), 
+        log.info("Salaire converti et sauvegardé: {} {} = {} TND (trimestre: {} TND)", 
+                request.getMontantDevise(), request.getDevise(), 
                 salaireTND, salaireTrimestriel);
         
         // Construire la réponse
         SalaryConversionResponse response = new SalaryConversionResponse();
-        response.setId(salaire.getId());
-        response.setMatricule(salaire.getMatricule());
-        response.setCle(salaire.getCle());
-        response.setSalaireDevise(request.getNouveauSalaireEtranger());
+        response.setEmpMat(salaire.getEmpMat());
+        response.setEmpCle(salaire.getEmpCle());
+        response.setMatriculeComplet(salaire.getEmployeurMatriculeComplet());
+        response.setSalaireDevise(request.getMontantDevise());
         response.setDevise(request.getDevise());
         response.setTauxChange(tauxChange);
         response.setDateCoursDevise(request.getDateDetachement());
-        response.setSalaireTND(salaireTND);
-        response.setSalaireTrimestriel(salaireTrimestriel);
+        response.setSalaireMensuelTND(salaireTND);
+        response.setSalaireTrimestrielTND(salaireTrimestriel);
         response.setDernierSalaireTN(request.getDernierSalaireTN());
         
         // Déterminer régime recommandé basé sur comparaison
@@ -107,26 +106,18 @@ public class SalaryService {
     }
     
     /**
-     * Récupérer dernier salaire d'un assuré
+     * Récupérer dernier salaire d'un dossier (pour affichage/historique)
      */
-    public SalaryConversionResponse getLastSalary(Long matricule) {
-        SalaireEtranger salaire = salaireEtrangerRepository.findLastSalaryByMatricule(matricule)
-                .orElseThrow(() -> new RuntimeException("Aucun salaire trouvé pour ce matricule"));
-        
-        return mapToResponse(salaire);
+    public SalaireEtranger getLastSalary(Long empMat, Integer empCle, LocalDate dcoDateDebut) {
+        return salaireEtrangerRepository
+                .findFirstByEmpMatAndEmpCleAndDcoDateDebutOrderBySleDateDesc(empMat, empCle, dcoDateDebut)
+                .orElseThrow(() -> new RuntimeException("Aucun salaire trouvé pour ce dossier"));
     }
     
-    private SalaryConversionResponse mapToResponse(SalaireEtranger salaire) {
-        SalaryConversionResponse response = new SalaryConversionResponse();
-        response.setId(salaire.getId());
-        response.setMatricule(salaire.getMatricule());
-        response.setCle(salaire.getCle());
-        response.setSalaireDevise(salaire.getSalaireDevise());
-        response.setDevise(salaire.getDevise());
-        response.setTauxChange(salaire.getTauxChange());
-        response.setDateCoursDevise(salaire.getSalaireDate());
-        response.setSalaireTND(salaire.getSalaireTND());
-        response.setSalaireTrimestriel(salaire.getSalaireTrimestriel());
-        return response;
+    /**
+     * Récupérer tous les salaires d'un dossier
+     */
+    public List<SalaireEtranger> getSalariesByDossier(Long empMat, Integer empCle, LocalDate dcoDateDebut) {
+        return salaireEtrangerRepository.findByEmpMatAndEmpCleAndDcoDateDebut(empMat, empCle, dcoDateDebut);
     }
 }

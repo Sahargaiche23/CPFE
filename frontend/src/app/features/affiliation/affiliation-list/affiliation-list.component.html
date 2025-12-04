@@ -36,20 +36,20 @@
       <div class="card bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm opacity-90 mb-1">En attente</p>
-            <h3 class="text-3xl font-bold">{{ getPendingCount() }}</h3>
+            <p class="text-sm opacity-90 mb-1">Inactives</p>
+            <h3 class="text-3xl font-bold">{{ getInactiveCount() }}</h3>
           </div>
-          <span class="material-icons text-5xl opacity-80">pending</span>
+          <span class="material-icons text-5xl opacity-80">pause_circle</span>
         </div>
       </div>
 
       <div class="card bg-gradient-to-r from-purple-500 to-purple-600 text-white">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm opacity-90 mb-1">Ce mois</p>
-            <h3 class="text-3xl font-bold">{{ getThisMonthCount() }}</h3>
+            <p class="text-sm opacity-90 mb-1">Total Salaires</p>
+            <h3 class="text-2xl font-bold">{{ getTotalSalary() | number:'1.0-0' }} TND</h3>
           </div>
-          <span class="material-icons text-5xl opacity-80">calendar_today</span>
+          <span class="material-icons text-5xl opacity-80">payments</span>
         </div>
       </div>
     </div>
@@ -59,28 +59,26 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Recherche</label>
-          <input type="text" placeholder="Nom, matricule..." 
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Nom, matricule..." 
                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Employeur</label>
-          <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
+          <select [(ngModel)]="selectedEmployer" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
             <option value="">Tous</option>
-            <option value="1">Test Company France</option>
-            <option value="2">IntCorp Deutschland</option>
+            <option *ngFor="let emp of employers" [value]="emp.id">{{ emp.name }}</option>
           </select>
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Statut</label>
-          <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
+          <select [(ngModel)]="selectedStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cnss-primary focus:border-transparent">
             <option value="">Tous</option>
             <option value="active">Active</option>
-            <option value="pending">En attente</option>
-            <option value="suspended">Suspendue</option>
+            <option value="inactive">Inactive</option>
           </select>
         </div>
         <div class="flex items-end">
-          <button class="w-full px-6 py-2 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all">
+          <button (click)="applyFilters()" class="w-full px-6 py-2 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all">
             <span class="material-icons text-sm mr-1">search</span>
             Rechercher
           </button>
@@ -108,46 +106,48 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let affiliation of affiliations" class="hover:bg-gray-50">
-              <td class="font-mono text-sm">{{ affiliation.matricule }}</td>
+            <tr *ngFor="let affiliation of filteredAffiliations" class="hover:bg-gray-50">
+              <td class="font-mono text-sm">{{ affiliation.numAffiliation }}</td>
               <td>
-                <div class="font-semibold text-gray-900">{{ affiliation.lastName }} {{ affiliation.firstName }}</div>
-                <div class="text-sm text-gray-500">{{ affiliation.nationalite }}</div>
+                <div class="font-semibold text-gray-900">{{ affiliation.assureName }}</div>
               </td>
               <td>
                 <div class="font-semibold">{{ affiliation.employerName }}</div>
-                <div class="text-sm text-gray-500">{{ affiliation.employerNumber }}</div>
+                <div class="text-sm text-gray-500">{{ affiliation.employerId }}</div>
               </td>
-              <td>{{ affiliation.startDate }}</td>
-              <td class="font-semibold">{{ affiliation.salary | number:'1.2-2' }}</td>
+              <td>{{ affiliation.dateDebut }}</td>
+              <td class="font-semibold">{{ affiliation.salaire | number:'1.2-2' }}</td>
               <td>
                 <span class="badge" [ngClass]="{
                   'bg-green-100 text-green-800': affiliation.status === 'active',
-                  'bg-orange-100 text-orange-800': affiliation.status === 'pending',
-                  'bg-red-100 text-red-800': affiliation.status === 'suspended'
+                  'bg-red-100 text-red-800': affiliation.status === 'inactive'
                 }">
                   {{ affiliation.statusLabel }}
                 </span>
               </td>
               <td>
                 <div class="flex items-center space-x-2">
-                  <button class="text-blue-600 hover:text-blue-800" title="Voir">
+                  <button (click)="viewDetails(affiliation)" class="text-blue-600 hover:text-blue-800" title="Voir détails">
                     <span class="material-icons text-xl">visibility</span>
                   </button>
-                  <button class="text-green-600 hover:text-green-800" title="Attestation">
+                  <button (click)="generateAttestation(affiliation)" 
+                          class="text-green-600 hover:text-green-800" 
+                          title="Télécharger Attestation PDF">
                     <span class="material-icons text-xl">description</span>
                   </button>
-                  <button class="text-orange-600 hover:text-orange-800" title="Modifier">
+                  <button [routerLink]="['/affiliation/edit', affiliation.id]" class="text-orange-600 hover:text-orange-800" title="Modifier">
                     <span class="material-icons text-xl">edit</span>
                   </button>
-                  <button class="text-red-600 hover:text-red-800" title="Suspendre">
-                    <span class="material-icons text-xl">block</span>
+                  <button (click)="deleteAffiliation(affiliation.id)" 
+                          class="text-red-600 hover:text-red-800" 
+                          title="Supprimer">
+                    <span class="material-icons text-xl">delete</span>
                   </button>
                 </div>
               </td>
             </tr>
             
-            <tr *ngIf="affiliations.length === 0">
+            <tr *ngIf="filteredAffiliations.length === 0">
               <td colspan="7" class="text-center py-12 text-gray-500">
                 <span class="material-icons text-6xl mb-4 block text-gray-300">people_outline</span>
                 <p class="text-lg font-semibold">Aucune affiliation trouvée</p>
@@ -175,6 +175,63 @@
           <button class="px-3 py-1 bg-cnss-primary text-white rounded">1</button>
           <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50" disabled>
             Suivant
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Détails -->
+  <div *ngIf="showDetailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="bg-cnss-primary text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+        <h3 class="text-xl font-bold">Détails de l'Affiliation</h3>
+        <button (click)="closeModal()" class="text-white hover:text-gray-200">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="p-6" *ngIf="selectedAffiliation">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">N° Affiliation</p>
+            <p class="font-semibold text-lg">{{ selectedAffiliation.numAffiliation }}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Assuré</p>
+            <p class="font-semibold text-lg">{{ selectedAffiliation.assureName }}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Employeur</p>
+            <p class="font-semibold">{{ selectedAffiliation.employerName }}</p>
+            <p class="text-sm text-gray-500">{{ selectedAffiliation.employerId }}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Date Début</p>
+            <p class="font-semibold">{{ selectedAffiliation.dateDebut }}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Date Fin</p>
+            <p class="font-semibold">{{ selectedAffiliation.dateFin || 'En cours' }}</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Salaire</p>
+            <p class="font-semibold text-green-600">{{ selectedAffiliation.salaire | number:'1.2-2' }} TND</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="text-sm text-gray-500">Statut</p>
+            <span class="badge" [ngClass]="{
+              'bg-green-100 text-green-800': selectedAffiliation.status === 'active',
+              'bg-red-100 text-red-800': selectedAffiliation.status === 'inactive'
+            }">{{ selectedAffiliation.statusLabel }}</span>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button (click)="generateAttestation(selectedAffiliation)" class="btn-primary">
+            <span class="material-icons mr-2">description</span>
+            Télécharger Attestation
+          </button>
+          <button (click)="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            Fermer
           </button>
         </div>
       </div>
