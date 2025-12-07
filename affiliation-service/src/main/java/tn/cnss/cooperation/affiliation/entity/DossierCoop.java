@@ -44,6 +44,43 @@ public class DossierCoop {
     @Column(name = "ASS_PRENOM", length = 100)
     private String assPrenom;  // Prénom de l'assuré
     
+    @Column(name = "DATE_NAISSANCE")
+    private LocalDate dateNaissance;  // Date de naissance
+    
+    @Column(name = "LIEU_NAISSANCE", length = 100)
+    private String lieuNaissance;  // Lieu de naissance
+    
+    @Column(name = "SEXE", length = 1)
+    private String sexe;  // M ou F
+    
+    @Column(name = "NUM_PASSEPORT", length = 50)
+    private String numPasseport;  // Numéro de passeport
+    
+    @Column(name = "NUM_SECU_ORIGINE", length = 50)
+    private String numSecuSociale;  // Numéro sécurité sociale pays d'origine
+    
+    @Column(name = "POSTE", length = 100)
+    private String poste;  // Poste occupé
+    
+    @Column(name = "TYPE_CONTRAT", length = 20)
+    private String typeContrat;  // CDI, CDD, etc.
+    
+    // === Coordonnées ===
+    @Column(name = "ADRESSE", length = 255)
+    private String adresse;
+    
+    @Column(name = "VILLE", length = 100)
+    private String ville;
+    
+    @Column(name = "PAYS_RESIDENCE", length = 100)
+    private String paysResidence;
+    
+    @Column(name = "TELEPHONE", length = 20)
+    private String telephone;
+    
+    @Column(name = "EMAIL", length = 100)
+    private String email;
+    
     // === Informations Détachement ===
     @Column(name = "PAY_COD", nullable = false)
     private Integer paysCode;  // Code pays de détachement

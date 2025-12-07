@@ -6,6 +6,7 @@ import { EmployerService } from '../../core/services/employer.service';
 import { AffiliationService } from '../../core/services/affiliation.service';
 import { DebitService } from '../../core/services/debit.service';
 import { PaymentService } from '../../core/services/payment.service';
+import { I18nService } from '../../core/services/i18n.service';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -31,7 +32,8 @@ export class DashboardComponent implements OnInit {
     private employerService: EmployerService,
     private affiliationService: AffiliationService,
     private debitService: DebitService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    public i18n: I18nService
   ) {}
 
   ngOnInit() {

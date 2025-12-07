@@ -3,10 +3,10 @@
     <div class="mb-8">
       <a routerLink="/affiliation" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
         <span class="material-icons mr-1">arrow_back</span>
-        Retour à la liste
+        {{ i18n.t('forms.backToList') }}
       </a>
-      <h1 class="text-3xl font-bold text-cnss-dark">Nouvelle Affiliation</h1>
-      <p class="text-gray-600 mt-2">Enregistrement d'une nouvelle affiliation employé</p>
+      <h1 class="text-3xl font-bold text-cnss-dark">{{ i18n.t('forms.newAffiliation') }}</h1>
+      <p class="text-gray-600 mt-2">{{ i18n.t('forms.newAffiliationDesc') }}</p>
     </div>
 
     <form [formGroup]="affiliationForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -15,25 +15,18 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">business</span>
-          Sélection de l'Employeur
+          {{ i18n.t('forms.employerSelection') }}
         </h2>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">
-            Employeur <span class="text-red-500">*</span>
+            {{ i18n.t('debit.employer') }} <span class="text-red-500">*</span>
           </label>
           <select formControlName="employerId" class="form-field">
-            <option value="">Sélectionner un employeur</option>
+            <option value="">{{ i18n.t('forms.selectEmployer') }}</option>
             <option *ngFor="let emp of employers" [value]="emp.id">
               {{ emp.nomCommercial }} ({{ emp.empMat }}-{{ emp.empCle }})
             </option>
           </select>
-          <p *ngIf="employers.length === 0" class="text-sm text-gray-500 mt-1">
-            Chargement des employeurs...
-          </p>
-          <div *ngIf="affiliationForm.get('employerId')?.invalid && affiliationForm.get('employerId')?.touched" 
-               class="text-red-600 text-sm mt-1">
-            L'employeur est obligatoire
-          </div>
         </div>
       </div>
 
@@ -41,35 +34,29 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">person</span>
-          Informations de l'Employé
+          {{ i18n.t('forms.employeeInfo') }}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Nom <span class="text-red-500">*</span>
+              {{ i18n.t('forms.lastName') }} <span class="text-red-500">*</span>
             </label>
             <input type="text" formControlName="lastName" 
-                   class="form-field"
-                   placeholder="Ex: Dupont">
-            <div *ngIf="affiliationForm.get('lastName')?.invalid && affiliationForm.get('lastName')?.touched" 
-                 class="text-red-600 text-sm mt-1">
-              Le nom est obligatoire
-            </div>
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Prénom <span class="text-red-500">*</span>
+              {{ i18n.t('forms.firstName') }} <span class="text-red-500">*</span>
             </label>
             <input type="text" formControlName="firstName" 
-                   class="form-field"
-                   placeholder="Ex: Jean">
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Date de Naissance <span class="text-red-500">*</span>
+              {{ i18n.t('forms.birthDate') }} <span class="text-red-500">*</span>
             </label>
             <input type="date" formControlName="birthDate" 
                    class="form-field">
@@ -77,7 +64,7 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Lieu de Naissance
+              {{ i18n.t('forms.birthPlace') }}
             </label>
             <input type="text" formControlName="birthPlace" 
                    class="form-field"
@@ -86,45 +73,42 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Nationalité <span class="text-red-500">*</span>
+              {{ i18n.t('forms.nationality') }} <span class="text-red-500">*</span>
             </label>
             <select formControlName="nationality" class="form-field">
-              <option value="">Sélectionner</option>
+              <option value="">{{ i18n.t('forms.selectOption') }}</option>
               <option value="Tunisienne">Tunisienne</option>
               <option value="Française">Française</option>
               <option value="Allemande">Allemande</option>
               <option value="Italienne">Italienne</option>
-              <option value="Autre">Autre</option>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Sexe <span class="text-red-500">*</span>
+              {{ i18n.t('forms.gender') }} <span class="text-red-500">*</span>
             </label>
             <select formControlName="gender" class="form-field">
-              <option value="">Sélectionner</option>
-              <option value="M">Masculin</option>
-              <option value="F">Féminin</option>
+              <option value="">{{ i18n.t('forms.selectOption') }}</option>
+              <option value="M">M</option>
+              <option value="F">F</option>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Numéro Passeport
+              {{ i18n.t('forms.passportNumber') }}
             </label>
             <input type="text" formControlName="passportNumber" 
-                   class="form-field"
-                   placeholder="Ex: 12AB34567">
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Numéro Sécurité Sociale (pays d'origine)
+              {{ i18n.t('forms.socialSecurityNumber') }}
             </label>
             <input type="text" formControlName="socialSecurityNumber" 
-                   class="form-field"
-                   placeholder="Ex: 123456789012345">
+                   class="form-field">
           </div>
         </div>
       </div>
@@ -133,13 +117,13 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">work</span>
-          Informations d'Emploi
+          {{ i18n.t('forms.employmentInfo') }}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Date de Début <span class="text-red-500">*</span>
+              {{ i18n.t('forms.startDate') }} <span class="text-red-500">*</span>
             </label>
             <input type="date" formControlName="startDate" 
                    class="form-field">
@@ -147,7 +131,7 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Date de Fin (si CDD)
+              {{ i18n.t('forms.endDate') }}
             </label>
             <input type="date" formControlName="endDate" 
                    class="form-field">
@@ -155,33 +139,29 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Poste <span class="text-red-500">*</span>
+              {{ i18n.t('forms.position') }} <span class="text-red-500">*</span>
             </label>
             <input type="text" formControlName="position" 
-                   class="form-field"
-                   placeholder="Ex: Ingénieur Commercial">
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Type de Contrat
+              {{ i18n.t('forms.contractType') }}
             </label>
             <select formControlName="contractType" class="form-field">
               <option value="CDI">CDI</option>
               <option value="CDD">CDD</option>
-              <option value="Stage">Stage</option>
-              <option value="Autre">Autre</option>
             </select>
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Salaire Mensuel Brut <span class="text-red-500">*</span>
+              {{ i18n.t('forms.grossSalary') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input type="number" formControlName="salary" 
-                     class="form-field"
-                     placeholder="Ex: 2500">
+                     class="form-field">
               <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">TND</span>
             </div>
           </div>
@@ -192,77 +172,61 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">contact_mail</span>
-          Coordonnées
+          {{ i18n.t('forms.coordinates') }}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Adresse
+              {{ i18n.t('forms.address') }}
             </label>
-            <textarea formControlName="address" rows="2"
-                      class="form-field"
-                      placeholder="Adresse complète"></textarea>
+            <textarea formControlName="address" rows="2" class="form-field"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Ville
+              {{ i18n.t('forms.city') }}
             </label>
-            <input type="text" formControlName="city" 
-                   class="form-field"
-                   placeholder="Ex: Paris">
+            <input type="text" formControlName="city" class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Pays de Résidence
+              {{ i18n.t('forms.residenceCountry') }}
             </label>
-            <input type="text" formControlName="country" 
-                   class="form-field"
-                   placeholder="Ex: France">
+            <input type="text" formControlName="country" class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Téléphone
+              {{ i18n.t('forms.phone') }}
             </label>
-            <input type="tel" formControlName="phone" 
-                   class="form-field"
-                   placeholder="+33 1 23 45 67 89">
+            <input type="tel" formControlName="phone" class="form-field" placeholder="+33 1 23 45 67 89">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Email
+              {{ i18n.t('forms.email') }}
             </label>
-            <input type="email" formControlName="email" 
-                   class="form-field"
-                   placeholder="exemple@email.com">
+            <input type="email" formControlName="email" class="form-field" placeholder="exemple@email.com">
           </div>
         </div>
       </div>
 
       <!-- Form Actions -->
       <div class="flex items-center justify-between pt-6 border-t">
-        <button type="button" 
-                routerLink="/affiliation"
+        <button type="button" routerLink="/affiliation"
                 class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-semibold">
-          Annuler
+          {{ i18n.t('forms.cancel') }}
         </button>
         
-        <div class="flex items-center gap-4">
-          <p *ngIf="affiliationForm.invalid" class="text-red-500 text-sm">
-            Veuillez remplir tous les champs obligatoires (*)
-          </p>
-          <button type="submit" 
-                  [disabled]="affiliationForm.invalid || loading"
-                  class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
-            <span *ngIf="loading" class="spinner-sm mr-2"></span>
-            <span class="material-icons mr-2" *ngIf="!loading">save</span>
-            {{ loading ? 'Enregistrement...' : 'Enregistrer l\'Affiliation' }}
-          </button>
-        </div>
+        <button type="submit" 
+                [disabled]="affiliationForm.invalid || loading"
+                class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+          <span *ngIf="loading" class="spinner-sm mr-2"></span>
+          <span class="material-icons mr-2" *ngIf="!loading">save</span>
+          {{ i18n.t('forms.registerAffiliation') }}
+        </button>
       </div>
     </form>
 

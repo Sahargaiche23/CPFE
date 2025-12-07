@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layout.component';
+import { SessionsComponent } from './sessions/sessions.component';
 import { I18nService, Language } from '../../core/services/i18n.service';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
@@ -10,7 +11,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, MainLayoutComponent],
+  imports: [CommonModule, FormsModule, MainLayoutComponent, SessionsComponent],
   template: `
     <app-main-layout>
       <div class="fade-in max-w-4xl mx-auto">
@@ -105,10 +106,15 @@ import { environment } from '../../../environments/environment';
                   <p class="font-medium">{{ i18n.t('settings.sessions') }}</p>
                   <p class="text-sm text-gray-500">Gérer les sessions connectées</p>
                 </div>
-                <button class="text-cnss-primary hover:underline">{{ i18n.t('settings.viewSessions') }}</button>
+                <button (click)="showSessions = !showSessions" class="text-cnss-primary hover:underline">
+                  {{ showSessions ? 'Masquer' : i18n.t('settings.viewSessions') }}
+                </button>
               </div>
             </div>
           </div>
+
+          <!-- Sessions actives -->
+          <app-sessions *ngIf="showSessions"></app-sessions>
 
           <!-- Actions -->
           <div class="flex justify-end gap-4">
@@ -137,6 +143,7 @@ export class SettingsComponent implements OnInit {
   
   saving = false;
   successMessage = '';
+  showSessions = false;
   private userId: number | null = null;
 
   constructor(

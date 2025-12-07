@@ -118,7 +118,7 @@ public class EmployeurService {
                 .adresse(employeur.getAdresse())
                 .telephone(employeur.getTelephone())
                 .email(employeur.getEmail())
-                .statut(employeur.getStatut())
+                .statut(employeur.getStatut() != null && !employeur.getStatut().isEmpty() ? employeur.getStatut() : "Actif")
                 .dateCreation(employeur.getDateCreation() != null ? employeur.getDateCreation().toString() : null)
                 .affiliations(affiliations)
                 .build();

@@ -5,6 +5,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { PaymentService } from '../../../core/services/payment.service';
 import { DebitService } from '../../../core/services/debit.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-payment-form',
@@ -26,7 +27,8 @@ export class PaymentFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private paymentService: PaymentService,
-    private debitService: DebitService
+    private debitService: DebitService,
+    public i18n: I18nService
   ) {
     this.paymentForm = this.fb.group({
       debitId: ['', Validators.required],

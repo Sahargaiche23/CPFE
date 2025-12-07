@@ -4,10 +4,10 @@
     <div class="mb-8">
       <a routerLink="/employer" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
         <span class="material-icons mr-1">arrow_back</span>
-        Retour à la liste
+        {{ i18n.t('forms.backToList') }}
       </a>
-      <h1 class="text-3xl font-bold text-cnss-dark">{{ isEditMode ? 'Modifier Employeur' : 'Nouvel Employeur' }}</h1>
-      <p class="text-gray-600 mt-2">Enregistrement d'un nouvel employeur régime 500 ou 510</p>
+      <h1 class="text-3xl font-bold text-cnss-dark">{{ i18n.t('forms.newEmployer') }}</h1>
+      <p class="text-gray-600 mt-2">{{ i18n.t('forms.newEmployerDesc') }}</p>
     </div>
 
     <!-- Form -->
@@ -17,17 +17,17 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">category</span>
-          Type de Régime
+          {{ i18n.t('forms.regimeType') }}
         </h2>
         <div class="grid grid-cols-2 gap-4">
           <label class="relative cursor-pointer">
             <input type="radio" formControlName="regime" value="500" class="sr-only peer">
             <div class="p-6 border-2 border-gray-300 rounded-lg peer-checked:border-cnss-primary peer-checked:bg-blue-50 transition-all">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-lg font-bold">Régime 500</span>
+                <span class="text-lg font-bold">{{ i18n.t('forms.regime500') }}</span>
                 <span class="material-icons text-blue-600">apartment</span>
               </div>
-              <p class="text-sm text-gray-600">Employeurs tunisiens</p>
+              <p class="text-sm text-gray-600">{{ i18n.t('forms.regime500Desc') }}</p>
             </div>
           </label>
           
@@ -35,16 +35,12 @@
             <input type="radio" formControlName="regime" value="510" class="sr-only peer">
             <div class="p-6 border-2 border-gray-300 rounded-lg peer-checked:border-cnss-primary peer-checked:bg-green-50 transition-all">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-lg font-bold">Régime 510</span>
+                <span class="text-lg font-bold">{{ i18n.t('forms.regime510') }}</span>
                 <span class="material-icons text-green-600">domain</span>
               </div>
-              <p class="text-sm text-gray-600">Employeurs étrangers</p>
+              <p class="text-sm text-gray-600">{{ i18n.t('forms.regime510Desc') }}</p>
             </div>
           </label>
-        </div>
-        <div *ngIf="employerForm.get('regime')?.invalid && employerForm.get('regime')?.touched" 
-             class="text-red-600 text-sm mt-2">
-          Veuillez sélectionner un régime
         </div>
       </div>
 
@@ -52,59 +48,51 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">business</span>
-          Informations de l'Entreprise
+          {{ i18n.t('forms.companyInfo') }}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Raison Sociale <span class="text-red-500">*</span>
+              {{ i18n.t('forms.legalName') }} <span class="text-red-500">*</span>
             </label>
             <input type="text" formControlName="raisonSociale" 
-                   class="form-field"
-                   placeholder="Nom officiel de l'entreprise">
-            <div *ngIf="employerForm.get('raisonSociale')?.invalid && employerForm.get('raisonSociale')?.touched" 
-                 class="text-red-600 text-sm mt-1">
-              La raison sociale est obligatoire
-            </div>
+                   class="form-field">
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Nom Commercial <span class="text-red-500">*</span>
+              {{ i18n.t('forms.tradeName') }} <span class="text-red-500">*</span>
             </label>
             <input type="text" formControlName="nomCommercial" 
-                   class="form-field"
-                   placeholder="Nom commercial de l'entreprise">
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Pays <span class="text-red-500">*</span>
+              {{ i18n.t('forms.country') }} <span class="text-red-500">*</span>
             </label>
             <select formControlName="pays" class="form-field">
-              <option value="">Sélectionner un pays</option>
+              <option value="">{{ i18n.t('forms.selectOption') }}</option>
               <option value="Tunisie">Tunisie</option>
               <option value="France">France</option>
               <option value="Allemagne">Allemagne</option>
               <option value="Italie">Italie</option>
               <option value="Belgique">Belgique</option>
               <option value="Suisse">Suisse</option>
-              <option value="Autre">Autre</option>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Forme Juridique
+              {{ i18n.t('forms.legalForm') }}
             </label>
             <select formControlName="legalForm" class="form-field">
-              <option value="">Sélectionner</option>
+              <option value="">{{ i18n.t('forms.selectOption') }}</option>
               <option value="SARL">SARL</option>
               <option value="SA">SA</option>
               <option value="SAS">SAS</option>
               <option value="SUARL">SUARL</option>
-              <option value="Autre">Autre</option>
             </select>
           </div>
         </div>
@@ -114,40 +102,29 @@
       <div class="card">
         <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
           <span class="material-icons mr-2 text-cnss-primary">contact_mail</span>
-          Coordonnées
+          {{ i18n.t('forms.coordinates') }}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Adresse <span class="text-red-500">*</span>
+              {{ i18n.t('forms.address') }} <span class="text-red-500">*</span>
             </label>
             <textarea formControlName="adresse" rows="3"
-                      class="form-field"
-                      placeholder="Adresse complète"></textarea>
+                      class="form-field"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Code Postal
-            </label>
-            <input type="text" formControlName="postalCode" 
-                   class="form-field"
-                   placeholder="Ex: 1000">
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Ville
+              {{ i18n.t('forms.city') }}
             </label>
             <input type="text" formControlName="city" 
-                   class="form-field"
-                   placeholder="Ville">
+                   class="form-field">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Téléphone
+              {{ i18n.t('forms.phone') }}
             </label>
             <input type="tel" formControlName="telephone" 
                    class="form-field"
@@ -156,38 +133,11 @@
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Email
+              {{ i18n.t('forms.email') }}
             </label>
             <input type="email" formControlName="email" 
                    class="form-field"
                    placeholder="contact@entreprise.com">
-          </div>
-        </div>
-      </div>
-
-      <!-- Legal Information -->
-      <div class="card">
-        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
-          <span class="material-icons mr-2 text-cnss-primary">gavel</span>
-          Informations Légales
-        </h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Numéro SIRET/SIREN
-            </label>
-            <input type="text" formControlName="taxId" 
-                   class="form-field"
-                   placeholder="123 456 789 00012">
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Date de Création
-            </label>
-            <input type="date" formControlName="creationDate" 
-                   class="form-field">
           </div>
         </div>
       </div>
@@ -197,7 +147,7 @@
         <button type="button" 
                 routerLink="/employer"
                 class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-semibold">
-          Annuler
+          {{ i18n.t('forms.cancel') }}
         </button>
         
         <button type="submit" 
@@ -205,7 +155,7 @@
                 class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
           <span *ngIf="loading" class="spinner-sm mr-2"></span>
           <span class="material-icons mr-2" *ngIf="!loading">save</span>
-          {{ loading ? 'Enregistrement...' : 'Enregistrer' }}
+          {{ i18n.t('forms.save') }}
         </button>
       </div>
     </form>

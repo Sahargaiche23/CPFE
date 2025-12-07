@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { EmployerService, Employer } from '../../../core/services/employer.service';
+import { PdfService } from '../../../core/services/pdf.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-employer-list',
@@ -23,7 +25,11 @@ export class EmployerListComponent implements OnInit {
   selectedRegime = '';
   selectedStatus = '';
 
-  constructor(private employerService: EmployerService) {}
+  constructor(
+    private employerService: EmployerService,
+    private pdfService: PdfService,
+    public i18n: I18nService
+  ) {}
 
   ngOnInit() {
     this.loadEmployers();
@@ -101,5 +107,17 @@ export class EmployerListComponent implements OnInit {
     this.selectedRegime = '';
     this.selectedStatus = '';
     this.filteredEmployers = [...this.employers];
+  }
+
+  exportPDF() {
+    const data = this.filteredEmployers.map(e => ({
+      matricule: e.employerNumber,
+      nomCommercial: e.tradeName,
+      regime: e.regime,
+      pays: e.country,
+      affiliationsCount: e.affiliationsCount,
+      actif: e.active
+    }));
+    this.pdfService.generateEmployeursReport(data, 'TUNIS');
   }
 }

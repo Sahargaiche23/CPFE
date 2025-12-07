@@ -6,6 +6,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 import { AffiliationService } from '../../../core/services/affiliation.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { EmployerService, Employer } from '../../../core/services/employer.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-affiliation-form',
@@ -29,7 +30,8 @@ export class AffiliationFormComponent implements OnInit {
     private route: ActivatedRoute,
     private affiliationService: AffiliationService,
     private pdfService: PdfService,
-    private employerService: EmployerService
+    private employerService: EmployerService,
+    public i18n: I18nService
   ) {
     this.affiliationForm = this.fb.group({
       employerId: ['', Validators.required],
@@ -74,14 +76,30 @@ export class AffiliationFormComponent implements OnInit {
       next: (data: any) => {
         console.log('Affiliation loaded:', data);
         this.existingData = data;
+        
+        // Mapper le code pays vers la nationalité
+        const nationality = this.getNationalityFromCode(data.paysCode);
+        
         this.affiliationForm.patchValue({
           employerId: `${data.empMat}-${data.empCle}`,
           lastName: data.assNom || '',
           firstName: data.assPrenom || '',
+          birthDate: data.dateNaissance || '',
+          birthPlace: data.lieuNaissance || '',
+          nationality: nationality,
+          gender: data.sexe || '',
+          passportNumber: data.numPasseport || '',
+          socialSecurityNumber: data.numSecuSociale || '',
           startDate: data.dcoDateDebut,
           endDate: data.dcoDateFin,
+          position: data.poste || '',
+          contractType: data.typeContrat || 'CDI',
           salary: data.dcoSalaire,
-          nationality: 'Tunisienne'
+          address: data.adresse || '',
+          city: data.ville || '',
+          country: data.paysResidence || '',
+          phone: data.telephone || '',
+          email: data.email || ''
         });
         this.loading = false;
       },
@@ -90,6 +108,17 @@ export class AffiliationFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  getNationalityFromCode(code: number): string {
+    const nationalities: { [key: number]: string } = {
+      788: 'Tunisienne',
+      250: 'Française',
+      276: 'Allemande',
+      380: 'Italienne',
+      999: 'Autre'
+    };
+    return nationalities[code] || 'Autre';
   }
 
   loadEmployers() {
@@ -124,9 +153,21 @@ export class AffiliationFormComponent implements OnInit {
           dcoDateDebut: formData.startDate,
           assNom: formData.lastName,
           assPrenom: formData.firstName,
+          dateNaissance: formData.birthDate || null,
+          lieuNaissance: formData.birthPlace || null,
+          sexe: formData.gender || null,
+          numPasseport: formData.passportNumber || null,
+          numSecuSociale: formData.socialSecurityNumber || null,
+          poste: formData.position || null,
+          typeContrat: formData.contractType || 'CDI',
           paysCode: this.getCountryCode(formData.nationality),
           dcoDateFin: formData.endDate || null,
-          dcoSalaire: parseFloat(formData.salary) || 0
+          dcoSalaire: parseFloat(formData.salary) || 0,
+          adresse: formData.address || null,
+          ville: formData.city || null,
+          paysResidence: formData.country || null,
+          telephone: formData.phone || null,
+          email: formData.email || null
         };
         
         this.affiliationService.updateById(this.affiliationId!, updateData).subscribe({
@@ -155,12 +196,24 @@ export class AffiliationFormComponent implements OnInit {
           assureCle: Math.floor(Math.random() * 90 + 10),
           assNom: formData.lastName,
           assPrenom: formData.firstName,
+          dateNaissance: formData.birthDate || null,
+          lieuNaissance: formData.birthPlace || null,
+          sexe: formData.gender || null,
+          numPasseport: formData.passportNumber || null,
+          numSecuSociale: formData.socialSecurityNumber || null,
+          poste: formData.position || null,
+          typeContrat: formData.contractType || 'CDI',
           paysCode: this.getCountryCode(formData.nationality),
           dcoDateFin: formData.endDate || null,
           dcoSalaire: parseFloat(formData.salary) || 0,
           dcoNumAffiliation: numAff,
           dcoClefAffiliation: cleAff,
-          dcoSalaireId: 'V'
+          dcoSalaireId: 'V',
+          adresse: formData.address || null,
+          ville: formData.city || null,
+          paysResidence: formData.country || null,
+          telephone: formData.phone || null,
+          email: formData.email || null
         };
         
         this.affiliationService.create(affiliationData).subscribe({

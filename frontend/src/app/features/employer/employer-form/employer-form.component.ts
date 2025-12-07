@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { EmployerService } from '../../../core/services/employer.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-employer-form',
@@ -23,7 +24,8 @@ export class EmployerFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private employerService: EmployerService
+    private employerService: EmployerService,
+    public i18n: I18nService
   ) {
     this.employerForm = this.fb.group({
       regime: ['500', Validators.required],

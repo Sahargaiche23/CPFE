@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { AffiliationService } from '../../../core/services/affiliation.service';
 import { EmployerService } from '../../../core/services/employer.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-affiliation-list',
@@ -33,33 +35,34 @@ export class AffiliationListComponent implements OnInit {
   constructor(
     private affiliationService: AffiliationService,
     private employerService: EmployerService,
-    private pdfService: PdfService
+    private pdfService: PdfService,
+    public i18n: I18nService
   ) {}
 
   ngOnInit() {
-    this.loadEmployers();
-    this.loadAffiliations();
+    this.loadAllData();
   }
 
-  loadEmployers() {
-    this.employerService.getAll().subscribe({
-      next: (data) => {
-        this.employers = data.map(e => ({
-          id: `${e.empMat}-${e.empCle}`,
-          name: e.nomCommercial || `Employeur ${e.empMat}`
-        }));
-      },
-      error: (err) => console.error('Erreur chargement employeurs:', err)
-    });
-  }
-
-  loadAffiliations() {
+  loadAllData() {
     this.loading = true;
     this.error = null;
     
-    this.affiliationService.getAll().subscribe({
-      next: (data: any[]) => {
-        this.affiliations = data.map(a => {
+    // Charger toutes les données en parallèle
+    forkJoin({
+      employers: this.employerService.getAll(),
+      affiliations: this.affiliationService.getAll()
+    }).subscribe({
+      next: (result) => {
+        // Mapper les employeurs d'abord
+        this.employers = result.employers.map(e => ({
+          id: `${e.empMat}-${e.empCle}`,
+          empMat: e.empMat,
+          empCle: e.empCle,
+          name: e.nomCommercial || `Employeur ${e.empMat}`
+        }));
+        
+        // Ensuite mapper les affiliations avec les employeurs disponibles
+        this.affiliations = result.affiliations.map((a: any) => {
           // Trouver le nom de l'employeur
           const employer = this.employers.find(e => e.id === `${a.empMat}-${a.empCle}`);
           
@@ -75,7 +78,7 @@ export class AffiliationListComponent implements OnInit {
             numAffiliation: a.dcoNumAffiliation && a.dcoClefAffiliation 
               ? `${a.dcoClefAffiliation}-${a.dcoNumAffiliation}` 
               : a.assureMatriculeComplet || '-',
-            employerName: employer?.name || a.employeurMatriculeComplet || a.nomEmployeur || '-',
+            employerName: employer?.name || '-',
             employerId: `${a.empMat}-${a.empCle}`,
             assureName: assureName,
             dateDebut: a.dcoDateDebut ? new Date(a.dcoDateDebut).toLocaleDateString('fr-FR') : '-',
@@ -89,11 +92,15 @@ export class AffiliationListComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        console.error('Erreur chargement affiliations:', err);
-        this.error = 'Erreur lors du chargement des affiliations';
+        console.error('Erreur chargement données:', err);
+        this.error = 'Erreur lors du chargement des données';
         this.loading = false;
       }
     });
+  }
+
+  loadAffiliations() {
+    this.loadAllData();
   }
 
   deleteAffiliation(id: number) {
@@ -162,5 +169,11 @@ export class AffiliationListComponent implements OnInit {
   closeModal() {
     this.showDetailModal = false;
     this.selectedAffiliation = null;
+  }
+
+  // Export PDF avec rendu arabe correct (côté frontend)
+  exportPDF() {
+    // Utiliser le PdfService pour générer le rapport avec le même en-tête que l'attestation
+    this.pdfService.generateAffiliationsReport(this.affiliations, 'TUNIS');
   }
 }

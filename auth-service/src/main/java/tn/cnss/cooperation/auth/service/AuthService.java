@@ -28,6 +28,16 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         log.info("Tentative de connexion pour: {}", request.getUsername());
         
+        // Vérifier d'abord si l'utilisateur existe et est actif
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        
+        // Vérifier si le compte est actif
+        if (user.getActive() == null || user.getActive() != 1) {
+            log.warn("Tentative de connexion avec compte désactivé: {}", request.getUsername());
+            throw new RuntimeException("Compte désactivé. Contactez l'administrateur.");
+        }
+        
         // Authentification avec Spring Security
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -35,9 +45,6 @@ public class AuthService {
                 request.getPassword()
             )
         );
-
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         // Génération du token JWT
         String token = jwtService.generateToken(

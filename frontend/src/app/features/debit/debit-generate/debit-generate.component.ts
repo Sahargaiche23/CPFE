@@ -5,6 +5,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { EmployerService, Employer } from '../../../core/services/employer.service';
 import { DebitService } from '../../../core/services/debit.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-debit-generate',
@@ -26,7 +27,8 @@ export class DebitGenerateComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private employerService: EmployerService,
-    private debitService: DebitService
+    private debitService: DebitService,
+    public i18n: I18nService
   ) {
     this.debitForm = this.fb.group({
       employerId: ['', Validators.required],

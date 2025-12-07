@@ -8,6 +8,7 @@ import { PaymentService, Payment } from '../../../core/services/payment.service'
 import { PdfService } from '../../../core/services/pdf.service';
 import { EmployerService } from '../../../core/services/employer.service';
 import { DebitService } from '../../../core/services/debit.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-payment-list',
@@ -40,7 +41,8 @@ export class PaymentListComponent implements OnInit {
     private pdfService: PdfService,
     private employerService: EmployerService,
     private debitService: DebitService,
-    private router: Router
+    private router: Router,
+    public i18n: I18nService
   ) {}
 
   ngOnInit() {
@@ -85,11 +87,6 @@ export class PaymentListComponent implements OnInit {
           // numAffiliation peut être "566859" (empMat) ou "566859-1" (empMat-empCle) ou engNum
           const numAff = p.numAffiliation || '';
           
-          // Trouver l'employeur par empMat ou par id complet
-          const employer = this.employers.find(e => 
-            e.empMat?.toString() === numAff || e.id === numAff
-          );
-          
           // Trouver le débit par engNum (numAffiliation du paiement = engNum du débit)
           const numAffNum = parseInt(numAff, 10);
           const debit = this.debits.find(d => {
@@ -100,6 +97,21 @@ export class PaymentListComponent implements OnInit {
             return match;
           });
           
+          // Trouver l'employeur - d'abord via le débit, sinon par empMat direct
+          let employer = null;
+          if (debit) {
+            // Utiliser empMat/empCle du débit pour trouver l'employeur
+            employer = this.employers.find(e => 
+              e.empMat === debit.empMat || e.id === debit.employerId
+            );
+          }
+          // Fallback: chercher directement par numAffiliation
+          if (!employer) {
+            employer = this.employers.find(e => 
+              e.empMat?.toString() === numAff || e.id === numAff
+            );
+          }
+          
           if (!debit) {
             console.log(`Payment ${p.id} numAff=${numAff} - No matching debit found in:`, 
               this.debits.map(d => ({ engNum: d.engNum, id: d.id })));
@@ -109,7 +121,8 @@ export class PaymentListComponent implements OnInit {
             id: p.id,
             reference: `PAY-${p.id?.toString().padStart(4, '0')}`,
             numAffiliation: p.numAffiliation || '-',
-            employerName: employer?.name || p.numAffiliation || '-',
+            employerName: employer?.name || '-',
+            employerId: employer?.id || debit?.employerId || '-',
             debitId: debit?.id || '-',
             debitAmount: debit?.montant || 0,
             trimestre: p.trimestre || '-',
@@ -214,5 +227,18 @@ export class PaymentListComponent implements OnInit {
     this.dateFrom = '';
     this.dateTo = '';
     this.filteredPayments = [...this.payments];
+  }
+
+  exportPDF() {
+    const data = this.filteredPayments.map(p => ({
+      reference: p.reference,
+      employerName: p.employerName,
+      debitRef: 'DEB-' + p.numAffiliation,
+      date: p.paymentDate,
+      amount: p.amount,
+      mode: p.paymentMode,
+      statusLabel: p.statusLabel
+    }));
+    this.pdfService.generatePaiementsReport(data, 'TUNIS');
   }
 }

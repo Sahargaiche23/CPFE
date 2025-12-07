@@ -45,15 +45,33 @@
             <span class="material-icons text-sm">expand_more</span>
           </button>
           
-          <div *ngIf="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
-            <a routerLink="/profile" class="dropdown-item">
+          <div *ngIf="isMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
+            <a routerLink="/profile" (click)="isMenuOpen = false" class="dropdown-item">
               <span class="material-icons text-sm">person</span>
               {{ i18n.t('nav.profile') }}
             </a>
-            <a routerLink="/settings" class="dropdown-item">
+            <a routerLink="/settings" (click)="isMenuOpen = false" class="dropdown-item">
               <span class="material-icons text-sm">settings</span>
               {{ i18n.t('nav.settings') }}
             </a>
+            <!-- Admin Menu -->
+            <div *ngIf="user.profil?.toLowerCase() === 'admin'">
+              <hr class="my-2">
+              <p class="px-4 py-1 text-xs text-gray-500 uppercase font-semibold">Administration</p>
+              <a routerLink="/reports" (click)="isMenuOpen = false" class="dropdown-item">
+                <span class="material-icons text-sm">description</span>
+                Rapports
+              </a>
+              <a routerLink="/admin/users" (click)="isMenuOpen = false" class="dropdown-item">
+                <span class="material-icons text-sm">group</span>
+                Gestion Utilisateurs
+              </a>
+              <a routerLink="/admin/logs" (click)="isMenuOpen = false" class="dropdown-item">
+                <span class="material-icons text-sm">history</span>
+                Journal d'Audit
+              </a>
+            </div>
+            
             <hr class="my-2">
             <button (click)="logout()" class="dropdown-item text-red-600 w-full text-left">
               <span class="material-icons text-sm">logout</span>

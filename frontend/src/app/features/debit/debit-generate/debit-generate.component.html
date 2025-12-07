@@ -3,53 +3,50 @@
     <div class="mb-8">
       <a routerLink="/debit" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
         <span class="material-icons mr-1">arrow_back</span>
-        Retour à la liste
+        {{ i18n.t('forms.backToList') }}
       </a>
       <h1 class="text-3xl font-bold text-cnss-dark">
-        {{ isEditMode ? 'Modifier le Débit' : 'Générer un Débit Trimestriel' }}
+        {{ i18n.t('forms.generateDebit') }}
       </h1>
       <p class="text-gray-600 mt-2">
-        {{ isEditMode ? 'Modification des informations du débit' : 'Création d\'un nouveau débit pour un employeur' }}
+        {{ i18n.t('forms.generateDebitDesc') }}
       </p>
     </div>
 
     <form [formGroup]="debitForm" (ngSubmit)="onSubmit()" class="space-y-6">
       <div class="card">
-        <h2 class="text-xl font-bold text-cnss-dark mb-6">Informations du Débit</h2>
+        <h2 class="text-xl font-bold text-cnss-dark mb-6">{{ i18n.t('forms.debitInfo') }}</h2>
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Employeur <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('debit.employer') }} <span class="text-red-500">*</span></label>
             <select formControlName="employerId" class="form-field">
-              <option value="">Sélectionner un employeur</option>
+              <option value="">{{ i18n.t('forms.selectEmployer') }}</option>
               <option *ngFor="let emp of employers" [value]="emp.id">
                 {{ emp.nomCommercial }} ({{ emp.empMat }}-{{ emp.empCle }})
               </option>
             </select>
-            <p *ngIf="employers.length === 0" class="text-sm text-gray-500 mt-1">
-              Chargement des employeurs...
-            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Trimestre <span class="text-red-500">*</span></label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('forms.trimester') }} <span class="text-red-500">*</span></label>
               <select formControlName="quarter" class="form-field">
-                <option value="Q1">T1 (Janvier - Mars)</option>
-                <option value="Q2">T2 (Avril - Juin)</option>
-                <option value="Q3">T3 (Juillet - Septembre)</option>
-                <option value="Q4">T4 (Octobre - Décembre)</option>
+                <option value="Q1">T1</option>
+                <option value="Q2">T2</option>
+                <option value="Q3">T3</option>
+                <option value="Q4">T4</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Année <span class="text-red-500">*</span></label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('forms.year') }} <span class="text-red-500">*</span></label>
               <input type="number" formControlName="year" class="form-field" value="2024">
             </div>
           </div>
 
           <!-- Champ montant visible en mode édition -->
           <div *ngIf="isEditMode">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Montant (TND)</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('debit.amount') }}</label>
             <input type="number" formControlName="montant" class="form-field" step="0.01">
           </div>
         </div>
@@ -57,11 +54,11 @@
 
       <div class="flex justify-between pt-6 border-t">
         <button type="button" routerLink="/debit" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-          Annuler
+          {{ i18n.t('forms.cancel') }}
         </button>
         <button type="submit" [disabled]="debitForm.invalid || loading" class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
           <span *ngIf="loading" class="spinner-sm mr-2"></span>
-          {{ loading ? (isEditMode ? 'Modification...' : 'Génération...') : (isEditMode ? 'Enregistrer' : 'Générer le Débit') }}
+          {{ i18n.t('forms.generateDebitBtn') }}
         </button>
       </div>
     </form>

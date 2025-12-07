@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-salary-converter',
@@ -31,7 +32,7 @@ export class SalaryConverterComponent implements OnInit {
     'CAD': 2.350
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, public i18n: I18nService) {
     this.converterForm = this.fb.group({
       sourceCurrency: ['', Validators.required],
       exchangeRate: [{ value: 0, disabled: false }, [Validators.required, Validators.min(0)]],

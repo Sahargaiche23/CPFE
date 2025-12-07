@@ -29,6 +29,11 @@ spring:
           predicates:
             - Path=/api/auth/**
             
+        - id: users-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/users/**
+            
         - id: employer-service
           uri: lb://employer-service
           predicates:
@@ -56,6 +61,11 @@ spring:
             - Path=/api/affiliations/**
           filters:
             - StripPrefix=1
+            
+        - id: reports-service
+          uri: lb://affiliation-service
+          predicates:
+            - Path=/api/reports/**
             
         - id: debit-service
           uri: lb://debit-service
