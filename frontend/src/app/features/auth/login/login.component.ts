@@ -40,7 +40,7 @@ export class LoginComponent {
       next: (response) => {
         // Rediriger selon le profil
         if (response.profil === 'COOPERANT') {
-          this.router.navigate(['/cooperant/mon-dossier']);
+          this.router.navigate(['/cooperant/espace']);
         } else {
           this.router.navigate(['/dashboard']);
         }

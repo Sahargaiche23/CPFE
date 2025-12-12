@@ -11,8 +11,9 @@ import { AuthService } from '../../../core/services/auth.service';
   template: `
     <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
       <header class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-          <a routerLink="/cooperant" class="text-teal-600 hover:text-teal-800">← Retour</a>
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+          <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
+          <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800">← Retour</a>
         </div>
       </header>
 

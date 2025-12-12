@@ -20,6 +20,10 @@ export const COOPERANT_ROUTES: Routes = [
   },
   // Routes Espace Coopérant
   {
+    path: 'espace',
+    loadComponent: () => import('./cooperant-dashboard/cooperant-dashboard.component').then(m => m.CooperantDashboardComponent)
+  },
+  {
     path: 'mon-dossier',
     loadComponent: () => import('./mon-dossier/mon-dossier.component').then(m => m.MonDossierComponent)
   },

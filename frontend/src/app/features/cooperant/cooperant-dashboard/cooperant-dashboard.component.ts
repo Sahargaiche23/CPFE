@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div class="flex items-center gap-4">
-            <img src="assets/images/logo.png" alt="CNSS" class="h-12" />
+            <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-14" />
             <div>
               <h1 class="text-xl font-bold text-gray-800">Espace Coopérant</h1>
               <p class="text-sm text-gray-500">CNSS - Coopération Technique</p>
