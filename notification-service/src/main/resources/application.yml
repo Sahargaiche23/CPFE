@@ -4,10 +4,10 @@ spring:
   application:
     name: notification-service
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: cnss.cooperation@gmail.com
-    password: your-password
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:doejohnk29@gmail.com}
+    password: ${SMTP_PASSWORD:adkdlfavuoxhuemp}
     properties:
       mail:
         smtp:

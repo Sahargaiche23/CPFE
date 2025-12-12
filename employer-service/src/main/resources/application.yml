@@ -41,3 +41,11 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui/index.html
+
+# URLs des services internes (Docker)
+auth:
+  service:
+    url: http://auth-service:8089
+notification:
+  service:
+    url: http://notification-service:8087

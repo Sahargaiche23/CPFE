@@ -1,0 +1,156 @@
+<app-main-layout>
+  <div class="fade-in max-w-4xl mx-auto">
+    <div class="mb-8">
+      <a routerLink="/cooperant" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
+        <span class="material-icons mr-1">arrow_back</span>
+        Retour
+      </a>
+      <h1 class="text-3xl font-bold text-cnss-dark">Détail Coopérant</h1>
+    </div>
+
+    <div *ngIf="loading" class="flex justify-center py-12">
+      <div class="spinner"></div>
+    </div>
+
+    <div *ngIf="!loading && cooperant" class="space-y-6">
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500">Matricule</div>
+            <div class="font-mono text-lg">{{ cooperant.matriculeComplet || (cooperant.matricule + '-' + cooperant.cle) }}</div>
+          </div>
+          <span class="badge" [ngClass]="{
+            'bg-yellow-100 text-yellow-800': cooperant.statutValidation === 'EN_ATTENTE',
+            'bg-green-100 text-green-800': cooperant.statutValidation === 'VALIDE',
+            'bg-red-100 text-red-800': cooperant.statutValidation === 'REJETE'
+          }">
+            {{ cooperant.statutValidation || 'EN_ATTENTE' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-4">Identité</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-sm text-gray-500">Nom complet (FR)</div>
+            <div class="font-semibold">{{ cooperant.nomCompletFr || (cooperant.prenomFr + ' ' + cooperant.nomFr) }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Nom complet (AR)</div>
+            <div class="font-semibold" dir="rtl">{{ cooperant.nomCompletAr || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Date naissance</div>
+            <div>{{ cooperant.dateNaissance || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Lieu naissance (FR)</div>
+            <div>{{ cooperant.lieuNaissanceFr || '-' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-4">Adresse</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-sm text-gray-500">Adresse (FR)</div>
+            <div>{{ cooperant.adresseFr }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Adresse (AR)</div>
+            <div dir="rtl">{{ cooperant.adresseAr || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Code postal</div>
+            <div>{{ cooperant.codePostal || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Localité (FR/AR)</div>
+            <div>{{ cooperant.localiteFr || '-' }} / <span dir="rtl">{{ cooperant.localiteAr || '-' }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-4">Contact & Pièce</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-sm text-gray-500">Téléphone</div>
+            <div>{{ cooperant.telephone || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Fax</div>
+            <div>{{ cooperant.fax || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Email</div>
+            <div>{{ cooperant.email || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Nationalité</div>
+            <div>{{ cooperant.nationalite || '-' }}</div>
+          </div>
+          <div class="md:col-span-2">
+            <div class="text-sm text-gray-500">Pièce identité</div>
+            <div class="font-semibold">{{ cooperant.typePieceIdentite }} - {{ cooperant.numPieceIdentite }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-4">Documents</h2>
+        <div class="grid grid-cols-1 gap-3">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div class="font-semibold">Dossier</div>
+              <div class="text-sm text-gray-500">{{ cooperant.fichierDossier || 'Aucun fichier' }}</div>
+            </div>
+            <a *ngIf="cooperant.fichierDossier" 
+               [href]="getDownloadUrl(cooperant.fichierDossier)" 
+               target="_blank"
+               class="btn-primary text-sm px-4 py-2 inline-flex items-center">
+              <span class="material-icons mr-1 text-sm">download</span>
+              Télécharger
+            </a>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div class="font-semibold">Pièce Identité</div>
+              <div class="text-sm text-gray-500">{{ cooperant.fichierIdentite || 'Aucun fichier' }}</div>
+            </div>
+            <a *ngIf="cooperant.fichierIdentite" 
+               [href]="getDownloadUrl(cooperant.fichierIdentite)" 
+               target="_blank"
+               class="btn-primary text-sm px-4 py-2 inline-flex items-center">
+              <span class="material-icons mr-1 text-sm">download</span>
+              Télécharger
+            </a>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div class="font-semibold">Autre</div>
+              <div class="text-sm text-gray-500">{{ cooperant.fichierAutre || 'Aucun fichier' }}</div>
+            </div>
+            <a *ngIf="cooperant.fichierAutre" 
+               [href]="getDownloadUrl(cooperant.fichierAutre)" 
+               target="_blank"
+               class="btn-primary text-sm px-4 py-2 inline-flex items-center">
+              <span class="material-icons mr-1 text-sm">download</span>
+              Télécharger
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <a *ngIf="cooperant.id" [routerLink]="['/cooperant/edit', cooperant.id]" class="btn-primary inline-flex items-center">
+          <span class="material-icons mr-2">edit</span>
+          Modifier
+        </a>
+      </div>
+
+    </div>
+  </div>
+</app-main-layout>

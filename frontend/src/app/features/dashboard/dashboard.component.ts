@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layout.component';
-import { EmployerService } from '../../core/services/employer.service';
+import { CooperantService } from '../../core/services/cooperant.service';
 import { AffiliationService } from '../../core/services/affiliation.service';
 import { DebitService } from '../../core/services/debit.service';
 import { PaymentService } from '../../core/services/payment.service';
@@ -29,7 +29,7 @@ export class DashboardComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private employerService: EmployerService,
+    private cooperantService: CooperantService,
     private affiliationService: AffiliationService,
     private debitService: DebitService,
     private paymentService: PaymentService,
@@ -45,7 +45,7 @@ export class DashboardComponent implements OnInit {
     this.error = null;
 
     forkJoin({
-      employers: this.employerService.getAll(),
+      employers: this.cooperantService.getAll(),
       affiliations: this.affiliationService.getAll(),
       debits: this.debitService.getAll(),
       payments: this.paymentService.getAll()
@@ -103,13 +103,13 @@ export class DashboardComponent implements OnInit {
       });
     }
     
-    // Add employers info
+    // Add cooperants info
     if (data.employers?.length > 0) {
       activities.push({
-        type: 'employer',
-        description: `${data.employers.length} employeur(s) actif(s)`,
+        type: 'cooperant',
+        description: `${data.employers.length} coopérant(s) actif(s)`,
         time: 'Actuel',
-        icon: 'business',
+        icon: 'person',
         color: 'text-purple-600'
       });
     }

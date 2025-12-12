@@ -9,6 +9,14 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'public/cooperant/depot',
+    loadComponent: () => import('./features/cooperant/cooperant-form/cooperant-form.component').then(m => m.CooperantFormComponent)
+  },
+  {
+    path: 'public/cooperant/new',
+    loadComponent: () => import('./features/cooperant/cooperant-form/cooperant-form.component').then(m => m.CooperantFormComponent)
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
@@ -20,7 +28,32 @@ export const routes: Routes = [
   {
     path: 'employer',
     canActivate: [authGuard],
-    loadChildren: () => import('./features/employer/employer.routes').then(m => m.EMPLOYER_ROUTES)
+    children: [
+      {
+        path: '',
+        redirectTo: '/cooperant',
+        pathMatch: 'full'
+      },
+      {
+        path: 'new',
+        redirectTo: '/cooperant/new',
+        pathMatch: 'full'
+      },
+      {
+        path: 'validation',
+        redirectTo: '/cooperant/validation',
+        pathMatch: 'full'
+      },
+      {
+        path: '**',
+        redirectTo: '/cooperant'
+      }
+    ]
+  },
+  {
+    path: 'cooperant',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/cooperant/cooperant.routes').then(m => m.COOPERANT_ROUTES)
   },
   {
     path: 'affiliation',

@@ -1,0 +1,106 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-cnss-primary via-cnss-secondary to-cnss-accent py-12 px-4">
+  <div class="max-w-3xl w-full">
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h3 class="text-2xl font-bold text-cnss-dark mb-2 text-center">Dépôt dossier Coopérant</h3>
+      <p class="text-sm text-gray-600 mb-6 text-center">
+        Remplissez le formulaire et joignez les documents. Après validation, vous pourrez suivre votre dossier.
+      </p>
+
+      <div *ngIf="successMessage" class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+        <div class="flex items-center">
+          <span class="material-icons mr-2">check_circle</span>
+          <div>
+            <div>{{ successMessage }}</div>
+            <div *ngIf="createdMatricule" class="mt-1 text-sm"><strong>Matricule:</strong> {{ createdMatricule }}</div>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <button type="button" (click)="goToLogin()" class="bg-cnss-primary text-white px-4 py-2 rounded-lg font-semibold">
+            Aller à la connexion
+          </button>
+        </div>
+      </div>
+
+      <form *ngIf="!successMessage" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">Nom (FR)</label>
+            <input class="form-input" type="text" formControlName="nomFr" />
+          </div>
+          <div>
+            <label class="form-label">Prénom (FR)</label>
+            <input class="form-input" type="text" formControlName="prenomFr" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="form-label">Adresse (FR)</label>
+            <input class="form-input" type="text" formControlName="adresseFr" />
+          </div>
+
+          <div>
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" formControlName="email" placeholder="ex: nom@exemple.com" />
+          </div>
+          <div>
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" type="text" formControlName="telephone" />
+          </div>
+
+          <div>
+            <label class="form-label">Type pièce</label>
+            <select class="form-input" formControlName="typePieceIdentite">
+              <option value="CIN">CIN</option>
+              <option value="PASSPORT">Passeport</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">N° pièce</label>
+            <input class="form-input" type="text" formControlName="numPieceIdentite" />
+          </div>
+
+          <div>
+            <label class="form-label">Régime</label>
+            <select class="form-input" formControlName="codeRegime">
+              <option value="500">500</option>
+              <option value="510">510</option>
+              <option value="515">515</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Nationalité</label>
+            <input class="form-input" type="text" formControlName="nationalite" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="form-label">Fichier dossier (PDF/Image)</label>
+            <input class="form-input" type="file" (change)="onFileChange($event, 'dossier')" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Fichier identité (PDF/Image)</label>
+            <input class="form-input" type="file" (change)="onFileChange($event, 'identite')" />
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button
+            type="submit"
+            [disabled]="loading || form.invalid"
+            class="w-full bg-cnss-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90
+                   transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50
+                   disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            <span *ngIf="!loading" class="material-icons mr-2">upload</span>
+            <span *ngIf="loading" class="spinner mr-2"></span>
+            {{ loading ? 'Envoi en cours...' : 'Déposer le dossier' }}
+          </button>
+        </div>
+
+        <div class="mt-6 text-center">
+          <button type="button" (click)="goToLogin()" class="text-cnss-primary hover:text-cnss-secondary text-sm font-medium">
+            Retour à la connexion
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -14,11 +14,11 @@ import { EmployerService, Employer } from '../../../core/services/employer.servi
         <div class="flex justify-between items-center mb-8">
           <h1 class="text-3xl font-bold text-cnss-dark">Détails Employeur</h1>
           <div class="flex gap-2">
-            <a [routerLink]="['/employer/edit', employer?.empMat + '-' + employer?.empCle]" 
+            <a [routerLink]="['/employer/edit', employer.empMat + '-' + employer.empCle]" 
                class="btn-secondary flex items-center gap-2" *ngIf="employer">
               <span class="material-icons text-sm">edit</span> Modifier
             </a>
-            <a routerLink="/employer" class="btn-outline">← Retour</a>
+            <a routerLink="/cooperant" class="btn-outline">← Retour</a>
           </div>
         </div>
 

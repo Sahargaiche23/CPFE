@@ -40,6 +40,11 @@ spring:
             - Path=/api/employers/**
           filters:
             - StripPrefix=1
+
+        - id: cooperant-service
+          uri: lb://employer-service
+          predicates:
+            - Path=/api/cooperants/**
             
         - id: salary-service
           uri: lb://salary-service

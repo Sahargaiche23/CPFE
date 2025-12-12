@@ -1,0 +1,89 @@
+<app-main-layout>
+  <div class="fade-in">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-cnss-dark">Validation Coopérants</h1>
+        <p class="text-gray-600 mt-2">Interface agent: valider / rejeter</p>
+      </div>
+      <a routerLink="/cooperant" class="btn-outline inline-flex items-center">
+        <span class="material-icons mr-2">list</span>
+        Liste
+      </a>
+    </div>
+
+    <div class="card mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Agent ID</label>
+          <input type="number" [(ngModel)]="agentId" class="form-field">
+        </div>
+        <div class="md:col-span-2 text-sm text-gray-600 flex items-end">
+          (Pour l'instant, l'ID agent est saisi manuellement. On pourra le récupérer depuis le profil connecté.)
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="spinner"></div>
+      </div>
+
+      <div *ngIf="!loading" class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Nom</th>
+              <th>Régime</th>
+              <th>Pièce</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of pending" class="hover:bg-gray-50">
+              <td class="font-mono text-sm">{{ c.matriculeComplet || (c.matricule + '-' + c.cle) }}</td>
+              <td>{{ c.nomCompletFr || (c.prenomFr + ' ' + c.nomFr) }}</td>
+              <td>{{ c.codeRegime }}</td>
+              <td>{{ c.typePieceIdentite }} {{ c.numPieceIdentite }}</td>
+              <td>
+                <div class="flex items-center space-x-2">
+                  <button (click)="valider(c.id!)" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">check</span>
+                    Valider
+                  </button>
+                  <button (click)="startReject(c.id!)" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">close</span>
+                    Rejeter
+                  </button>
+                  <a [routerLink]="['/cooperant', c.id]" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">visibility</span>
+                    Voir
+                  </a>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="pending.length === 0">
+              <td colspan="5" class="text-center py-12 text-gray-500">
+                <span class="material-icons text-6xl mb-4 block text-gray-300">verified</span>
+                <p class="text-lg font-semibold">Aucun dossier en attente</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="selectedId" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+        <h2 class="text-xl font-bold text-cnss-dark mb-4">Motif de rejet</h2>
+        <textarea rows="4" [(ngModel)]="rejectMotif" class="form-field" placeholder="Saisir le motif..."></textarea>
+        <div class="flex justify-end gap-3 mt-6">
+          <button (click)="cancelReject()" class="px-5 py-2 border border-gray-300 rounded hover:bg-gray-50">Annuler</button>
+          <button (click)="rejeter()" class="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700">Confirmer rejet</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</app-main-layout>

@@ -25,7 +25,7 @@ export class I18nService {
       // Navigation
       nav: {
         dashboard: 'Tableau de bord',
-        employers: 'Employeurs',
+        employers: 'Coopérants',
         affiliations: 'Affiliations',
         debits: 'Débits',
         payments: 'Paiements',
@@ -37,7 +37,7 @@ export class I18nService {
       dashboard: {
         title: 'Tableau de Bord',
         welcome: 'Bienvenue dans le système de gestion de la coopération technique',
-        totalEmployers: 'Total Employeurs',
+        totalEmployers: 'Total Coopérants',
         totalAffiliations: 'Total Affiliations',
         pendingDebits: 'Débits en attente',
         totalPayments: 'Total Paiements',
@@ -47,11 +47,11 @@ export class I18nService {
       },
       // Employers
       employer: {
-        title: 'Gestion des Employeurs',
-        subtitle: 'Liste des employeurs régime 500 et 510',
-        new: 'Nouvel Employeur',
-        edit: 'Modifier Employeur',
-        details: 'Détails Employeur',
+        title: 'Gestion des Coopérants',
+        subtitle: 'Liste des coopérants (500, 510, 515)',
+        new: 'Nouveau Coopérant',
+        edit: 'Modifier Coopérant',
+        details: 'Détails Coopérant',
         number: 'Numéro',
         tradeName: 'Nom Commercial',
         legalName: 'Raison Sociale',
@@ -68,8 +68,8 @@ export class I18nService {
         search: 'Rechercher',
         filter: 'Filtrer',
         all: 'Tous',
-        noResults: 'Aucun employeur trouvé',
-        confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet employeur ?'
+        noResults: 'Aucun coopérant trouvé',
+        confirmDelete: 'Êtes-vous sûr de vouloir supprimer ce coopérant ?'
       },
       // Affiliations
       affiliation: {
@@ -198,7 +198,7 @@ export class I18nService {
       },
       // Quick actions
       quickActions: {
-        newEmployer: 'Nouvel Employeur',
+        newEmployer: 'Nouveau Coopérant',
         newAffiliation: 'Nouvelle Affiliation',
         generateDebit: 'Générer Débit',
         newPayment: 'Nouveau Paiement',
@@ -208,7 +208,7 @@ export class I18nService {
       activities: {
         affiliations: 'affiliation(s) enregistrée(s)',
         totalPayments: 'Total paiements',
-        activeEmployers: 'employeur(s) actif(s)',
+        activeEmployers: 'coopérant(s) actif(s)',
         pendingDebits: 'débit(s) en attente',
         recent: 'Récent',
         current: 'Actuel',
@@ -238,20 +238,20 @@ export class I18nService {
         registerPaymentBtn: 'Enregistrer le Paiement',
         // Debit form
         generateDebit: 'Générer un Débit Trimestriel',
-        generateDebitDesc: 'Création d\'un nouveau débit pour un employeur',
+        generateDebitDesc: 'Création d\'un nouveau débit pour un coopérant',
         debitInfo: 'Informations du Débit',
-        selectEmployer: 'Sélectionner un employeur',
+        selectCooperant: 'Sélectionner un coopérant',
         trimester: 'Trimestre',
         year: 'Année',
         generateDebitBtn: 'Générer le Débit',
-        // Employer form
-        newEmployer: 'Nouvel Employeur',
-        newEmployerDesc: 'Enregistrement d\'un nouvel employeur régime 500 ou 510',
+        // Cooperant form
+        newCooperant: 'Nouveau Coopérant',
+        newCooperantDesc: 'Enregistrement d\'un nouveau coopérant (500, 510, 515)',
         regimeType: 'Type de Régime',
         regime500: 'Régime 500',
-        regime500Desc: 'Employeurs tunisiens',
+        regime500Desc: 'Coopérant Général',
         regime510: 'Régime 510',
-        regime510Desc: 'Employeurs étrangers',
+        regime510Desc: 'Coopérant Agricole Amélioré',
         companyInfo: 'Informations de l\'Entreprise',
         legalName: 'Raison Sociale',
         tradeName: 'Nom Commercial',
@@ -264,7 +264,7 @@ export class I18nService {
         // Affiliation form
         newAffiliation: 'Nouvelle Affiliation',
         newAffiliationDesc: 'Enregistrement d\'une nouvelle affiliation employé',
-        employerSelection: 'Sélection de l\'Employeur',
+        cooperantSelection: 'Sélection du Coopérant',
         employeeInfo: 'Informations de l\'Employé',
         firstName: 'Prénom',
         lastName: 'Nom',
@@ -315,8 +315,8 @@ export class I18nService {
       // Navigation
       nav: {
         dashboard: 'لوحة القيادة',
-        employers: 'أصحاب العمل',
-        affiliations: 'الانتماءات',
+        employers: 'المتعاونون',
+        affiliations: 'الانتسابات',
         debits: 'الديون',
         payments: 'المدفوعات',
         profile: 'ملفي الشخصي',
@@ -327,21 +327,21 @@ export class I18nService {
       dashboard: {
         title: 'لوحة القيادة',
         welcome: 'مرحباً بكم في نظام إدارة التعاون التقني',
-        totalEmployers: 'إجمالي أصحاب العمل',
-        totalAffiliations: 'إجمالي الانتماءات',
+        totalEmployers: 'مجموع المتعاونين',
+        totalAffiliations: 'مجموع الانتسابات',
         pendingDebits: 'الديون المعلقة',
-        totalPayments: 'إجمالي المدفوعات',
-        recentActivities: 'الأنشطة الأخيرة',
+        totalPayments: 'مجموع المدفوعات',
+        recentActivities: 'النشاطات الأخيرة',
         quickActions: 'إجراءات سريعة',
         viewDetails: 'عرض التفاصيل'
       },
       // Employers
       employer: {
-        title: 'إدارة أصحاب العمل',
-        subtitle: 'قائمة أصحاب العمل نظام 500 و 510',
-        new: 'صاحب عمل جديد',
-        edit: 'تعديل صاحب العمل',
-        details: 'تفاصيل صاحب العمل',
+        title: 'إدارة المتعاونين',
+        subtitle: 'قائمة المتعاونين (500، 510، 515)',
+        new: 'متعاون جديد',
+        edit: 'تعديل المتعاون',
+        details: 'تفاصيل المتعاون',
         number: 'الرقم',
         tradeName: 'الاسم التجاري',
         legalName: 'الاسم القانوني',
@@ -353,20 +353,20 @@ export class I18nService {
         status: 'الحالة',
         active: 'نشط',
         inactive: 'غير نشط',
-        affiliationsCount: 'الانتماءات',
+        affiliationsCount: 'الانتسابات',
         actions: 'الإجراءات',
         search: 'بحث',
         filter: 'تصفية',
         all: 'الكل',
-        noResults: 'لم يتم العثور على أصحاب عمل',
-        confirmDelete: 'هل أنت متأكد من حذف صاحب العمل هذا؟'
+        noResults: 'لا يوجد متعاون',
+        confirmDelete: 'هل أنت متأكد من حذف هذا المتعاون؟'
       },
       // Affiliations
       affiliation: {
         title: 'إدارة الانتماءات',
         new: 'انتماء جديد',
         number: 'رقم الانتماء',
-        employer: 'صاحب العمل',
+        employer: 'المتعاون',
         startDate: 'تاريخ البداية',
         endDate: 'تاريخ النهاية',
         status: 'الحالة',
@@ -379,7 +379,7 @@ export class I18nService {
         subtitle: 'قائمة المدفوعات المسجلة وحالتها',
         new: 'دفعة جديدة',
         reference: 'المرجع',
-        employer: 'صاحب العمل',
+        employer: 'المتعاون',
         debit: 'الدين',
         date: 'تاريخ الدفع',
         amount: 'المبلغ (دينار)',
@@ -464,7 +464,7 @@ export class I18nService {
         subtitle: 'قائمة الديون المنشأة وحالتها',
         generate: 'إنشاء دين',
         number: 'الرقم',
-        employer: 'صاحب العمل',
+        employer: 'المتعاون',
         period: 'الفترة',
         dateGeneration: 'تاريخ الإنشاء',
         amount: 'المبلغ (دينار)',
@@ -488,7 +488,7 @@ export class I18nService {
       },
       // Quick actions
       quickActions: {
-        newEmployer: 'صاحب عمل جديد',
+        newEmployer: 'متعاون جديد',
         newAffiliation: 'انتماء جديد',
         generateDebit: 'إنشاء دين',
         newPayment: 'دفعة جديدة',
@@ -498,8 +498,8 @@ export class I18nService {
       activities: {
         affiliations: 'انتماء(ات) مسجلة',
         totalPayments: 'إجمالي المدفوعات',
-        activeEmployers: 'صاحب(ة) عمل نشط',
-        pendingDebits: 'دين(ديون) معلقة',
+        activeEmployers: 'متعاون نشط',
+        pendingDebits: 'دين معلق',
         recent: 'حديث',
         current: 'حالي',
         toProcess: 'للمعالجة'
@@ -528,20 +528,20 @@ export class I18nService {
         registerPaymentBtn: 'تسجيل الدفعة',
         // Debit form
         generateDebit: 'إنشاء دين فصلي',
-        generateDebitDesc: 'إنشاء دين جديد لصاحب عمل',
+        generateDebitDesc: 'إنشاء دين جديد للمتعاون',
         debitInfo: 'معلومات الدين',
-        selectEmployer: 'اختر صاحب عمل',
+        selectCooperant: 'اختر متعاون',
         trimester: 'الفصل',
         year: 'السنة',
         generateDebitBtn: 'إنشاء الدين',
-        // Employer form
-        newEmployer: 'صاحب عمل جديد',
-        newEmployerDesc: 'تسجيل صاحب عمل جديد نظام 500 أو 510',
+        // Cooperant form
+        newCooperant: 'متعاون جديد',
+        newCooperantDesc: 'تسجيل متعاون جديد (500، 510، 515)',
         regimeType: 'نوع النظام',
         regime500: 'النظام 500',
-        regime500Desc: 'أصحاب العمل التونسيون',
+        regime500Desc: 'متعاون عام',
         regime510: 'النظام 510',
-        regime510Desc: 'أصحاب العمل الأجانب',
+        regime510Desc: 'متعاون فلاحي محسن',
         companyInfo: 'معلومات الشركة',
         legalName: 'الاسم القانوني',
         tradeName: 'الاسم التجاري',
@@ -554,7 +554,7 @@ export class I18nService {
         // Affiliation form
         newAffiliation: 'انتماء جديد',
         newAffiliationDesc: 'تسجيل انتماء موظف جديد',
-        employerSelection: 'اختيار صاحب العمل',
+        cooperantSelection: 'اختيار المتعاون',
         employeeInfo: 'معلومات الموظف',
         firstName: 'الاسم الأول',
         lastName: 'اسم العائلة',
@@ -605,11 +605,11 @@ export class I18nService {
       // Navigation
       nav: {
         dashboard: 'Dashboard',
-        employers: 'Employers',
+        employers: 'Cooperants',
         affiliations: 'Affiliations',
         debits: 'Debits',
         payments: 'Payments',
-        profile: 'My Profile',
+        profile: 'My profile',
         settings: 'Settings',
         logout: 'Logout'
       },
@@ -617,21 +617,21 @@ export class I18nService {
       dashboard: {
         title: 'Dashboard',
         welcome: 'Welcome to the Technical Cooperation Management System',
-        totalEmployers: 'Total Employers',
+        totalEmployers: 'Total Cooperants',
         totalAffiliations: 'Total Affiliations',
         pendingDebits: 'Pending Debits',
         totalPayments: 'Total Payments',
-        recentActivities: 'Recent Activities',
-        quickActions: 'Quick Actions',
-        viewDetails: 'View Details'
+        recentActivities: 'Recent activities',
+        quickActions: 'Quick actions',
+        viewDetails: 'View details'
       },
       // Employers
       employer: {
-        title: 'Employer Management',
-        subtitle: 'List of regime 500 and 510 employers',
-        new: 'New Employer',
-        edit: 'Edit Employer',
-        details: 'Employer Details',
+        title: 'Cooperants Management',
+        subtitle: 'List of cooperants (500, 510, 515)',
+        new: 'New Cooperant',
+        edit: 'Edit Cooperant',
+        details: 'Cooperant Details',
         number: 'Number',
         tradeName: 'Trade Name',
         legalName: 'Legal Name',
@@ -648,14 +648,15 @@ export class I18nService {
         search: 'Search',
         filter: 'Filter',
         all: 'All',
-        noResults: 'No employers found',
-        confirmDelete: 'Are you sure you want to delete this employer?'
+        noResults: 'No cooperants found',
+        confirmDelete: 'Are you sure you want to delete this cooperant?'
       },
       // Affiliations
       affiliation: {
         title: 'Affiliation Management',
         new: 'New Affiliation',
         number: 'Affiliation Number',
+        cooperant: 'Cooperant',
         employer: 'Employer',
         startDate: 'Start Date',
         endDate: 'End Date',

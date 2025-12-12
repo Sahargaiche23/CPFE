@@ -84,7 +84,7 @@ export class EmployerFormComponent implements OnInit {
         this.employerService.update(this.empMat, this.empCle, data).subscribe({
           next: () => {
             this.loading = false;
-            this.router.navigate(['/employer']);
+            this.router.navigate(['/cooperant']);
           },
           error: (err) => {
             console.error('Erreur mise à jour:', err);
@@ -97,7 +97,7 @@ export class EmployerFormComponent implements OnInit {
           next: (result) => {
             console.log('Employer created:', result);
             this.loading = false;
-            this.router.navigate(['/employer']);
+            this.router.navigate(['/cooperant']);
           },
           error: (err) => {
             console.error('Erreur création:', err);

@@ -2,6 +2,7 @@ package tn.cnss.cooperation.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,25 @@ import tn.cnss.cooperation.notification.dto.EmailRequest;
 public class EmailService {
     
     private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username:}")
+    private String fromEmail;
+
+    public void sendGenericEmail(String to, String subject, String content) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(content);
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                message.setFrom(fromEmail);
+            }
+            mailSender.send(message);
+            log.info("Email générique envoyé avec succès à: {}", to);
+        } catch (Exception e) {
+            log.error("Erreur lors de l'envoi de l'email générique: {}", e.getMessage());
+        }
+    }
     
     public void sendAffiliationEmail(EmailRequest request) {
         log.info("Envoi email à: {} pour affiliation: {}", 
@@ -44,7 +64,9 @@ public class EmailService {
             message.setTo(request.getEmail());
             message.setSubject(subject);
             message.setText(content);
-            message.setFrom("cnss.cooperation@gmail.com");
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                message.setFrom(fromEmail);
+            }
             
             mailSender.send(message);
             log.info("Email envoyé avec succès à: {}", request.getEmail());

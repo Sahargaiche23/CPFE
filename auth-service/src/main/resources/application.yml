@@ -29,3 +29,8 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui/index.html
+
+# URL du notification-service (Docker)
+notification:
+  service:
+    url: http://notification-service:8087

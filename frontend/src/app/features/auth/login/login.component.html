@@ -78,9 +78,20 @@
           {{ loading ? 'Connexion en cours...' : 'Se connecter' }}
         </button>
 
+        <button
+          type="button"
+          routerLink="/public/cooperant/new"
+          class="w-full mt-3 bg-white text-cnss-primary py-3 rounded-lg font-semibold border border-cnss-primary
+                 hover:bg-cnss-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-md
+                 flex items-center justify-center"
+        >
+          <span class="material-icons mr-2">description</span>
+          Déposer un dossier
+        </button>
+
         <!-- Forgot Password -->
         <div class="mt-6 text-center">
-          <a href="#" class="text-cnss-primary hover:text-cnss-secondary text-sm font-medium">
+          <a routerLink="/auth/forgot-password" class="text-cnss-primary hover:text-cnss-secondary text-sm font-medium">
             Mot de passe oublié ?
           </a>
         </div>

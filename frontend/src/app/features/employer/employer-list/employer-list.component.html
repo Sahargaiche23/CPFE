@@ -11,7 +11,7 @@
           <span class="material-icons mr-2">picture_as_pdf</span>
           {{ i18n.t('table.exportPdf') }}
         </button>
-        <a routerLink="/employer/new" class="btn-primary">
+        <a routerLink="/cooperant/new" class="btn-primary">
           <span class="material-icons mr-2">add</span>
           {{ i18n.t('employer.new') }}
         </a>
@@ -156,7 +156,7 @@
                 <span class="material-icons text-6xl mb-4 block text-gray-300">business_center</span>
                 <p class="text-lg font-semibold">Aucun employeur trouvé</p>
                 <p class="text-sm mt-2">{{ employers.length === 0 ? 'Commencez par créer votre premier employeur' : 'Modifiez vos critères de recherche' }}</p>
-                <a *ngIf="employers.length === 0" routerLink="/employer/new" class="btn-primary mt-4 inline-flex items-center">
+                <a *ngIf="employers.length === 0" routerLink="/cooperant/new" class="btn-primary mt-4 inline-flex items-center">
                   <span class="material-icons mr-2">add</span>
                   Créer un employeur
                 </a>

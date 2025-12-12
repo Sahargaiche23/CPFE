@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.cnss.cooperation.notification.dto.EmailRequest;
+import tn.cnss.cooperation.notification.dto.GenericEmailRequest;
 import tn.cnss.cooperation.notification.service.EmailService;
 
 @RestController
@@ -17,6 +18,12 @@ public class NotificationController {
     @PostMapping("/affiliation")
     public ResponseEntity<String> sendAffiliationEmail(@RequestBody EmailRequest request) {
         emailService.sendAffiliationEmail(request);
+        return ResponseEntity.ok("Email envoyé");
+    }
+
+    @PostMapping("/email")
+    public ResponseEntity<String> sendEmail(@RequestBody GenericEmailRequest request) {
+        emailService.sendGenericEmail(request.getTo(), request.getSubject(), request.getContent());
         return ResponseEntity.ok("Email envoyé");
     }
     
