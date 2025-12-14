@@ -86,16 +86,41 @@ public class UserController {
     }
     
     /**
-     * Supprimer un utilisateur
+     * Supprimer un utilisateur et le coopérant associé
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id, HttpServletRequest httpRequest) {
         try {
-            userService.getUserById(id).ifPresent(user -> {
+            User user = userService.getUserById(id).orElse(null);
+            if (user != null) {
+                // Log de suppression
                 auditService.logAction(id, user.getUsername(), AuditService.ACTION_USER_DELETE,
                         "Suppression utilisateur", httpRequest, null, true);
-            });
+                
+                // Supprimer le coopérant associé via employer-service (si profil COOPERANT)
+                if (user.getProfil() != null && user.getProfil().toLowerCase().contains("cooperant")) {
+                    try {
+                        userService.deleteCooperantByEmail(user.getEmail());
+                    } catch (Exception e) {
+                        // Log mais ne pas bloquer la suppression utilisateur
+                        System.err.println("Erreur suppression coopérant: " + e.getMessage());
+                    }
+                }
+            }
             userService.deleteUser(id);
+            return ResponseEntity.ok(Map.of("message", "Utilisateur supprimé"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Supprimer un utilisateur par email (appelé par employer-service)
+     */
+    @DeleteMapping("/by-email/{email}")
+    public ResponseEntity<?> deleteUserByEmail(@PathVariable String email) {
+        try {
+            userService.deleteUserByEmail(email);
             return ResponseEntity.ok(Map.of("message", "Utilisateur supprimé"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -267,8 +292,22 @@ public class UserController {
         
         stats.put("totalUsers", allUsers.size());
         stats.put("activeUsers", allUsers.stream().filter(u -> u.getActive() == 1).count());
-        stats.put("adminUsers", allUsers.stream().filter(u -> "admin".equals(u.getProfil())).count());
-        stats.put("regularUsers", allUsers.stream().filter(u -> "user".equals(u.getProfil())).count());
+        // Compter admin (insensible à la casse)
+        stats.put("adminUsers", allUsers.stream()
+                .filter(u -> u.getProfil() != null && u.getProfil().toLowerCase().contains("admin"))
+                .count());
+        // Compter agents (user, agent, AGENT_COOP_TECH - exclure cooperant et admin)
+        stats.put("regularUsers", allUsers.stream()
+                .filter(u -> u.getProfil() != null && 
+                        !u.getProfil().toLowerCase().contains("admin") &&
+                        !u.getProfil().toLowerCase().contains("cooperant") &&
+                        (u.getProfil().equalsIgnoreCase("user") || 
+                         u.getProfil().toLowerCase().contains("agent")))
+                .count());
+        // Compter coopérants
+        stats.put("cooperantUsers", allUsers.stream()
+                .filter(u -> u.getProfil() != null && u.getProfil().toLowerCase().contains("cooperant"))
+                .count());
         
         return ResponseEntity.ok(stats);
     }

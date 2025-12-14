@@ -129,15 +129,37 @@ public class CooperantService {
     }
     
     /**
-     * Supprimer (désactiver) un coopérant
+     * Supprimer définitivement un coopérant et son compte utilisateur
      */
     public void delete(Long id) {
         Cooperant cooperant = cooperantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Coopérant non trouvé: " + id));
         
-        cooperant.setActif(false);
-        Objects.requireNonNull(cooperantRepository.save(cooperant));
-        log.info("Coopérant désactivé: {}", id);
+        String email = cooperant.getEmail();
+        
+        // Supprimer le coopérant de la base
+        cooperantRepository.delete(cooperant);
+        log.info("Coopérant supprimé: {}", id);
+        
+        // Supprimer le compte utilisateur associé via auth-service
+        if (email != null && !email.isEmpty()) {
+            try {
+                restTemplate.delete(authServiceUrl + "/api/users/by-email/" + email);
+                log.info("Compte utilisateur supprimé pour: {}", email);
+            } catch (Exception e) {
+                log.warn("Impossible de supprimer le compte utilisateur: {}", e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Supprimer (définitivement) un coopérant par email
+     */
+    public void deleteByEmail(String email) {
+        cooperantRepository.findByEmail(email).ifPresent(cooperant -> {
+            cooperantRepository.delete(cooperant);
+            log.info("Coopérant supprimé définitivement par email: {}", email);
+        });
     }
     
     /**
@@ -370,28 +392,44 @@ public class CooperantService {
         String nomComplet = cooperant.getNomCompletFr();
         
         try {
-            // 1. Appeler auth-service pour créer le compte
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            // 1. Vérifier si l'utilisateur existe déjà
+            boolean userExists = false;
+            try {
+                restTemplate.getForEntity(
+                        authServiceUrl + "/api/auth/debug/" + email,
+                        Object.class
+                );
+                userExists = true;
+                log.info("Utilisateur existe déjà: {}", email);
+            } catch (Exception e) {
+                // Utilisateur n'existe pas, on peut le créer
+                userExists = false;
+            }
             
-            Map<String, Object> userRequest = new HashMap<>();
-            userRequest.put("username", email);
-            userRequest.put("password", password);
-            userRequest.put("email", email);
-            userRequest.put("firstName", cooperant.getPrenomFr());
-            userRequest.put("lastName", cooperant.getNomFr());
-            userRequest.put("profil", "COOPERANT");
+            if (!userExists) {
+                // 2. Appeler auth-service pour créer le compte
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                
+                Map<String, Object> userRequest = new HashMap<>();
+                userRequest.put("username", email);
+                userRequest.put("password", password);
+                userRequest.put("email", email);
+                userRequest.put("firstName", cooperant.getPrenomFr());
+                userRequest.put("lastName", cooperant.getNomFr());
+                userRequest.put("profil", "COOPERANT");
+                
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(userRequest, headers);
+                
+                restTemplate.postForEntity(
+                        authServiceUrl + "/api/users",
+                        entity,
+                        Object.class
+                );
+                log.info("Compte utilisateur créé pour coopérant: {}", email);
+            }
             
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(userRequest, headers);
-            
-            restTemplate.postForEntity(
-                    authServiceUrl + "/api/users",
-                    entity,
-                    Object.class
-            );
-            log.info("Compte utilisateur créé pour coopérant: {}", email);
-            
-            // 2. Envoyer email avec identifiants via notification-service
+            // 3. Envoyer email avec identifiants via notification-service (toujours)
             sendCredentialsEmail(email, password, nomComplet);
             
         } catch (Exception e) {

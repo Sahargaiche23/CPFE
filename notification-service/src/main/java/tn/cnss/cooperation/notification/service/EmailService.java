@@ -1,12 +1,17 @@
 package tn.cnss.cooperation.notification.service;
 
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import tn.cnss.cooperation.notification.dto.EmailRequest;
+
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +25,17 @@ public class EmailService {
 
     public void sendGenericEmail(String to, String subject, String content) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(content);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setTo(to);
+            helper.setSubject(subject);
+            // Envoyer en HTML si le contenu contient des balises HTML
+            boolean isHtml = content != null && (content.contains("<html") || content.contains("<body") || content.contains("<div") || content.contains("<table"));
+            helper.setText(content != null ? content : "", isHtml);
+            
             if (fromEmail != null && !fromEmail.isBlank()) {
-                message.setFrom(fromEmail);
+                helper.setFrom(fromEmail);
             }
             mailSender.send(message);
             log.info("Email générique envoyé avec succès à: {}", to);
@@ -72,6 +82,33 @@ public class EmailService {
             log.info("Email envoyé avec succès à: {}", request.getEmail());
         } catch (Exception e) {
             log.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
+        }
+    }
+
+    public void sendEmailWithAttachment(String to, String subject, String content, String pdfBase64, String fileName) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, false);
+            
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                helper.setFrom(fromEmail);
+            }
+            
+            // Attacher le PDF
+            if (pdfBase64 != null && !pdfBase64.isBlank()) {
+                byte[] pdfBytes = Base64.getDecoder().decode(pdfBase64);
+                ByteArrayResource pdfResource = new ByteArrayResource(pdfBytes);
+                helper.addAttachment(fileName != null ? fileName : "attestation_affiliation.pdf", pdfResource);
+            }
+            
+            mailSender.send(message);
+            log.info("Email avec pièce jointe envoyé avec succès à: {}", to);
+        } catch (Exception e) {
+            log.error("Erreur lors de l'envoi de l'email avec pièce jointe: {}", e.getMessage());
         }
     }
 }

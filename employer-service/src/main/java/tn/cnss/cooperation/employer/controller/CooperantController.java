@@ -94,6 +94,16 @@ public class CooperantController {
     }
     
     /**
+     * Supprimer un coopérant par email
+     */
+    @DeleteMapping("/by-email/{email}")
+    public ResponseEntity<Void> deleteByEmail(@PathVariable String email) {
+        log.info("DELETE /api/cooperants/by-email/{} - Suppression coopérant par email", email);
+        cooperantService.deleteByEmail(email);
+        return ResponseEntity.noContent().build();
+    }
+    
+    /**
      * Recherche par nom ou matricule
      */
     @GetMapping("/search")

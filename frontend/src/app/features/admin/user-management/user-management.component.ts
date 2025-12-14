@@ -23,7 +23,7 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
         </div>
 
         <!-- Statistiques -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div class="bg-white rounded-xl shadow p-4">
             <div class="text-3xl font-bold text-cnss-primary">{{ stats?.totalUsers || 0 }}</div>
             <div class="text-gray-600">Total Utilisateurs</div>
@@ -33,12 +33,16 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
             <div class="text-gray-600">Actifs</div>
           </div>
           <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-3xl font-bold text-blue-600">{{ stats?.adminUsers || 0 }}</div>
+            <div class="text-3xl font-bold text-purple-600">{{ stats?.adminUsers || 0 }}</div>
             <div class="text-gray-600">Administrateurs</div>
           </div>
           <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-3xl font-bold text-orange-600">{{ stats?.regularUsers || 0 }}</div>
+            <div class="text-3xl font-bold text-blue-600">{{ stats?.regularUsers || 0 }}</div>
             <div class="text-gray-600">Agents</div>
+          </div>
+          <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-3xl font-bold text-teal-600">{{ stats?.cooperantUsers || 0 }}</div>
+            <div class="text-gray-600">Coopérants</div>
           </div>
         </div>
 
@@ -89,9 +93,12 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
                 </td>
                 <td class="px-6 py-4">{{ user.firstName }} {{ user.lastName }}</td>
                 <td class="px-6 py-4">
-                  <span [class]="user.profil === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'" 
-                        class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ user.profil === 'admin' ? 'Admin' : 'Agent' }}
+                  <span [ngClass]="{
+                    'bg-purple-100 text-purple-800': user.profil?.toLowerCase() === 'admin',
+                    'bg-teal-100 text-teal-800': user.profil?.toLowerCase() === 'cooperant',
+                    'bg-blue-100 text-blue-800': user.profil?.toLowerCase() !== 'admin' && user.profil?.toLowerCase() !== 'cooperant'
+                  }" class="px-2 py-1 rounded-full text-xs font-medium">
+                    {{ getRoleLabel(user.profil) }}
                   </span>
                 </td>
                 <td class="px-6 py-4">{{ user.burCod || '-' }}</td>
@@ -124,6 +131,11 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
                     <button (click)="viewLogs(user)" class="text-gray-600 hover:text-gray-800" title="Voir logs">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                    </button>
+                    <button (click)="confirmDelete(user)" class="text-red-600 hover:text-red-800" title="Supprimer">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                       </svg>
                     </button>
                   </div>
@@ -222,6 +234,33 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
           </div>
         </div>
 
+        <!-- Modal Suppression -->
+        <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div class="p-6 border-b">
+              <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <h2 class="text-xl font-bold text-gray-800">Confirmer la suppression</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-gray-600 mb-4">
+                Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ deleteUser?.username }}</strong> ?
+                Cette action est irréversible.
+              </p>
+              <div class="flex justify-end gap-3">
+                <button (click)="cancelDelete()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Annuler</button>
+                <button (click)="performDelete()" [disabled]="loading"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                  {{ loading ? 'Suppression...' : 'Supprimer' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Modal Logs -->
         <div *ngIf="showLogsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
@@ -285,8 +324,10 @@ export class UserManagementComponent implements OnInit {
   showModal = false;
   showResetModal = false;
   showLogsModal = false;
+  showDeleteModal = false;
   isEditing = false;
   loading = false;
+  deleteUser: User | null = null;
   
   selectedUser: User | null = null;
   newPassword = '';
@@ -358,6 +399,15 @@ export class UserManagementComponent implements OnInit {
       return (user.firstName[0] + user.lastName[0]).toUpperCase();
     }
     return user.username[0].toUpperCase();
+  }
+
+  getRoleLabel(profil: string | undefined): string {
+    if (!profil) return 'Utilisateur';
+    const lower = profil.toLowerCase();
+    if (lower === 'admin') return 'Admin';
+    if (lower === 'cooperant') return 'Coopérant';
+    if (lower.includes('agent')) return 'Agent';
+    return 'Utilisateur';
   }
 
   openCreateModal() {
@@ -474,5 +524,33 @@ export class UserManagementComponent implements OnInit {
       case 'PASSWORD_CHANGE': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  confirmDelete(user: User) {
+    this.deleteUser = user;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.deleteUser = null;
+    this.showDeleteModal = false;
+  }
+
+  performDelete() {
+    if (!this.deleteUser) return;
+    this.loading = true;
+    this.userService.delete(this.deleteUser.id).subscribe({
+      next: () => {
+        this.loading = false;
+        this.showDeleteModal = false;
+        this.deleteUser = null;
+        this.loadUsers();
+        this.loadStats();
+      },
+      error: (err) => {
+        this.loading = false;
+        alert('Erreur: ' + (err.error?.error || 'Erreur lors de la suppression'));
+      }
+    });
   }
 }

@@ -59,6 +59,10 @@
                     <span class="material-icons mr-1">visibility</span>
                     Voir
                   </a>
+                  <a [routerLink]="['/affiliation/complete', c.id]" class="px-3 py-2 bg-cnss-primary text-white rounded hover:bg-cnss-secondary transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">assignment</span>
+                    Affilier
+                  </a>
                 </div>
               </td>
             </tr>
@@ -74,13 +78,15 @@
       </div>
     </div>
 
-    <div *ngIf="selectedId" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-        <h2 class="text-xl font-bold text-cnss-dark mb-4">Motif de rejet</h2>
-        <textarea rows="4" [(ngModel)]="rejectMotif" class="form-field" placeholder="Saisir le motif..."></textarea>
+    <div *ngIf="selectedId" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Motif de rejet</h2>
+        <textarea rows="4" [(ngModel)]="rejectMotif" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500" 
+                  placeholder="Saisir le motif du rejet..."></textarea>
         <div class="flex justify-end gap-3 mt-6">
-          <button (click)="cancelReject()" class="px-5 py-2 border border-gray-300 rounded hover:bg-gray-50">Annuler</button>
-          <button (click)="rejeter()" class="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700">Confirmer rejet</button>
+          <button (click)="cancelReject()" class="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">Annuler</button>
+          <button (click)="rejeter()" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Confirmer rejet</button>
         </div>
       </div>
     </div>

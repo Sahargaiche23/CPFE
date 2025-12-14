@@ -28,8 +28,9 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         log.info("Tentative de connexion pour: {}", request.getUsername());
         
-        // Vérifier d'abord si l'utilisateur existe et est actif
+        // Vérifier d'abord si l'utilisateur existe (par username OU par email)
         User user = userRepository.findByUsername(request.getUsername())
+                .or(() -> userRepository.findByEmail(request.getUsername()))
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
         
         // Vérifier si le compte est actif
@@ -38,10 +39,10 @@ public class AuthService {
             throw new RuntimeException("Compte désactivé. Contactez l'administrateur.");
         }
         
-        // Authentification avec Spring Security
+        // Authentification avec Spring Security (utiliser le vrai username trouvé)
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
+                user.getUsername(),
                 request.getPassword()
             )
         );

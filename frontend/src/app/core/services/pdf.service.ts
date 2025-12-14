@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { I18nService } from './i18n.service';
+import jsPDF from 'jspdf';
 
 declare var jspdf: any;
 
@@ -122,21 +123,24 @@ export class PdfService {
         
         <!-- Informations -->
         <div class="info-row">
-          <div class="info-left">
-            Tunis, le ${dateStr}<br><br>
-            <strong>N° Affiliation:</strong> ${data.affiliationNumber || '54-500380'}<br>
-            <strong>N° Enregistrement:</strong> ${data.registrationNumber || '02-16732404'}
-          </div>
           <div class="info-right">
             المكتب الجهوي بتونس المدينة<br>
             شارع مدريد - تونس 12
           </div>
+          <div class="info-left">
+            تونس في ${dateStr}
+          </div>
+        </div>
+        
+        <div style="text-align: right; margin: 15px 0; font-size: 13px;">
+          <strong>رقم الإنخراط:</strong> ${data.affiliationNumber || '54-500380'}<br>
+          <strong>رقم التسجيل:</strong> ${data.registrationNumber || '02-16732404'}
         </div>
         
         <!-- Bénéficiaire -->
         <div style="text-align: right; margin: 20px 0; font-size: 13px;">
-          <strong>السيد/ة :</strong> ${data.employeeName || 'نجلة بنت محمد حسن القصعجي'}<br>
-          <strong>العنوان :</strong> ${data.address || '2036 نهج السروات جامع الروضة 16 العزار'}
+          <strong>السيد/ة :</strong> ${data.employeeName || ''}<br>
+          <strong>العنوان :</strong> ${data.address || ''}
         </div>
         
         <!-- Sujet -->
@@ -1104,5 +1108,184 @@ export class PdfService {
           document.body.removeChild(iframe);
         });
     }, 2000);
+  }
+
+  /**
+   * Génère l'attestation d'affiliation en PDF et retourne le base64 (utilise html2canvas pour l'arabe)
+   */
+  generateAttestationPdfBase64(data: {
+    affiliationNumber: string;
+    employeeName: string;
+    employeeNameAr?: string;
+    registrationNumber: string;
+    regime: string;
+    dateEffet: string;
+    periodeDebut: string;
+    periodeFin: string;
+    salaire: number;
+    montantCotisation: string;
+    address?: string;
+  }): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const today = new Date().toLocaleDateString('fr-FR');
+      const logoUrl = window.location.origin + '/assets/images/logo-cnss.png';
+      
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; height: 1123px; border: none; z-index: -1; opacity: 0;';
+      document.body.appendChild(iframe);
+      
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        reject('Cannot access iframe document');
+        return;
+      }
+      
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Amiri', 'Traditional Arabic', 'Arial', serif; 
+              font-size: 14px; 
+              line-height: 1.8;
+              padding: 40px;
+              background: white;
+            }
+            .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+            .header-fr { text-align: left; font-size: 11px; direction: ltr; }
+            .header-ar { text-align: right; font-size: 13px; }
+            .logo-box { 
+              border: 2px solid #8B0000; 
+              padding: 20px; 
+              margin: 25px 0; 
+              text-align: center;
+            }
+            .logo-fr { color: #8B0000; font-size: 20px; font-weight: bold; direction: ltr; }
+            .logo-ar { color: #8B0000; font-size: 16px; font-weight: bold; margin-top: 5px; }
+            .info-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; }
+            .info-left { text-align: left; direction: ltr; }
+            .info-right { text-align: right; }
+            .subject { 
+              text-align: center; 
+              margin: 30px 0; 
+              color: #8B0000; 
+              font-size: 18px; 
+              font-weight: bold;
+              text-decoration: underline;
+            }
+            .body-text { 
+              text-align: right; 
+              font-size: 13px; 
+              line-height: 2.2;
+              margin: 20px 0;
+            }
+            .body-text p { margin-bottom: 12px; text-align: justify; }
+            .signature { text-align: left; margin-top: 40px; font-weight: bold; }
+            .footer { 
+              text-align: center; 
+              font-size: 10px; 
+              color: #666; 
+              margin-top: 50px; 
+              border-top: 1px solid #000; 
+              padding-top: 10px;
+              direction: ltr;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-fr">
+              République Tunisienne<br>
+              Ministère des Affaires Sociales<br>
+              et des Tunisiens à l'Étranger
+            </div>
+            <div class="header-ar">
+              الجمهورية التونسية<br>
+              وزارة الشؤون الاجتماعية والتضامن<br>
+              والتونسيين بالخارج
+            </div>
+          </div>
+          
+          <div class="logo-box" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            <img src="${logoUrl}" alt="CNSS" style="width: 70px; height: auto;" crossorigin="anonymous">
+            <div>
+              <div class="logo-fr">Caisse Nationale de Sécurité Sociale</div>
+              <div class="logo-ar">الصندوق الوطني للضمان الاجتماعي</div>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-right" style="text-align: right;">
+              المكتب الجهوي بتونس المدينة<br>
+              شارع مدريد - تونس 12
+            </div>
+            <div class="info-left" style="text-align: left; direction: ltr;">
+              تونس في ${today}
+            </div>
+          </div>
+          
+          <div style="text-align: right; margin: 15px 0; font-size: 13px;">
+            <strong>رقم الإنخراط:</strong> ${data.affiliationNumber}<br>
+            <strong>رقم التسجيل:</strong> ${data.registrationNumber}
+          </div>
+          
+          <div style="text-align: right; margin: 20px 0; font-size: 13px;">
+            <strong>السيد/ة :</strong> ${data.employeeNameAr || data.employeeName}<br>
+            <strong>العنوان :</strong> ${data.address || ''}
+          </div>
+          
+          <div class="subject">الموضوع : إعلام بالانخراط</div>
+          
+          <div class="body-text">
+            <p>أما بعد،</p>
+            <p>أتشرف بإعلامكم بقبول مطلب انخراطكم بالصندوق الوطني للضمان الاجتماعي في إطار التغطية الاجتماعية للأعوان الموفدين في حالة إلحاق للعمل في نطاق التعاون الفني وبإسنادكم رقم الانخراط المبين أعلاه والذي:</p>
+            <p>- وإثره فإعلاوة بعنوان نظام جرايات الشيخوخة والعجز والباقين على قيد الحياة من تاريخ <strong>${data.dateEffet}</strong></p>
+            <p>- وكذلك فإعلاوة بعنوان نظام التأمينات الاجتماعية من تاريخ <strong>${data.periodeDebut}</strong></p>
+            <p>لذا فالمرغوب منكم ذكر رقم انخراطكم، إضافة إلى رقم تسجيلكم، في مختلف تعاملاتكم مع مصالح الصندوق الوطني للضمان الاجتماعي المتعلقة بالتغطية الاجتماعية بعنوان فترات الإلحاق في نطاق التعاون الفني.</p>
+            <p>ولضمان مواصلة التمتع بمنافع الضمان الاجتماعي في أحسن الظروف، المرغوب منكم دفع مساهماتكم قبل انقضاء الأجل القانوني المحدد باليوم الخامس عشر الموالي لكل ثلاثية، كما يمكنكم دفع مساهماتكم مسبقا أو شهريا.</p>
+            <p>وعند الاقتضاء، ونظرا لتعديل مبالغ مساهماتكم طبقا للنسب المنصوص عليها بالقانون عدد 105 لسنة 1995 المؤرخ في 14 ديسمبر 1995 والمتعلق بإحداث نظام موحد لضم الخدمات بعنوان أنظمة التقاعد والعجز والباقين على قيد الحياة، يتعين عليكم دفع مساهماتكم في أول أقساطه سنة من الأجل القانوني المذكور أعلاه.</p>
+            <p style="margin-top: 25px;">مع فائق الاحترام والتقدير</p>
+            <p><strong>والسلام</strong></p>
+          </div>
+          
+          <div class="signature">رئيس المكتب الجهوي بتونس المدينة</div>
+          
+          <div class="footer">© CNSS - Caisse Nationale de Sécurité Sociale</div>
+        </body>
+        </html>
+      `);
+      iframeDoc.close();
+      
+      setTimeout(() => {
+        const html2canvas = (window as any).html2canvas;
+        html2canvas(iframeDoc.body, { 
+          scale: 1.5,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 794,
+          windowHeight: 1123
+        }).then((canvas: HTMLCanvasElement) => {
+          const { jsPDF } = (window as any).jspdf;
+          const doc = new jsPDF('p', 'mm', 'a4');
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.8);
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+          
+          const pdfBase64 = doc.output('datauristring').split(',')[1];
+          document.body.removeChild(iframe);
+          resolve(pdfBase64);
+        }).catch((err: any) => {
+          document.body.removeChild(iframe);
+          reject(err);
+        });
+      }, 2000);
+    });
   }
 }

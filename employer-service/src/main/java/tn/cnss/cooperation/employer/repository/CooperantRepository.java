@@ -21,6 +21,9 @@ public interface CooperantRepository extends JpaRepository<Cooperant, Long> {
     // Recherche par numéro pièce d'identité
     Optional<Cooperant> findByNumPieceIdentite(String numPieceIdentite);
     
+    // Recherche par email
+    Optional<Cooperant> findByEmail(String email);
+    
     // Liste des coopérants actifs
     List<Cooperant> findByActifTrue();
     

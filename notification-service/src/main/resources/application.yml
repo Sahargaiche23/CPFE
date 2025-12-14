@@ -1,8 +1,17 @@
 server:
   port: 8087
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 spring:
   application:
     name: notification-service
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_PROPERTIES: true
+  codec:
+    max-in-memory-size: 50MB
   mail:
     host: ${SMTP_HOST:smtp.gmail.com}
     port: ${SMTP_PORT:587}

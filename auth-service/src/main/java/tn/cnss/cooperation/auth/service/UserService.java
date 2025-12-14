@@ -2,9 +2,11 @@ package tn.cnss.cooperation.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import tn.cnss.cooperation.auth.dto.ChangePasswordRequest;
 import tn.cnss.cooperation.auth.dto.CreateUserRequest;
 import tn.cnss.cooperation.auth.dto.UpdateUserRequest;
@@ -22,6 +24,10 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RestTemplate restTemplate;
+    
+    @Value("${employer.service.url:http://employer-service:8081}")
+    private String employerServiceUrl;
     
     /**
      * Obtenir tous les utilisateurs
@@ -167,6 +173,18 @@ public class UserService {
     }
     
     /**
+     * Supprimer un utilisateur par email
+     */
+    @Transactional
+    public void deleteUserByEmail(String email) {
+        log.info("Suppression de l'utilisateur par email: {}", email);
+        userRepository.findByEmail(email).ifPresent(user -> {
+            userRepository.delete(user);
+            log.info("Utilisateur supprimé: {}", email);
+        });
+    }
+    
+    /**
      * Mise à jour de la dernière connexion
      */
     @Transactional
@@ -175,5 +193,20 @@ public class UserService {
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
         });
+    }
+    
+    /**
+     * Supprimer le coopérant associé par email via employer-service
+     */
+    public void deleteCooperantByEmail(String email) {
+        if (email == null || email.isEmpty()) return;
+        try {
+            log.info("Suppression du coopérant avec email: {}", email);
+            restTemplate.delete(employerServiceUrl + "/api/cooperants/by-email/" + email);
+            log.info("Coopérant supprimé avec succès");
+        } catch (Exception e) {
+            log.error("Erreur lors de la suppression du coopérant: {}", e.getMessage());
+            throw e;
+        }
     }
 }

@@ -21,6 +21,10 @@ export class CooperantListComponent implements OnInit {
   searchTerm = '';
   selectedRegime = '';
   selectedValidation = '';
+  
+  // Suppression
+  deleteId: number | null = null;
+  deleteName = '';
 
   constructor(
     private cooperantService: CooperantService,
@@ -63,5 +67,30 @@ export class CooperantListComponent implements OnInit {
     this.selectedRegime = '';
     this.selectedValidation = '';
     this.filtered = [...this.cooperants];
+  }
+
+  confirmDelete(c: Cooperant) {
+    this.deleteId = c.id!;
+    this.deleteName = c.nomCompletFr || `${c.prenomFr} ${c.nomFr}`;
+  }
+
+  cancelDelete() {
+    this.deleteId = null;
+    this.deleteName = '';
+  }
+
+  deleteCooperant() {
+    if (!this.deleteId) return;
+    this.cooperantService.delete(this.deleteId).subscribe({
+      next: () => {
+        this.deleteId = null;
+        this.deleteName = '';
+        this.load();
+      },
+      error: (err) => {
+        console.error('Erreur suppression:', err);
+        alert('Erreur lors de la suppression');
+      }
+    });
   }
 }

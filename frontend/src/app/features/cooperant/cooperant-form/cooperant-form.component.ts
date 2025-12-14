@@ -175,7 +175,8 @@ export class CooperantFormComponent implements OnInit {
         error: (err) => {
           console.error('Erreur création:', err);
           this.loading = false;
-          alert('Erreur lors de la création');
+          const msg = err.error?.message || err.error || 'Erreur lors de la création';
+          alert(msg);
         }
       });
     }
