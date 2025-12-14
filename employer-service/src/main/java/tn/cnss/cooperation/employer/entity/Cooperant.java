@@ -109,6 +109,13 @@ public class Cooperant {
     @Column(name = "FICHIER_AUTRE", length = 500)
     private String fichierAutre;
     
+    // ===== AFFILIATION =====
+    @Column(name = "NUM_AFFILIATION", length = 20)
+    private String numAffiliation;
+    
+    @Column(name = "CLE_AFFILIATION", length = 10)
+    private String cleAffiliation;
+    
     // ===== VALIDATION =====
     @Column(name = "STATUT_VALIDATION", length = 20)
     private String statutValidation; // EN_ATTENTE, VALIDE, REJETE

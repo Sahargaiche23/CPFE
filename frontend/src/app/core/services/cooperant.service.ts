@@ -56,6 +56,15 @@ export interface Cooperant {
   validePar?: number;
   motifRejet?: string;
   
+  // Affiliation
+  numAffiliation?: string;
+  cleAffiliation?: string;
+  
+  // Cotisation
+  cotisationPayee?: boolean;
+  montantCotisation?: number;
+  datePaiement?: string;
+  
   // Audit
   actif?: boolean;
   createdAt?: string;
@@ -175,5 +184,13 @@ export class CooperantService {
 
   getStatsByValidation(): Observable<{[key: string]: number}> {
     return this.http.get<{[key: string]: number}>(`${this.apiUrl}/stats/validation`);
+  }
+
+  // Mettre à jour l'affiliation du coopérant
+  updateAffiliation(id: number, numAffiliation: string, cleAffiliation: string): Observable<Cooperant> {
+    return this.http.patch<Cooperant>(`${this.apiUrl}/${id}`, {
+      numAffiliation,
+      cleAffiliation
+    });
   }
 }

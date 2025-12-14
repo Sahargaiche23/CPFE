@@ -890,6 +890,18 @@ export class AffiliationCompleteComponent implements OnInit {
         error: (err) => console.log('Email non envoyé:', err.message)
       });
 
+      // Sauvegarder le numAffiliation dans le coopérant
+      if (this.cooperantId) {
+        this.cooperantService.updateAffiliation(
+          this.cooperantId,
+          formData.numAffiliation || '',
+          formData.cleAffiliation || ''
+        ).subscribe({
+          next: () => console.log('Affiliation sauvegardée dans le coopérant'),
+          error: (err) => console.log('Erreur sauvegarde affiliation:', err.message)
+        });
+      }
+
       // Télécharger aussi le PDF localement
       this.pdfService.generateAffiliationAttestation(certificatData);
       this.submitting = false;

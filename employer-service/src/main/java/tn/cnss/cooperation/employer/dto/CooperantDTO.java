@@ -58,6 +58,10 @@ public class CooperantDTO {
     private String fichierIdentite;
     private String fichierAutre;
     
+    // Affiliation
+    private String numAffiliation;
+    private String cleAffiliation;
+    
     // Validation
     private String statutValidation;
     private LocalDateTime dateValidation;

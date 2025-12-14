@@ -358,6 +358,9 @@ public class CooperantService {
         dto.setFichierIdentite(c.getFichierIdentite());
         dto.setFichierAutre(c.getFichierAutre());
         
+        dto.setNumAffiliation(c.getNumAffiliation());
+        dto.setCleAffiliation(c.getCleAffiliation());
+        
         dto.setStatutValidation(c.getStatutValidation());
         dto.setDateValidation(c.getDateValidation());
         dto.setValidePar(c.getValidePar());
@@ -484,5 +487,27 @@ public class CooperantService {
         } catch (Exception e) {
             log.error("Erreur envoi email identifiants à {}: {}", email, e.getMessage());
         }
+    }
+    
+    /**
+     * Mise à jour partielle du coopérant (affiliation)
+     */
+    public CooperantDTO updateAffiliation(Long id, Map<String, String> updates) {
+        Cooperant cooperant = cooperantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Coopérant non trouvé: " + id));
+        
+        if (updates.containsKey("numAffiliation")) {
+            cooperant.setNumAffiliation(updates.get("numAffiliation"));
+        }
+        if (updates.containsKey("cleAffiliation")) {
+            cooperant.setCleAffiliation(updates.get("cleAffiliation"));
+        }
+        
+        cooperant.setUpdatedAt(LocalDateTime.now());
+        Cooperant saved = cooperantRepository.save(cooperant);
+        log.info("Affiliation mise à jour pour coopérant {}: {}-{}", id, 
+                saved.getCleAffiliation(), saved.getNumAffiliation());
+        
+        return toDTO(saved);
     }
 }

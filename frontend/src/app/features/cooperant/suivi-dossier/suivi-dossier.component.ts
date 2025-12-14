@@ -49,7 +49,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </div>
 
               <!-- Décision -->
-              <div class="flex items-start gap-4">
+              <div class="flex items-start gap-4 mb-8">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
                      [ngClass]="{
                        'bg-green-500 text-white': cooperant.statutValidation === 'VALIDE',
@@ -69,6 +69,45 @@ import { AuthService } from '../../../core/services/auth.service';
                       {{ cooperant.statutValidation === 'VALIDE' ? 'Votre dossier a été validé !' : 'Votre dossier a été rejeté' }}
                     </p>
                     <p class="text-sm mt-1" *ngIf="cooperant.motifRejet">Motif: {{ cooperant.motifRejet }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Affiliation -->
+              <div class="flex items-start gap-4 mb-8" *ngIf="cooperant.statutValidation === 'VALIDE'">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                     [ngClass]="cooperant.numAffiliation ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white animate-pulse'">
+                  {{ cooperant.numAffiliation ? '✓' : '⏳' }}
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-semibold text-gray-800">Affiliation</h4>
+                  <p class="text-sm text-gray-500" *ngIf="cooperant.numAffiliation">Complétée</p>
+                  <p class="text-sm text-gray-500" *ngIf="!cooperant.numAffiliation">En cours...</p>
+                  <div class="mt-2 p-3 rounded-lg bg-blue-50" *ngIf="cooperant.numAffiliation">
+                    <p class="font-medium text-blue-700">N° Affiliation: {{ cooperant.numAffiliation }}</p>
+                    <p class="text-sm text-blue-600 mt-1">Votre attestation d'affiliation a été générée</p>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-1" *ngIf="!cooperant.numAffiliation">Attribution du numéro d'affiliation CNSS</p>
+                </div>
+              </div>
+
+              <!-- Débit / Cotisation -->
+              <div class="flex items-start gap-4" *ngIf="cooperant.statutValidation === 'VALIDE' && cooperant.numAffiliation">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                     [ngClass]="cooperant.cotisationPayee ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'">
+                  {{ cooperant.cotisationPayee ? '✓' : '💳' }}
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-semibold text-gray-800">Débit / Cotisation</h4>
+                  <p class="text-sm text-gray-500" *ngIf="cooperant.cotisationPayee">Payée</p>
+                  <p class="text-sm text-gray-500" *ngIf="!cooperant.cotisationPayee">En attente de paiement</p>
+                  <div class="mt-2 p-3 rounded-lg" [ngClass]="cooperant.cotisationPayee ? 'bg-green-50' : 'bg-orange-50'">
+                    <p class="font-medium" [ngClass]="cooperant.cotisationPayee ? 'text-green-700' : 'text-orange-700'">
+                      {{ cooperant.cotisationPayee ? 'Cotisation réglée' : 'Cotisation à payer' }}
+                    </p>
+                    <p class="text-sm mt-1" *ngIf="cooperant.montantCotisation">
+                      Montant: {{ cooperant.montantCotisation | number:'1.3-3' }} TND
+                    </p>
                   </div>
                 </div>
               </div>

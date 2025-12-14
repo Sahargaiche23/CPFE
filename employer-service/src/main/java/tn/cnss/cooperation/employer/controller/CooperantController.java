@@ -84,6 +84,17 @@ public class CooperantController {
     }
     
     /**
+     * Mise à jour partielle (affiliation)
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<CooperantDTO> patchAffiliation(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> updates) {
+        log.info("PATCH /api/cooperants/{} - Mise à jour affiliation", id);
+        return ResponseEntity.ok(cooperantService.updateAffiliation(id, updates));
+    }
+    
+    /**
      * Supprimer (désactiver) un coopérant
      */
     @DeleteMapping("/{id}")
