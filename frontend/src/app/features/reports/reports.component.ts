@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layout.component';
 import { PdfService } from '../../core/services/pdf.service';
-import { AffiliationService } from '../../core/services/affiliation.service';
+import { CooperantService } from '../../core/services/cooperant.service';
 import { PaymentService } from '../../core/services/payment.service';
-import { EmployerService } from '../../core/services/employer.service';
+import { DebitService } from '../../core/services/debit.service';
 
 @Component({
   selector: 'app-reports',
@@ -248,9 +248,9 @@ export class ReportsComponent implements OnInit {
 
   constructor(
     private pdfService: PdfService,
-    private affiliationService: AffiliationService,
+    private cooperantService: CooperantService,
     private paymentService: PaymentService,
-    private employerService: EmployerService
+    private debitService: DebitService
   ) {}
 
   ngOnInit() {
@@ -260,49 +260,47 @@ export class ReportsComponent implements OnInit {
   loadAllData() {
     this.loading = true;
     forkJoin({
-      affiliations: this.affiliationService.getAll(),
+      cooperants: this.cooperantService.getAll(),
       paiements: this.paymentService.getAll(),
-      employeurs: this.employerService.getAll()
+      debits: this.debitService.getAll()
     }).subscribe({
       next: (result) => {
-        // Mapper les employeurs d'abord pour pouvoir les référencer
-        this.employeurs = (result.employeurs as any[]).map((e: any) => ({
-          matricule: `${e.empMat}-${e.empCle}`,
-          empMat: e.empMat,
-          empCle: e.empCle,
-          nomCommercial: e.nomCommercial || '-',
-          regime: e.regime || (e.empRegime ? `Régime ${e.empRegime}` : 'Non défini'),
-          pays: e.pays || 'Tunisie',
-          affiliationsCount: 0,
-          actif: e.statut === 'Actif' || e.actif !== false
+        const cooperants = result.cooperants as any[];
+        
+        // Employeurs = tous les coopérants
+        this.employeurs = cooperants.map((c: any) => ({
+          id: c.id,
+          matricule: c.matriculeComplet || `${c.cleAffiliation}-${c.numAffiliation}` || '-',
+          nomCommercial: c.nomCompletFr || c.nomFr || c.nomAr || '-',
+          regime: c.codeRegime ? `Régime ${c.codeRegime}` : 'Non défini',
+          pays: c.pays || 'Tunisie',
+          affiliationsCount: c.numAffiliation ? 1 : 0,
+          actif: c.statutValidation === 'VALIDE' || c.actif !== false
         }));
         
-        // Mapper les affiliations
-        this.affiliations = (result.affiliations as any[]).map((a: any) => ({
-          numAffiliation: a.assureMatriculeComplet || `${a.dcoClefAffiliation}-${a.dcoNumAffiliation}` || '-',
-          assureName: (a.assNom && a.assPrenom) ? `${a.assNom} ${a.assPrenom}` : '-',
-          employerId: `${a.empMat}-${a.empCle}`,
-          dateDebut: a.dcoDateDebut,
-          salaire: a.dcoSalaire || 0
+        // Affiliations = coopérants avec numAffiliation
+        const affiliatedCooperants = cooperants.filter((c: any) => c.numAffiliation);
+        this.affiliations = affiliatedCooperants.map((c: any) => ({
+          numAffiliation: c.cleAffiliation && c.numAffiliation 
+            ? `${c.cleAffiliation}-${c.numAffiliation}` 
+            : c.numAffiliation || '-',
+          assureName: c.nomCompletFr || c.nomFr || '-',
+          employerId: c.matriculeComplet || '-',
+          dateDebut: c.dateEffetAffiliation 
+            ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
+            : (c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '-'),
+          salaire: c.salaire || 0
         }));
         
-        // Mettre à jour le compte d'affiliations pour chaque employeur
-        this.employeurs.forEach(emp => {
-          emp.affiliationsCount = this.affiliations.filter(a => a.employerId === emp.matricule).length;
-        });
-        
-        // Mapper les paiements avec les bons champs
+        // Mapper les paiements
         this.paiements = (result.paiements as any[]).map((p: any) => {
-          // Trouver l'employeur par numAffiliation
-          const employer = this.employeurs.find((e: any) => 
-            e.empMat?.toString() === p.numAffiliation || 
-            e.matricule === p.numAffiliation
-          );
           return {
             reference: `PAY-${p.id?.toString().padStart(4, '0')}`,
-            employerName: employer?.nomCommercial || p.numAffiliation || '-',
-            debitRef: `DEB-${p.numAffiliation || '-'}`,
-            date: p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR') : '-',
+            employerName: p.cooperantNom || p.numAffiliation || '-',
+            debitRef: p.debitId ? `DEB-${p.debitId}` : '-',
+            date: p.datePaiement 
+              ? new Date(p.datePaiement).toLocaleDateString('fr-FR') 
+              : (p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR') : '-'),
             amount: p.montant || 0,
             mode: p.modePaiement || '-',
             statusLabel: p.paiementPartiel ? 'Partiel' : 'Validé'
