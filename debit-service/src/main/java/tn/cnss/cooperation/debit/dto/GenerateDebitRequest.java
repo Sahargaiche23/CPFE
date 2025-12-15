@@ -16,4 +16,5 @@ public class GenerateDebitRequest {
     private BigDecimal montantCotisation;
     private String dateDebut;
     private String email;
+    private String pdfBase64;
 }

@@ -8,6 +8,7 @@ import { CooperantService, Cooperant } from '../../../core/services/cooperant.se
 import { DebitService } from '../../../core/services/debit.service';
 import { RegimeService, RegimeCotisation } from '../../../core/services/regime.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { PdfService } from '../../../core/services/pdf.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -37,7 +38,8 @@ export class DebitGenerateComponent implements OnInit {
     private cooperantService: CooperantService,
     private debitService: DebitService,
     private regimeService: RegimeService,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private pdfService: PdfService
   ) {
     const currentYear = new Date().getFullYear();
     const currentQuarter = Math.ceil((new Date().getMonth() + 1) / 3);
@@ -230,32 +232,79 @@ export class DebitGenerateComponent implements OnInit {
           }
         });
       } else {
-        // Mode création - générer l'avis de débit
-        const debitData = {
-          cooperantId: this.selectedCooperant.id,
+        // Mode création - générer l'avis de débit avec PDF arabe
+        const nomCooperant = this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`;
+        
+        // Générer le PDF arabe côté frontend
+        const pdfData = {
+          number: formData.numAffiliation,
+          employerName: nomCooperant,
+          trimestre: `T${trimestre}`,
+          generatedDate: new Date().toISOString(),
+          amount: montantCotisation,
           numAffiliation: formData.numAffiliation,
-          nomCooperant: this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`,
-          adresse: this.selectedCooperant.adresseFr || '',
           matricule: this.selectedCooperant.matriculeComplet || '',
-          trimestre: trimestre,
-          annee: formData.year,
           salaire: salaire,
-          montantCotisation: montantCotisation,
-          dateDebut: formData.dateDebut,
-          email: this.selectedCooperant.email
+          adresse: this.selectedCooperant.adresseFr || '',
+          annee: formData.year
         };
         
-        this.debitService.generate(debitData).subscribe({
-          next: (response: any) => {
-            this.loading = false;
-            alert('Avis de débit créé avec succès !');
-            this.router.navigate(['/debit']);
-          },
-          error: (err: any) => {
-            console.error('Erreur génération débit:', err);
-            this.loading = false;
-            alert('Erreur lors de la génération du débit');
-          }
+        this.pdfService.generateDebitPdfBase64(pdfData).then((pdfBase64: string) => {
+          const debitData = {
+            cooperantId: this.selectedCooperant!.id,
+            numAffiliation: formData.numAffiliation,
+            nomCooperant: nomCooperant,
+            adresse: this.selectedCooperant!.adresseFr || '',
+            matricule: this.selectedCooperant!.matriculeComplet || '',
+            trimestre: trimestre,
+            annee: formData.year,
+            salaire: salaire,
+            montantCotisation: montantCotisation,
+            dateDebut: formData.dateDebut,
+            email: this.selectedCooperant!.email,
+            pdfBase64: pdfBase64
+          };
+          
+          this.debitService.generate(debitData).subscribe({
+            next: (response: any) => {
+              this.loading = false;
+              alert('Avis de débit créé avec succès !');
+              this.router.navigate(['/debit']);
+            },
+            error: (err: any) => {
+              console.error('Erreur génération débit:', err);
+              this.loading = false;
+              alert('Erreur lors de la génération du débit');
+            }
+          });
+        }).catch((err: any) => {
+          console.error('Erreur génération PDF:', err);
+          // Fallback: envoyer sans PDF
+          const debitData = {
+            cooperantId: this.selectedCooperant!.id,
+            numAffiliation: formData.numAffiliation,
+            nomCooperant: nomCooperant,
+            adresse: this.selectedCooperant!.adresseFr || '',
+            matricule: this.selectedCooperant!.matriculeComplet || '',
+            trimestre: trimestre,
+            annee: formData.year,
+            salaire: salaire,
+            montantCotisation: montantCotisation,
+            dateDebut: formData.dateDebut,
+            email: this.selectedCooperant!.email
+          };
+          
+          this.debitService.generate(debitData).subscribe({
+            next: () => {
+              this.loading = false;
+              alert('Avis de débit créé (sans PDF arabe)');
+              this.router.navigate(['/debit']);
+            },
+            error: () => {
+              this.loading = false;
+              alert('Erreur lors de la génération du débit');
+            }
+          });
         });
       }
     }

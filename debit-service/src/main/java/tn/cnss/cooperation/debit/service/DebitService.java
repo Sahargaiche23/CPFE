@@ -79,27 +79,44 @@ public class DebitService {
             
             String subject = "CNSS - Avis de Débit T" + request.getTrimestre() + "/" + request.getAnnee();
             
-            // Utiliser le nouvel endpoint qui génère le PDF côté serveur
-            Map<String, Object> emailRequest = new HashMap<>();
-            emailRequest.put("to", request.getEmail());
-            emailRequest.put("subject", subject);
-            emailRequest.put("numAffiliation", request.getNumAffiliation());
-            emailRequest.put("matricule", request.getMatricule() != null ? request.getMatricule() : "");
-            emailRequest.put("nomCooperant", request.getNomCooperant() != null ? request.getNomCooperant() : "");
-            emailRequest.put("adresse", request.getAdresse() != null ? request.getAdresse() : "");
-            emailRequest.put("trimestre", request.getTrimestre());
-            emailRequest.put("annee", request.getAnnee());
-            emailRequest.put("salaire", request.getSalaire() != null ? request.getSalaire().doubleValue() : 0.0);
-            emailRequest.put("montantTotal", debit.getMontantCotisation() != null ? debit.getMontantCotisation().doubleValue() : 0.0);
-            
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
-            
-            restTemplate.postForEntity(
-                    notificationServiceUrl + "/notification/debit-email",
-                    entity,
-                    Object.class
-            );
-            log.info("Email avec PDF avis de débit envoyé à: {}", request.getEmail());
+            // Si le PDF arabe est fourni par le frontend, l'utiliser directement
+            if (request.getPdfBase64() != null && !request.getPdfBase64().isEmpty()) {
+                Map<String, Object> emailRequest = new HashMap<>();
+                emailRequest.put("to", request.getEmail());
+                emailRequest.put("subject", subject);
+                emailRequest.put("content", buildDebitEmailContentHtml(request, debit));
+                emailRequest.put("pdfBase64", request.getPdfBase64());
+                emailRequest.put("fileName", "avis_debit_" + request.getNumAffiliation() + "_T" + request.getTrimestre() + "_" + request.getAnnee() + ".pdf");
+                
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
+                restTemplate.postForEntity(
+                        notificationServiceUrl + "/notification/email-with-attachment",
+                        entity,
+                        Object.class
+                );
+                log.info("Email avec PDF arabe envoyé à: {}", request.getEmail());
+            } else {
+                // Fallback: utiliser l'ancien endpoint qui génère le PDF côté serveur
+                Map<String, Object> emailRequest = new HashMap<>();
+                emailRequest.put("to", request.getEmail());
+                emailRequest.put("subject", subject);
+                emailRequest.put("numAffiliation", request.getNumAffiliation());
+                emailRequest.put("matricule", request.getMatricule() != null ? request.getMatricule() : "");
+                emailRequest.put("nomCooperant", request.getNomCooperant() != null ? request.getNomCooperant() : "");
+                emailRequest.put("adresse", request.getAdresse() != null ? request.getAdresse() : "");
+                emailRequest.put("trimestre", request.getTrimestre());
+                emailRequest.put("annee", request.getAnnee());
+                emailRequest.put("salaire", request.getSalaire() != null ? request.getSalaire().doubleValue() : 0.0);
+                emailRequest.put("montantTotal", debit.getMontantCotisation() != null ? debit.getMontantCotisation().doubleValue() : 0.0);
+                
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
+                restTemplate.postForEntity(
+                        notificationServiceUrl + "/notification/debit-email",
+                        entity,
+                        Object.class
+                );
+                log.info("Email avec PDF français envoyé à: {}", request.getEmail());
+            }
             
         } catch (Exception e) {
             log.error("Erreur envoi email avis de débit: {}", e.getMessage());
