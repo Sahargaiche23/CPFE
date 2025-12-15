@@ -1,8 +1,19 @@
 server:
   port: 8085
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 spring:
   application:
     name: debit-service
+  codec:
+    max-in-memory-size: 50MB
+  jackson:
+    mapper:
+      DEFAULT_VIEW_INCLUSION: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/XEPDB1
     username: COPT

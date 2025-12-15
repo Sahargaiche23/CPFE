@@ -104,22 +104,32 @@
                   {{ debit.statusLabel }}
                 </span>
               </td>
-              <td>
-                <div class="flex items-center space-x-2">
-                  <button (click)="viewDebit(debit)" class="text-blue-600 hover:text-blue-800" title="Voir">
-                    <span class="material-icons text-xl">visibility</span>
+              <td style="position: relative; z-index: 100;">
+                <div class="flex items-center gap-1" style="position: relative; z-index: 101;">
+                  <button type="button" (click)="viewDebit(debit)" 
+                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
+                    class="flex items-center justify-center rounded hover:bg-blue-100 text-blue-600 bg-blue-50" title="Voir">
+                    <span class="material-icons text-lg">visibility</span>
                   </button>
-                  <button (click)="printDebit(debit)" class="text-purple-600 hover:text-purple-800" title="Imprimer">
-                    <span class="material-icons text-xl">print</span>
+                  <button type="button" (click)="printDebit(debit)" 
+                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
+                    class="flex items-center justify-center rounded hover:bg-purple-100 text-purple-600 bg-purple-50" title="Imprimer">
+                    <span class="material-icons text-lg">print</span>
                   </button>
-                  <button (click)="downloadDebit(debit)" class="text-green-600 hover:text-green-800" title="Télécharger">
-                    <span class="material-icons text-xl">download</span>
+                  <button type="button" (click)="downloadDebit(debit)" 
+                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
+                    class="flex items-center justify-center rounded hover:bg-green-100 text-green-600 bg-green-50" title="Télécharger">
+                    <span class="material-icons text-lg">download</span>
                   </button>
-                  <button (click)="editDebit(debit)" class="text-orange-600 hover:text-orange-800" title="Modifier">
-                    <span class="material-icons text-xl">edit</span>
+                  <button type="button" (click)="editDebit(debit)" 
+                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
+                    class="flex items-center justify-center rounded hover:bg-orange-100 text-orange-600 bg-orange-50" title="Modifier">
+                    <span class="material-icons text-lg">edit</span>
                   </button>
-                  <button (click)="deleteDebit(debit.id)" class="text-red-600 hover:text-red-800" title="Supprimer">
-                    <span class="material-icons text-xl">delete</span>
+                  <button type="button" (click)="deleteDebit(debit.id)" 
+                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
+                    class="flex items-center justify-center rounded hover:bg-red-100 text-red-600 bg-red-50" title="Supprimer">
+                    <span class="material-icons text-lg">delete</span>
                   </button>
                 </div>
               </td>

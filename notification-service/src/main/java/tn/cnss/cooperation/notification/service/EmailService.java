@@ -94,8 +94,9 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             
-            // Toujours envoyer le contenu comme HTML
-            helper.setText(content != null ? content : "", true);
+            // Message simple sans HTML
+            String simpleText = "Bonjour,\n\nVeuillez trouver ci-joint votre avis de débit.\n\nCordialement,\nCNSS - Caisse Nationale de Sécurité Sociale";
+            helper.setText(simpleText, false);
             
             if (fromEmail != null && !fromEmail.isBlank()) {
                 helper.setFrom(fromEmail);

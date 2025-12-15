@@ -55,11 +55,12 @@ spring:
             - StripPrefix=1
             
         - id: regime-service
-          uri: lb://debit-service
+          uri: lb://regime-service
           predicates:
             - Path=/api/regimes/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/api/regimes/(?<segment>.*), /regime/${segment}
+            - RewritePath=/api/regimes, /regime
             
         - id: affiliation-service
           uri: lb://affiliation-service

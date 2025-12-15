@@ -93,12 +93,19 @@ export class DebitListComponent implements OnInit {
   }
 
   deleteDebit(id: number) {
+    if (!id) {
+      alert('ID du débit non trouvé');
+      return;
+    }
     if (confirm('Êtes-vous sûr de vouloir supprimer ce débit ?')) {
       this.debitService.delete(id).subscribe({
-        next: () => this.loadDebits(),
+        next: () => {
+          alert('Débit supprimé avec succès');
+          this.loadDebits();
+        },
         error: (err) => {
           console.error('Erreur suppression:', err);
-          alert('Erreur lors de la suppression');
+          alert('Erreur lors de la suppression: ' + (err.message || 'Erreur inconnue'));
         }
       });
     }

@@ -1566,7 +1566,7 @@ export class PdfService {
       const dateLimite = new Date(annee, moisLimite > 12 ? 0 : moisLimite - 1, 15);
       if (moisLimite > 12) dateLimite.setFullYear(annee + 1);
       const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR');
-      const dateLimitePlus2Ans = new Date(dateLimite.getFullYear() + 2, dateLimite.getMonth(), dateLimite.getDate()).toLocaleDateString('fr-FR');
+      const dateLimitePlus2Ans = new Date(dateLimite.getFullYear() + 1, dateLimite.getMonth(), dateLimite.getDate()).toLocaleDateString('fr-FR');
       
       const iframe = document.createElement('iframe');
       iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; height: 1123px; border: none; z-index: -1; opacity: 0;';
