@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { I18nService } from '../../../core/services/i18n.service';
+import { ExchangeRateService, ExchangeRate } from '../../../core/services/exchange-rate.service';
+import { Subject, interval } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-salary-converter',
@@ -11,11 +14,13 @@ import { I18nService } from '../../../core/services/i18n.service';
   templateUrl: './salary-converter.component.html',
   styles: []
 })
-export class SalaryConverterComponent implements OnInit {
+export class SalaryConverterComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   converterForm: FormGroup;
   convertedAmount: number = 0;
-  employeeRate: number = 9.18; // Taux de cotisation salariale en %
-  employerRate: number = 16.57; // Taux de cotisation patronale en %
+  employeeRate: number = 9.18;
+  employerRate: number = 16.57;
   
   employeeContribution: number = 0;
   employerContribution: number = 0;
@@ -23,16 +28,20 @@ export class SalaryConverterComponent implements OnInit {
   netSalary: number = 0;
   totalCost: number = 0;
 
-  // Taux de change par défaut (mis à jour quotidiennement en production)
-  exchangeRates: any = {
-    'EUR': 3.450,
-    'USD': 3.180,
-    'GBP': 4.020,
-    'CHF': 3.680,
-    'CAD': 2.350
-  };
+  // Taux de change dynamiques
+  exchangeRates: ExchangeRate[] = [];
+  selectedRate: ExchangeRate | null = null;
+  isLoadingRates: boolean = true;
+  lastUpdateTime: Date = new Date();
+  
+  // Pour le mini-graphique
+  historicalData: { date: string; rate: number }[] = [];
 
-  constructor(private fb: FormBuilder, public i18n: I18nService) {
+  constructor(
+    private fb: FormBuilder, 
+    public i18n: I18nService,
+    private exchangeRateService: ExchangeRateService
+  ) {
     this.converterForm = this.fb.group({
       sourceCurrency: ['', Validators.required],
       exchangeRate: [{ value: 0, disabled: false }, [Validators.required, Validators.min(0)]],
@@ -40,15 +49,62 @@ export class SalaryConverterComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadExchangeRates();
+    
+    // Rafraîchir les taux toutes les 5 minutes
+    interval(300000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadExchangeRates());
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadExchangeRates() {
+    this.isLoadingRates = true;
+    this.exchangeRateService.getLatestRates()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rates) => {
+          this.exchangeRates = rates;
+          this.lastUpdateTime = new Date();
+          this.isLoadingRates = false;
+          
+          // Mettre à jour le taux si une devise est déjà sélectionnée
+          const currency = this.converterForm.get('sourceCurrency')?.value;
+          if (currency) {
+            this.updateRate();
+          }
+        },
+        error: () => {
+          this.isLoadingRates = false;
+        }
+      });
+  }
+
+  loadHistoricalData(currency: string) {
+    this.exchangeRateService.getHistoricalRates(currency, 7)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        this.historicalData = data;
+      });
+  }
 
   updateRate() {
     const currency = this.converterForm.get('sourceCurrency')?.value;
-    if (currency && this.exchangeRates[currency]) {
-      this.converterForm.patchValue({
-        exchangeRate: this.exchangeRates[currency]
-      });
-      this.calculate();
+    if (currency) {
+      const rate = this.exchangeRates.find(r => r.code === currency);
+      if (rate) {
+        this.selectedRate = rate;
+        this.converterForm.patchValue({
+          exchangeRate: rate.rate
+        });
+        this.loadHistoricalData(currency);
+        this.calculate();
+      }
     }
   }
 
