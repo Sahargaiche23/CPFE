@@ -3,6 +3,7 @@ package tn.cnss.cooperation.notification.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.cnss.cooperation.notification.dto.DebitEmailRequest;
 import tn.cnss.cooperation.notification.dto.EmailRequest;
 import tn.cnss.cooperation.notification.dto.EmailWithAttachmentRequest;
 import tn.cnss.cooperation.notification.dto.GenericEmailRequest;
@@ -38,6 +39,23 @@ public class NotificationController {
             request.getFileName()
         );
         return ResponseEntity.ok("Email avec pièce jointe envoyé");
+    }
+
+    @PostMapping("/debit-email")
+    public ResponseEntity<String> sendDebitEmail(@RequestBody DebitEmailRequest request) {
+        emailService.sendDebitEmailWithPdf(
+            request.getTo(),
+            request.getSubject(),
+            request.getNumAffiliation(),
+            request.getMatricule(),
+            request.getNomCooperant(),
+            request.getAdresse(),
+            request.getTrimestre(),
+            request.getAnnee(),
+            request.getSalaire(),
+            request.getMontantTotal()
+        );
+        return ResponseEntity.ok("Email avec PDF envoyé");
     }
 
     @GetMapping("/health")

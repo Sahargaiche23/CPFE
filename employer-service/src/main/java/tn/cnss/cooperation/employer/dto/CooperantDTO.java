@@ -61,6 +61,8 @@ public class CooperantDTO {
     // Affiliation
     private String numAffiliation;
     private String cleAffiliation;
+    private java.math.BigDecimal salaire;
+    private java.time.LocalDate dateEffetAffiliation;
     
     // Validation
     private String statutValidation;

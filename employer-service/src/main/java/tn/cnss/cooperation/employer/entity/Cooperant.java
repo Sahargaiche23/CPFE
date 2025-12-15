@@ -116,6 +116,12 @@ public class Cooperant {
     @Column(name = "CLE_AFFILIATION", length = 10)
     private String cleAffiliation;
     
+    @Column(name = "SALAIRE", precision = 15, scale = 3)
+    private java.math.BigDecimal salaire;
+    
+    @Column(name = "DATE_EFFET_AFFILIATION")
+    private LocalDate dateEffetAffiliation;
+    
     // ===== VALIDATION =====
     @Column(name = "STATUT_VALIDATION", length = 20)
     private String statutValidation; // EN_ATTENTE, VALIDE, REJETE

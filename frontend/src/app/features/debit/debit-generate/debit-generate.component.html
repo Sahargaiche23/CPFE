@@ -1,65 +1,167 @@
 <app-main-layout>
-  <div class="fade-in max-w-3xl mx-auto">
+  <div class="fade-in max-w-4xl mx-auto">
     <div class="mb-8">
       <a routerLink="/debit" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
         <span class="material-icons mr-1">arrow_back</span>
-        {{ i18n.t('forms.backToList') }}
+        Retour à la liste
       </a>
       <h1 class="text-3xl font-bold text-cnss-dark">
-        {{ i18n.t('forms.generateDebit') }}
+        {{ isEditMode ? 'Modifier le Débit' : 'Création des Débits' }}
       </h1>
       <p class="text-gray-600 mt-2">
-        {{ i18n.t('forms.generateDebitDesc') }}
+        Générer un avis de débit pour un coopérant affilié
       </p>
     </div>
 
     <form [formGroup]="debitForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Section Période -->
       <div class="card">
-        <h2 class="text-xl font-bold text-cnss-dark mb-6">{{ i18n.t('forms.debitInfo') }}</h2>
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">date_range</span>
+          Période
+        </h2>
+        
+        <div class="space-y-4">
+          <div class="flex gap-6">
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" formControlName="periode" value="en_cours" class="mr-2 text-cnss-primary" (change)="onPeriodeChange('en_cours')">
+              <span class="text-sm font-medium">En cours</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" formControlName="periode" value="toutes" class="mr-2 text-cnss-primary" (change)="onPeriodeChange('toutes')">
+              <span class="text-sm font-medium">Toutes</span>
+            </label>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4" *ngIf="debitForm.get('periode')?.value === 'en_cours'">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Trimestre <span class="text-red-500">*</span></label>
+              <select formControlName="quarter" class="form-field">
+                <option value="Q1">T1 (Janvier - Mars)</option>
+                <option value="Q2">T2 (Avril - Juin)</option>
+                <option value="Q3">T3 (Juillet - Septembre)</option>
+                <option value="Q4">T4 (Octobre - Décembre)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Année <span class="text-red-500">*</span></label>
+              <input type="number" formControlName="year" class="form-field" min="2020" max="2030">
+            </div>
+          </div>
+          
+          <!-- Info pour Toutes les périodes -->
+          <div *ngIf="debitForm.get('periode')?.value === 'toutes'" class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+            <p class="text-yellow-800 text-sm">
+              <span class="font-semibold">Mode "Toutes":</span> Génère les avis de débit pour tous les trimestres impayés du coopérant sélectionné.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Dossier -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-cnss-dark mb-6 flex items-center">
+          <span class="material-icons mr-2 text-cnss-primary">folder</span>
+          Dossier
+        </h2>
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('debit.employer') }} <span class="text-red-500">*</span></label>
-            <select formControlName="employerId" class="form-field">
-              <option value="">{{ i18n.t('forms.selectEmployer') }}</option>
-              <option *ngFor="let emp of employers" [value]="emp.id">
-                {{ emp.nomCommercial }} ({{ emp.empMat }}-{{ emp.empCle }})
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Coopérant affilié <span class="text-red-500">*</span></label>
+            <select formControlName="cooperantId" class="form-field">
+              <option value="">-- Sélectionner un coopérant --</option>
+              <option *ngFor="let coop of cooperants" [value]="coop.id">
+                {{ coop.nomCompletFr || (coop.prenomFr + ' ' + coop.nomFr) }} 
+                ({{ coop.cleAffiliation }}-{{ coop.numAffiliation }})
               </option>
             </select>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('forms.trimester') }} <span class="text-red-500">*</span></label>
-              <select formControlName="quarter" class="form-field">
-                <option value="Q1">T1</option>
-                <option value="Q2">T2</option>
-                <option value="Q3">T3</option>
-                <option value="Q4">T4</option>
-              </select>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">N° Affiliation</label>
+              <input type="text" formControlName="numAffiliation" class="form-field" placeholder="Auto-rempli ou saisir manuellement">
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('forms.year') }} <span class="text-red-500">*</span></label>
-              <input type="number" formControlName="year" class="form-field" value="2024">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Date début</label>
+              <input type="date" formControlName="dateDebut" class="form-field">
             </div>
+          </div>
+
+          <!-- Infos coopérant sélectionné -->
+          <div *ngIf="selectedCooperant" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+            <h3 class="font-semibold text-blue-800 mb-2">Informations du coopérant</h3>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div><span class="text-gray-600">Matricule:</span> {{ selectedCooperant.matriculeComplet }}</div>
+              <div><span class="text-gray-600">Email:</span> {{ selectedCooperant.email }}</div>
+              <div><span class="text-gray-600">Salaire:</span> {{ (selectedCooperant.salaire || 0) | number:'1.3-3' }} TND</div>
+            </div>
+          </div>
+
+          <!-- Tableau des cotisations dynamiques avec sélection -->
+          <div *ngIf="cotisations.length > 0" class="mt-6">
+            <h3 class="font-semibold text-gray-800 mb-3">Détail des cotisations (الاشتراكات)</h3>
+            <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
+              <thead class="bg-red-800 text-white">
+                <tr>
+                  <th class="px-2 py-3 text-center text-xs">اختيار</th>
+                  <th class="px-4 py-3 text-right text-xs" dir="rtl">الرمز</th>
+                  <th class="px-4 py-3 text-right text-xs" dir="rtl">النظام</th>
+                  <th class="px-4 py-3 text-center text-xs">النسبة %</th>
+                  <th class="px-4 py-3 text-center text-xs">قاعدة الإحتساب</th>
+                  <th class="px-4 py-3 text-center text-xs">المبلغ</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let cot of cotisations; let i = index" 
+                    class="hover:bg-gray-50"
+                    [class.opacity-50]="!cot.selected"
+                    [class.bg-green-50]="cot.selected">
+                  <td class="px-2 py-3 text-center">
+                    <input type="checkbox" 
+                           [(ngModel)]="cot.selected" 
+                           [ngModelOptions]="{standalone: true}"
+                           (change)="onRegimeSelectionChange()"
+                           class="w-5 h-5 text-red-800 rounded focus:ring-red-500 cursor-pointer">
+                  </td>
+                  <td class="px-4 py-3 text-right font-mono font-bold text-red-800">{{ cot.regime.code }}</td>
+                  <td class="px-4 py-3 text-right" dir="rtl">{{ cot.regime.nomAr }}</td>
+                  <td class="px-4 py-3 text-center">{{ cot.regime.taux }}%</td>
+                  <td class="px-4 py-3 text-center">{{ cot.base | number:'1.3-3' }}</td>
+                  <td class="px-4 py-3 text-center font-bold">{{ cot.selected ? (cot.montant | number:'1.3-3') : '0.000' }}</td>
+                </tr>
+                <tr class="bg-yellow-50 font-bold">
+                  <td colspan="5" class="px-4 py-3 text-right" dir="rtl">المجملة</td>
+                  <td class="px-4 py-3 text-center text-red-800 text-lg">{{ totalCotisation | number:'1.3-3' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-xs text-gray-500 mt-2">
+              <a routerLink="/admin/regimes" class="text-red-800 hover:underline">Gérer les régimes</a>
+            </p>
           </div>
 
           <!-- Champ montant visible en mode édition -->
           <div *ngIf="isEditMode">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ i18n.t('debit.amount') }}</label>
-            <input type="number" formControlName="montant" class="form-field" step="0.01">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Montant cotisation</label>
+            <input type="number" formControlName="montant" class="form-field" step="0.001">
           </div>
         </div>
       </div>
 
       <div class="flex justify-between pt-6 border-t">
-        <button type="button" routerLink="/debit" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-          {{ i18n.t('forms.cancel') }}
+        <button type="button" routerLink="/debit" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center">
+          <span class="material-icons mr-2">close</span>
+          Annuler
         </button>
-        <button type="submit" [disabled]="debitForm.invalid || loading" class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50">
-          <span *ngIf="loading" class="spinner-sm mr-2"></span>
-          {{ i18n.t('forms.generateDebitBtn') }}
-        </button>
+        <div class="flex gap-3">
+          <button type="submit" [disabled]="debitForm.invalid || loading || !selectedCooperant" 
+                  class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center">
+            <span *ngIf="loading" class="spinner-sm mr-2"></span>
+            <span class="material-icons mr-2">{{ isEditMode ? 'save' : 'add_circle' }}</span>
+            {{ isEditMode ? 'Modifier' : 'Créer' }}
+          </button>
+        </div>
       </div>
     </form>
   </div>

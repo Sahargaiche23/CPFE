@@ -2,10 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
-import { AffiliationService } from '../../../core/services/affiliation.service';
-import { EmployerService } from '../../../core/services/employer.service';
+import { CooperantService, Cooperant } from '../../../core/services/cooperant.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
@@ -33,8 +31,7 @@ export class AffiliationListComponent implements OnInit {
   selectedAffiliation: any = null;
 
   constructor(
-    private affiliationService: AffiliationService,
-    private employerService: EmployerService,
+    private cooperantService: CooperantService,
     private pdfService: PdfService,
     public i18n: I18nService
   ) {}
@@ -47,47 +44,31 @@ export class AffiliationListComponent implements OnInit {
     this.loading = true;
     this.error = null;
     
-    // Charger toutes les données en parallèle
-    forkJoin({
-      employers: this.employerService.getAll(),
-      affiliations: this.affiliationService.getAll()
-    }).subscribe({
-      next: (result) => {
-        // Mapper les employeurs d'abord
-        this.employers = result.employers.map(e => ({
-          id: `${e.empMat}-${e.empCle}`,
-          empMat: e.empMat,
-          empCle: e.empCle,
-          name: e.nomCommercial || `Employeur ${e.empMat}`
+    // Charger les coopérants qui ont un numAffiliation
+    this.cooperantService.getAll().subscribe({
+      next: (cooperants: Cooperant[]) => {
+        // Filtrer uniquement ceux qui ont un numAffiliation
+        const affiliatedCooperants = cooperants.filter(c => c.numAffiliation);
+        
+        this.affiliations = affiliatedCooperants.map((c: Cooperant) => ({
+          id: c.id,
+          numAffiliation: c.cleAffiliation && c.numAffiliation 
+            ? `${c.cleAffiliation}-${c.numAffiliation}` 
+            : c.numAffiliation || '-',
+          employerName: c.nomCompletFr || '-',
+          employerId: c.matriculeComplet || '-',
+          assureName: c.nomCompletFr || c.nomCompletAr || '-',
+          dateDebut: c.dateEffetAffiliation 
+            ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
+            : (c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '-'),
+          dateFin: '-',
+          salaire: c.salaire || 0,
+          status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
+          statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
+          regime: c.codeRegime || '500',
+          email: c.email
         }));
         
-        // Ensuite mapper les affiliations avec les employeurs disponibles
-        this.affiliations = result.affiliations.map((a: any) => {
-          // Trouver le nom de l'employeur
-          const employer = this.employers.find(e => e.id === `${a.empMat}-${a.empCle}`);
-          
-          // Construire le nom complet de l'assuré
-          const assureName = (a.assNom && a.assPrenom) 
-            ? `${a.assNom} ${a.assPrenom}` 
-            : (a.lastName && a.firstName) 
-              ? `${a.lastName} ${a.firstName}`
-              : a.assureMatriculeComplet || '-';
-          
-          return {
-            id: a.dcoId,
-            numAffiliation: a.dcoNumAffiliation && a.dcoClefAffiliation 
-              ? `${a.dcoClefAffiliation}-${a.dcoNumAffiliation}` 
-              : a.assureMatriculeComplet || '-',
-            employerName: employer?.name || '-',
-            employerId: `${a.empMat}-${a.empCle}`,
-            assureName: assureName,
-            dateDebut: a.dcoDateDebut ? new Date(a.dcoDateDebut).toLocaleDateString('fr-FR') : '-',
-            dateFin: a.dcoDateFin ? new Date(a.dcoDateFin).toLocaleDateString('fr-FR') : '-',
-            salaire: a.dcoSalaire || 0,
-            status: a.actif !== false ? 'active' : 'inactive',
-            statusLabel: a.actif !== false ? 'Active' : 'Inactive'
-          };
-        });
         this.filteredAffiliations = [...this.affiliations];
         this.loading = false;
       },
@@ -104,12 +85,13 @@ export class AffiliationListComponent implements OnInit {
   }
 
   deleteAffiliation(id: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette affiliation ?')) {
-      this.affiliationService.delete(id).subscribe({
+    if (confirm('Êtes-vous sûr de vouloir retirer cette affiliation ?')) {
+      // Retirer l'affiliation (numAffiliation) sans supprimer le coopérant
+      this.cooperantService.updateAffiliation(id, '', '').subscribe({
         next: () => this.loadAffiliations(),
         error: (err: any) => {
-          console.error('Erreur suppression:', err);
-          alert('Erreur lors de la suppression');
+          console.error('Erreur retrait affiliation:', err);
+          alert('Erreur lors du retrait de l\'affiliation');
         }
       });
     }

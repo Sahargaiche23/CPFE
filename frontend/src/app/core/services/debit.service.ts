@@ -14,10 +14,17 @@ export interface Debit {
 }
 
 export interface GenerateDebitRequest {
-  empMat: number;
-  empCle: number;
+  cooperantId?: number;
+  numAffiliation: string;
+  nomCooperant?: string;
+  adresse?: string;
+  matricule?: string;
   trimestre: number;
   annee: number;
+  salaire?: number;
+  montantCotisation?: number;
+  dateDebut?: string;
+  email?: string;
 }
 
 @Injectable({

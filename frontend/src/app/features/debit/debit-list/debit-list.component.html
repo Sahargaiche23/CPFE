@@ -6,6 +6,10 @@
         <p class="text-gray-600 mt-2">{{ i18n.t('debit.subtitle') }}</p>
       </div>
       <div class="flex gap-3">
+        <button (click)="printAllDebits()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all flex items-center">
+          <span class="material-icons mr-2">print</span>
+          Imprimer Toutes
+        </button>
         <button (click)="exportPDF()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center">
           <span class="material-icons mr-2">picture_as_pdf</span>
           {{ i18n.t('table.exportPdf') }}
@@ -104,6 +108,9 @@
                 <div class="flex items-center space-x-2">
                   <button (click)="viewDebit(debit)" class="text-blue-600 hover:text-blue-800" title="Voir">
                     <span class="material-icons text-xl">visibility</span>
+                  </button>
+                  <button (click)="printDebit(debit)" class="text-purple-600 hover:text-purple-800" title="Imprimer">
+                    <span class="material-icons text-xl">print</span>
                   </button>
                   <button (click)="downloadDebit(debit)" class="text-green-600 hover:text-green-800" title="Télécharger">
                     <span class="material-icons text-xl">download</span>

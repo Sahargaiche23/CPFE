@@ -55,7 +55,7 @@ spring:
             - StripPrefix=1
             
         - id: regime-service
-          uri: lb://regime-service
+          uri: lb://debit-service
           predicates:
             - Path=/api/regimes/**
           filters:

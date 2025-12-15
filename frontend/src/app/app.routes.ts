@@ -96,6 +96,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/audit-logs/audit-logs.component').then(m => m.AuditLogsComponent)
   },
   {
+    path: 'admin/regimes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/admin/regime-management/regime-management.component').then(m => m.RegimeManagementComponent)
+  },
+  {
     path: 'reports',
     canActivate: [adminGuard],
     loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent)

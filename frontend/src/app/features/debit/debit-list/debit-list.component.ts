@@ -6,6 +6,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 import { DebitService, Debit } from '../../../core/services/debit.service';
 import { EmployerService } from '../../../core/services/employer.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { RegimeService, RegimeCotisation } from '../../../core/services/regime.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class DebitListComponent implements OnInit {
   loading = true;
   debits: any[] = [];
   employers: any[] = [];
+  regimes: RegimeCotisation[] = [];
   error: string | null = null;
   selectedDebit: any = null;
 
@@ -26,6 +28,7 @@ export class DebitListComponent implements OnInit {
     private debitService: DebitService,
     private employerService: EmployerService,
     private pdfService: PdfService,
+    private regimeService: RegimeService,
     private router: Router,
     public i18n: I18nService
   ) {}
@@ -41,9 +44,13 @@ export class DebitListComponent implements OnInit {
     // Charger toutes les données en parallèle
     forkJoin({
       employers: this.employerService.getAll(),
-      debits: this.debitService.getAll()
+      debits: this.debitService.getAll(),
+      regimes: this.regimeService.getAll()
     }).subscribe({
       next: (result) => {
+        // Stocker les régimes
+        this.regimes = result.regimes || [];
+        
         // Mapper les employeurs d'abord
         this.employers = result.employers.map(e => ({
           id: `${e.empMat}-${e.empCle}`,
@@ -52,21 +59,23 @@ export class DebitListComponent implements OnInit {
           name: e.nomCommercial || `Employeur ${e.empMat}`
         }));
         
-        // Mapper les débits avec les noms des employeurs
+        // Mapper les débits (nouvelle structure Debit pour coopérants)
         this.debits = (result.debits as any[]).map(d => {
-          const employerId = `${d.empMat}-${d.empCle}`;
-          const employer = this.employers.find(e => e.id === employerId);
-          
           return {
-            id: d.engNum || d.id,
-            number: d.referenceComplete || `ENG-${(d.engNum || d.id)?.toString().padStart(4, '0')}/ECH-${d.enoNumEng || '0'}${d.empCle || ''}`,
-            employerName: employer?.name || '-',
-            employerId: employerId,
-            trimestre: d.enoNumEng ? `T${d.enoNumEng}` : (d.trimestre || '-'),
-            generatedDate: d.enoDateEcheance || d.createdAt ? new Date(d.enoDateEcheance || d.createdAt).toLocaleDateString('fr-FR') : '-',
-            amount: d.engMontant || d.enoMontantEcheance || d.montantCotisation || 0,
-            status: (d.enoSituation === 2 || d.paye) ? 'paid' : 'pending',
-            statusLabel: (d.enoSituation === 2 || d.paye) ? 'Payé' : 'En attente'
+            id: d.id,
+            number: d.numAffiliation || `DEB-${d.id?.toString().padStart(4, '0')}`,
+            employerName: d.nomCooperant || '-',
+            trimestre: d.trimestre || '-',
+            generatedDate: d.createdAt ? new Date(d.createdAt).toLocaleDateString('fr-FR') : '-',
+            amount: d.montantCotisation || 0,
+            status: d.paye ? 'paid' : 'pending',
+            statusLabel: d.paye ? 'Payé' : 'En attente',
+            // Champs pour le PDF officiel
+            numAffiliation: d.numAffiliation || '',
+            matricule: d.matricule || '',
+            salaire: d.salaire || 0,
+            adresse: d.adresse || '',
+            annee: d.annee || new Date().getFullYear()
           };
         });
         this.loading = false;
@@ -120,8 +129,31 @@ export class DebitListComponent implements OnInit {
   }
 
   downloadDebit(debit: any) {
-    // Utiliser PdfService pour générer le PDF avec l'en-tête CNSS officiel
-    this.pdfService.generateDebitPdf(debit);
+    // Calculer les cotisations dynamiques à partir des régimes
+    const cotisations = this.calculateCotisations(debit.salaire || 0);
+    const debitWithCotisations = { ...debit, cotisations };
+    this.pdfService.generateDebitPdf(debitWithCotisations);
+  }
+
+  printDebit(debit: any) {
+    // Calculer les cotisations dynamiques à partir des régimes
+    const cotisations = this.calculateCotisations(debit.salaire || 0);
+    const debitWithCotisations = { ...debit, cotisations };
+    this.pdfService.generateDebitPdf(debitWithCotisations, true);
+  }
+
+  private calculateCotisations(salaire: number): { code: string; nomAr: string; taux: number; base: number; montant: number }[] {
+    return this.regimes.map(regime => {
+      const base = salaire * regime.coefficientBase;
+      const montant = base * (regime.taux / 100);
+      return {
+        code: regime.code,
+        nomAr: regime.nomAr,
+        taux: regime.taux,
+        base,
+        montant
+      };
+    });
   }
 
   exportPDF() {
@@ -136,5 +168,10 @@ export class DebitListComponent implements OnInit {
       statusLabel: d.statusLabel
     }));
     this.pdfService.generatePaiementsReport(data, 'TUNIS');
+  }
+
+  printAllDebits() {
+    // Générer le rapport PDF de tous les débits (mode "Toutes")
+    this.pdfService.generateAllDebitsReport(this.debits, 'TUNIS');
   }
 }

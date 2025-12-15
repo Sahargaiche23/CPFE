@@ -634,7 +634,7 @@ export class PdfService {
   }
 
   /**
-   * Génère un PDF de débit trimestriel avec l'en-tête CNSS officiel
+   * Génère un PDF d'avis de débit officiel CNSS (même format que attestation)
    */
   generateDebitPdf(debit: {
     number: string;
@@ -643,10 +643,34 @@ export class PdfService {
     generatedDate: string;
     amount: number;
     statusLabel: string;
-  }): void {
+    numAffiliation?: string;
+    matricule?: string;
+    salaire?: number;
+    adresse?: string;
+    annee?: number;
+    cotisations?: { code: string; nomAr: string; taux: number; base: number; montant: number }[];
+  }, openForPrint: boolean = false): void {
     const today = new Date();
     const dateStr = today.toLocaleDateString('fr-FR');
     const logoUrl = window.location.origin + '/assets/images/logo-cnss.png';
+    
+    // Extraire trimestre et année
+    const trimestreMatch = debit.trimestre?.match(/T(\d)/);
+    const trimestreNum = trimestreMatch ? parseInt(trimestreMatch[1]) : 1;
+    const annee = debit.annee || new Date().getFullYear();
+    
+    // Utiliser les cotisations dynamiques ou calculer par défaut
+    const salaire = debit.salaire || (debit.amount / 0.2575);
+    const hasDynamicCotisations = debit.cotisations && debit.cotisations.length > 0;
+    const total = hasDynamicCotisations 
+      ? debit.cotisations!.reduce((sum, c) => sum + c.montant, 0)
+      : debit.amount;
+    
+    // Date limite de paiement (15 du mois suivant le trimestre)
+    const moisLimite = trimestreNum * 3 + 1;
+    const dateLimite = new Date(annee, moisLimite > 12 ? 0 : moisLimite - 1, 15);
+    if (moisLimite > 12) dateLimite.setFullYear(annee + 1);
+    const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR');
     
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; height: 1123px; border: none; z-index: -1; opacity: 0;';
@@ -670,59 +694,56 @@ export class PdfService {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
             font-family: 'Amiri', 'Traditional Arabic', 'Arial', serif; 
-            font-size: 14px; 
-            line-height: 1.6;
-            padding: 40px;
+            font-size: 13px; 
+            line-height: 1.8;
+            padding: 30px 40px;
             background: white;
           }
-          .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
-          .header-fr { text-align: left; font-size: 12px; direction: ltr; }
-          .header-ar { text-align: right; font-size: 14px; }
+          .header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+          .header-fr { text-align: left; font-size: 11px; direction: ltr; }
+          .header-ar { text-align: right; font-size: 12px; }
           .logo-box { 
-            border: 3px solid #8B0000; 
-            padding: 15px; 
-            margin: 20px 0; 
+            border: 2px solid #8B0000; 
+            padding: 15px 20px; 
+            margin: 15px 0; 
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
           }
-          .logo-fr { color: #8B0000; font-size: 20px; font-weight: bold; font-style: italic; direction: ltr; }
-          .logo-ar { color: #8B0000; font-size: 16px; font-weight: bold; margin-top: 5px; }
-          .logo-img { width: 70px; height: auto; }
-          .title { text-align: center; margin: 30px 0; }
-          .title h1 { color: #8B0000; font-size: 24px; font-weight: bold; direction: ltr; }
-          .title-ar { color: #8B0000; font-size: 18px; margin-top: 5px; }
-          .content { margin: 30px 0; direction: ltr; }
-          .info-line { margin: 15px 0; font-size: 14px; }
-          .info-line strong { color: #333; }
-          .amount-box { 
-            border: 2px solid #8B0000; 
-            background: #FFF8DC; 
-            padding: 20px; 
+          .logo-fr { color: #8B0000; font-size: 18px; font-weight: bold; direction: ltr; }
+          .logo-ar { color: #8B0000; font-size: 14px; font-weight: bold; margin-top: 3px; }
+          .logo-img { width: 60px; height: auto; }
+          .info-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 12px; }
+          .info-left { text-align: left; direction: ltr; }
+          .info-right { text-align: right; }
+          .subject { 
             text-align: center; 
-            margin: 30px 0;
-            border-radius: 8px;
-          }
-          .amount { color: #8B0000; font-size: 28px; font-weight: bold; }
-          .status { margin: 20px 0; font-size: 14px; }
-          .status-badge { 
-            display: inline-block; 
-            padding: 5px 15px; 
-            border-radius: 20px; 
+            margin: 20px 0; 
+            font-size: 16px; 
             font-weight: bold;
           }
-          .status-pending { background: #FEF3C7; color: #92400E; }
-          .status-paid { background: #D1FAE5; color: #065F46; }
+          .body-text { 
+            text-align: right; 
+            font-size: 12px; 
+            line-height: 2;
+            margin: 15px 0;
+          }
+          .body-text p { margin-bottom: 10px; text-align: justify; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
+          th, td { border: 1px solid #333; padding: 6px 8px; text-align: center; }
+          th { background: #f0f0f0; font-weight: bold; }
+          .signature { text-align: left; margin-top: 30px; font-weight: bold; font-size: 12px; }
           .footer { 
             text-align: center; 
-            font-size: 10px; 
+            font-size: 9px; 
             color: #666; 
-            margin-top: 50px; 
-            border-top: 1px solid #ccc; 
-            padding-top: 15px;
+            margin-top: 30px; 
+            border-top: 1px solid #000; 
+            padding-top: 8px;
             direction: ltr;
           }
+          .highlight { background: #fffacd; padding: 8px; border-radius: 4px; margin: 10px 0; }
         </style>
       </head>
       <body>
@@ -749,37 +770,107 @@ export class PdfService {
           </div>
         </div>
         
-        <!-- Titre -->
-        <div class="title">
-          <h1>DÉBIT TRIMESTRIEL</h1>
-          <div class="title-ar">الدين الثلاثي</div>
-        </div>
-        
-        <!-- Contenu -->
-        <div class="content">
-          <div class="info-line"><strong>Numéro:</strong> ${debit.number}</div>
-          <div class="info-line"><strong>Employeur:</strong> ${debit.employerName}</div>
-          <div class="info-line"><strong>Période:</strong> ${debit.trimestre}</div>
-          <div class="info-line"><strong>Date d'échéance:</strong> ${debit.generatedDate}</div>
-          
-          <div class="amount-box">
-            <div class="amount">${debit.amount?.toLocaleString('fr-FR', {minimumFractionDigits: 3})} TND</div>
-            <div style="margin-top: 5px; font-size: 12px; color: #666;">Montant à payer</div>
+        <!-- Informations -->
+        <div class="info-row">
+          <div class="info-right">
+            المكتب الجهوي بتونس المدينة<br>
+            شارع مدريد - تونس 12
           </div>
-          
-          <div class="status">
-            <strong>Statut:</strong> 
-            <span class="status-badge ${debit.statusLabel === 'Payé' ? 'status-paid' : 'status-pending'}">
-              ${debit.statusLabel}
-            </span>
+          <div class="info-left">
+            تونس في ${dateStr}
           </div>
         </div>
         
-        <div class="footer">
-          Document généré automatiquement par le Système de Coopération Technique CNSS<br>
-          © 2025 - Caisse Nationale de Sécurité Sociale - Tunisie<br>
-          Date de génération: ${dateStr}
+        <div style="text-align: right; margin: 10px 0; font-size: 12px;">
+          <strong>رقم الإنخراط:</strong> ${debit.numAffiliation || debit.number}<br>
+          <strong>رقم التسجيل:</strong> ${debit.matricule || ''}
         </div>
+        
+        <!-- Bénéficiaire -->
+        <div style="text-align: right; margin: 15px 0; font-size: 12px;">
+          <strong>السيد/ة :</strong> ${debit.employerName}<br>
+          <strong>العنوان :</strong> ${debit.adresse || ''}
+        </div>
+        
+        <!-- Sujet -->
+        <div class="subject">الموضوع : إعلام بدفع المساهمات</div>
+        
+        <!-- Corps -->
+        <div class="body-text">
+          <p>أما بعد،</p>
+          <p>أتشرف بإعلامكم بأن مبلغ المساهمات الواجب عليكم دفعها للصندوق الوطني للضمان الاجتماعي في إطار التغطية الاجتماعية للأعوان الموفدين في حالة إلحاق للعمل في نطاق التعاون الفني، طبقا للأمر عدد 1879 لسنة 2007،</p>
+          <p>لسنة <strong>${annee}</strong> الثلاثية <strong>${trimestreNum}</strong> الموافق في 23 جويلية 2007، بدفوعل الثلاث</p>
+          <p>مفصلا كما يلي سنة آلاف و تسعة مائة و واحد و خمسون دينار و 285 مليم حدد ب</p>
+        </div>
+        
+        <!-- Tableau des cotisations -->
+        <table>
+          <tr>
+            <th>المبلغ</th>
+            <th>النسبة (%)</th>
+            <th>قاعدة الإحتساب (د.ت)</th>
+            <th>النظام</th>
+            <th>الرمز</th>
+          </tr>
+          ${hasDynamicCotisations 
+            ? debit.cotisations!.map(c => `
+              <tr>
+                <td>${c.montant.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>${c.taux}</td>
+                <td>${c.base.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>${c.nomAr}</td>
+                <td>${c.code}</td>
+              </tr>
+            `).join('')
+            : `
+              <tr>
+                <td>${(salaire * 0.135).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>13.5</td>
+                <td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>جرايات الشيخوخة و العجز و الباقين على قيد الحياة</td>
+                <td>133</td>
+              </tr>
+              <tr>
+                <td>0.000</td>
+                <td>0</td>
+                <td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>التأمينات الاجتماعية</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>${(salaire * 0.735 * 0.09).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>9</td>
+                <td>${(salaire * 0.735).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                <td>(*) النظام التكميلي للجرايات</td>
+                <td>91</td>
+              </tr>
+            `
+          }
+          <tr style="font-weight: bold; background: #f9f9f9;">
+            <td>${total.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+            <td colspan="4">المجملة</td>
+          </tr>
+        </table>
+        
+        <div class="body-text">
+          <p>(*) الجزء الذي يفوق 6 مرات الأجر الأدنى</p>
+          <p>هذا ويمكنكم تسديد مساهماتكم بواسطة <strong>${dateLimiteStr}</strong> فالمرغوب منكم تسديد هذا المبلغ في أجل لا يتجاوز</p>
+          <p>تحويل بريدي أو بنكي إلى الحساب الجاري للصندوق لدى الشركة التونسية للبنك عدد: 10104059103466578833</p>
+          <p>أو إلى الحساب الجاري البريدي للصندوق عدد: 17001000000000733217</p>
+          <p class="highlight">كما يمكنكم تكليف من تريدون بتسديد المساهمات مباشرة بشباليك المكتب الجهوري بتونس المدينة</p>
+          <p>يغرم الصندوق بتحميل مبالغها طبقا للنسب ب <strong>${dateLimiteStr.replace(/\d{4}/, (parseInt(dateLimiteStr.split('/')[2]) + 2).toString())}</strong> و في صورة عدم دفع مساهماتكم في أجل أقصاه</p>
+          <p>المنصوص</p>
+          <p>عليها بالقانون عدد 105 لسنة 1995 المؤرخ في 14 ديسمبر 1995 و المتعلق بإحداث نظام موحد لضم الخدمات بعنوان</p>
+          <p>أنظمة التقاعد و العجز والباقين على قيد الحياة</p>
+          <p style="margin-top: 20px;">مع فائق الاحترام والتقدير</p>
+          <p><strong>والسلام</strong></p>
+        </div>
+        
+        <!-- Signature -->
+        <div class="signature">رئيس المكتب الجهوي بتونس المدينة</div>
+        
+        <!-- Footer -->
+        <div class="footer">© CNSS - Caisse Nationale de Sécurité Sociale - Document généré le ${dateStr}</div>
       </body>
       </html>
     `);
@@ -791,21 +882,35 @@ export class PdfService {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        windowWidth: 794,
+        windowHeight: 1123
       }).then((canvas: HTMLCanvasElement) => {
         const { jsPDF } = (window as any).jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-        doc.save(`debit_${debit.number}.pdf`);
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        
+        if (openForPrint) {
+          const pdfBlob = doc.output('blob');
+          const pdfUrl = URL.createObjectURL(pdfBlob);
+          const printWindow = window.open(pdfUrl, '_blank');
+          if (printWindow) {
+            printWindow.onload = () => {
+              printWindow.print();
+            };
+          }
+        } else {
+          doc.save(`avis_debit_${debit.numAffiliation || debit.number}.pdf`);
+        }
         
         document.body.removeChild(iframe);
       }).catch((err: any) => {
         console.error('Erreur génération PDF:', err);
         document.body.removeChild(iframe);
       });
-    }, 1500);
+    }, 2000);
   }
 
   /**
@@ -1287,5 +1392,147 @@ export class PdfService {
         });
       }, 2000);
     });
+  }
+
+  /**
+   * Génère un rapport PDF de tous les débits (mode "Toutes")
+   */
+  generateAllDebitsReport(debits: any[], bureau: string = 'TUNIS'): void {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('fr-FR');
+    const logoUrl = window.location.origin + '/assets/images/logo-cnss.png';
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 1200px; height: 1600px; border: none; z-index: -1; opacity: 0;';
+    document.body.appendChild(iframe);
+    
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+    
+    let tableRows = '';
+    let totalAmount = 0;
+    debits.forEach(d => {
+      const salaire = d.salaire || 0;
+      const montant = d.amount || d.montantCotisation || 0;
+      totalAmount += montant;
+      tableRows += `
+        <tr>
+          <td style="text-align: right;">${Number(salaire).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+          <td>${d.trimestre || '-'}/${d.annee || '-'}</td>
+          <td style="text-align: left;">${d.employerName || d.nomCooperant || '-'}</td>
+          <td>${d.matricule || '-'}</td>
+          <td>${d.numAffiliation || d.number || '-'}</td>
+        </tr>
+      `;
+    });
+    
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Amiri', Arial, serif; font-size: 14px; padding: 30px; background: white; }
+          .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+          .header-fr { text-align: left; font-size: 12px; direction: ltr; }
+          .header-ar { text-align: right; font-size: 14px; }
+          .logo-box { border: 2px solid #8B0000; padding: 15px 25px; margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 20px; }
+          .logo-fr { color: #8B0000; font-size: 22px; font-weight: bold; font-style: italic; direction: ltr; }
+          .logo-ar { color: #8B0000; font-size: 18px; font-weight: bold; margin-top: 5px; }
+          .logo-img { width: 70px; }
+          .info-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 13px; }
+          .info-left { text-align: left; direction: ltr; }
+          .info-right { text-align: right; }
+          .title { text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+          th { background: #f0f0f0; border: 1px solid #000; padding: 10px 6px; text-align: center; font-weight: bold; }
+          td { border: 1px solid #000; padding: 8px 6px; text-align: center; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .footer { text-align: center; font-size: 10px; color: #666; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; direction: ltr; }
+          .count-info { text-align: right; margin: 10px 0; font-size: 13px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="header-fr">République Tunisienne<br>Ministère des Affaires Sociales et de solidarité<br>et des Tunisiens à l'Étranger</div>
+          <div class="header-ar">الجمهورية التونسية<br>وزارة الشؤون الاجتماعية و التضامن<br>والتونسيين بالخارج</div>
+        </div>
+        
+        <div class="logo-box">
+          <img class="logo-img" src="${logoUrl}" alt="CNSS">
+          <div style="text-align: center;">
+            <div class="logo-ar">الصندوق الوطني للضمان الاجتماعي</div>
+            <div class="logo-fr">Caisse Nationale<br>de Sécurité Sociale</div>
+          </div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-right">
+            المكتب الجهوري بتونس المدينة<br>
+            شارع مدريد - تونس 12
+          </div>
+          <div class="info-left">
+            ${dateStr} تونس في
+          </div>
+        </div>
+        
+        <div class="count-info">
+          <strong>Nombre de lignes</strong> ${debits.length}
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Salaire</th>
+              <th>Tr/Année</th>
+              <th>Nom&prénom / raison sociale</th>
+              <th>Employeur</th>
+              <th>°Assur</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        
+        <div class="footer">© CNSS - Caisse Nationale de Sécurité Sociale - Rapport généré le ${dateStr}</div>
+      </body>
+      </html>
+    `);
+    iframeDoc.close();
+    
+    setTimeout(() => {
+      const html2canvas = (window as any).html2canvas;
+      html2canvas(iframeDoc.body, { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: 1200,
+        windowHeight: 1600
+      }).then((canvas: HTMLCanvasElement) => {
+        const { jsPDF } = (window as any).jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
+        
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+        
+        const pdfBlob = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(pdfUrl, '_blank');
+        if (printWindow) {
+          printWindow.onload = () => printWindow.print();
+        }
+        
+        document.body.removeChild(iframe);
+      }).catch((err: any) => {
+        console.error('Erreur génération PDF:', err);
+        document.body.removeChild(iframe);
+      });
+    }, 2000);
   }
 }

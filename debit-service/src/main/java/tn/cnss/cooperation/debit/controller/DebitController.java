@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.cnss.cooperation.debit.dto.GenerateDebitRequest;
+import tn.cnss.cooperation.debit.entity.Debit;
 import tn.cnss.cooperation.debit.entity.EngagementEcheance;
+import tn.cnss.cooperation.debit.repository.DebitRepository;
 import tn.cnss.cooperation.debit.repository.EngagementEcheanceRepository;
 import tn.cnss.cooperation.debit.service.DebitGenerationService;
+import tn.cnss.cooperation.debit.service.DebitService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -19,32 +22,33 @@ import java.util.List;
 public class DebitController {
     
     private final EngagementEcheanceRepository echeanceRepository;
-    private final DebitGenerationService debitService;
+    private final DebitGenerationService debitGenerationService;
+    private final DebitService debitService;
+    private final DebitRepository debitRepository;
     
     @GetMapping
-    public ResponseEntity<List<EngagementEcheance>> getAll() {
+    public ResponseEntity<List<Debit>> getAll() {
+        // Retourner les débits de la nouvelle table Debit (coopérants)
+        return ResponseEntity.ok(debitRepository.findAll());
+    }
+    
+    @GetMapping("/legacy")
+    public ResponseEntity<List<EngagementEcheance>> getAllLegacy() {
+        // Ancien endpoint pour les EngagementEcheance (employeurs)
         return ResponseEntity.ok(echeanceRepository.findAll());
     }
     
     @PostMapping("/generate")
-    public ResponseEntity<List<EngagementEcheance>> generate(@RequestBody GenerateDebitRequest request) {
-        log.info("Génération débit: T{}/{}", request.getTrimestre(), request.getAnnee());
+    public ResponseEntity<?> generate(@RequestBody GenerateDebitRequest request) {
+        log.info("Génération débit coopérant: {}, T{}/{}", 
+                request.getNumAffiliation(), request.getTrimestre(), request.getAnnee());
         
-        if (request.getEmpMat() != null && request.getEmpCle() != null) {
-            List<EngagementEcheance> debits = debitService.genererDebitEmployeur(
-                request.getEmpMat(), 
-                request.getEmpCle(), 
-                request.getTrimestre(), 
-                request.getAnnee()
-            );
-            return ResponseEntity.ok(debits);
+        // Utiliser le nouveau service pour générer le débit avec envoi email
+        Debit debit = debitService.generateDebit(request);
+        if (debit != null) {
+            return ResponseEntity.ok(debit);
         }
-        
-        List<EngagementEcheance> debits = debitService.genererDebitTrimestre(
-            request.getTrimestre(), 
-            request.getAnnee()
-        );
-        return ResponseEntity.ok(debits);
+        return ResponseEntity.badRequest().body("Erreur lors de la génération du débit");
     }
     
     @GetMapping("/trimestre/{trimestre}/{annee}")
@@ -61,8 +65,16 @@ public class DebitController {
         return ResponseEntity.ok(echeances);
     }
     
-    @GetMapping("/{engNum}")
-    public ResponseEntity<EngagementEcheance> getById(@PathVariable Long engNum) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Debit> getById(@PathVariable Long id) {
+        // Chercher dans la table Debit (coopérants)
+        return debitRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/legacy/{engNum}")
+    public ResponseEntity<EngagementEcheance> getLegacyById(@PathVariable Long engNum) {
         List<EngagementEcheance> echeances = echeanceRepository.findByEngNum(engNum);
         if (echeances.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -70,21 +82,45 @@ public class DebitController {
         return ResponseEntity.ok(echeances.get(0));
     }
     
-    @PutMapping("/{engNum}")
-    public ResponseEntity<EngagementEcheance> update(@PathVariable Long engNum, @RequestBody EngagementEcheance debit) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Debit> update(@PathVariable Long id, @RequestBody Debit debit) {
+        return debitRepository.findById(id)
+            .map(existing -> {
+                existing.setNumAffiliation(debit.getNumAffiliation());
+                existing.setMontantCotisation(debit.getMontantCotisation());
+                existing.setTrimestre(debit.getTrimestre());
+                existing.setAnnee(debit.getAnnee());
+                existing.setPaye(debit.getPaye());
+                return ResponseEntity.ok(debitRepository.save(existing));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @PutMapping("/legacy/{engNum}")
+    public ResponseEntity<EngagementEcheance> updateLegacy(@PathVariable Long engNum, @RequestBody EngagementEcheance debit) {
         List<EngagementEcheance> echeances = echeanceRepository.findByEngNum(engNum);
         if (echeances.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         EngagementEcheance existing = echeances.get(0);
-        // Mettre à jour les champs modifiables
         existing.setEnoMontantEcheance(debit.getEnoMontantEcheance());
         existing.setEnoSituation(debit.getEnoSituation());
         return ResponseEntity.ok(echeanceRepository.save(existing));
     }
     
-    @DeleteMapping("/{engNum}")
-    public ResponseEntity<Void> delete(@PathVariable Long engNum) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        // Supprimer depuis la table Debit (coopérants)
+        if (debitRepository.existsById(id)) {
+            debitRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
+    @DeleteMapping("/legacy/{engNum}")
+    public ResponseEntity<Void> deleteLegacy(@PathVariable Long engNum) {
+        // Ancien endpoint pour EngagementEcheance
         List<EngagementEcheance> echeances = echeanceRepository.findByEngNum(engNum);
         if (echeances.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -99,18 +135,3 @@ public class DebitController {
     }
 }
 
-class GenerateDebitRequest {
-    private Long empMat;
-    private Integer empCle;
-    private int trimestre;
-    private int annee;
-    
-    public Long getEmpMat() { return empMat; }
-    public void setEmpMat(Long empMat) { this.empMat = empMat; }
-    public Integer getEmpCle() { return empCle; }
-    public void setEmpCle(Integer empCle) { this.empCle = empCle; }
-    public int getTrimestre() { return trimestre; }
-    public void setTrimestre(int trimestre) { this.trimestre = trimestre; }
-    public int getAnnee() { return annee; }
-    public void setAnnee(int annee) { this.annee = annee; }
-}

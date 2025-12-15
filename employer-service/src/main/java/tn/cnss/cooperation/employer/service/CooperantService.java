@@ -360,6 +360,8 @@ public class CooperantService {
         
         dto.setNumAffiliation(c.getNumAffiliation());
         dto.setCleAffiliation(c.getCleAffiliation());
+        dto.setSalaire(c.getSalaire());
+        dto.setDateEffetAffiliation(c.getDateEffetAffiliation());
         
         dto.setStatutValidation(c.getStatutValidation());
         dto.setDateValidation(c.getDateValidation());
@@ -398,12 +400,15 @@ public class CooperantService {
             // 1. Vérifier si l'utilisateur existe déjà
             boolean userExists = false;
             try {
-                restTemplate.getForEntity(
+                var response = restTemplate.getForEntity(
                         authServiceUrl + "/api/auth/debug/" + email,
-                        Object.class
+                        Map.class
                 );
-                userExists = true;
-                log.info("Utilisateur existe déjà: {}", email);
+                // L'utilisateur existe seulement si on a une réponse avec un body non vide
+                userExists = response.getBody() != null && !response.getBody().isEmpty();
+                if (userExists) {
+                    log.info("Utilisateur existe déjà: {}", email);
+                }
             } catch (Exception e) {
                 // Utilisateur n'existe pas, on peut le créer
                 userExists = false;
@@ -501,6 +506,18 @@ public class CooperantService {
         }
         if (updates.containsKey("cleAffiliation")) {
             cooperant.setCleAffiliation(updates.get("cleAffiliation"));
+        }
+        if (updates.containsKey("salaire")) {
+            String salaireStr = updates.get("salaire");
+            if (salaireStr != null && !salaireStr.isEmpty()) {
+                cooperant.setSalaire(new java.math.BigDecimal(salaireStr));
+            }
+        }
+        if (updates.containsKey("dateEffetAffiliation")) {
+            String dateStr = updates.get("dateEffetAffiliation");
+            if (dateStr != null && !dateStr.isEmpty()) {
+                cooperant.setDateEffetAffiliation(java.time.LocalDate.parse(dateStr));
+            }
         }
         
         cooperant.setUpdatedAt(LocalDateTime.now());

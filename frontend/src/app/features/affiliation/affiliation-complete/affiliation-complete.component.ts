@@ -890,12 +890,15 @@ export class AffiliationCompleteComponent implements OnInit {
         error: (err) => console.log('Email non envoyé:', err.message)
       });
 
-      // Sauvegarder le numAffiliation dans le coopérant
+      // Sauvegarder le numAffiliation, salaire et date dans le coopérant
       if (this.cooperantId) {
+        const salaire = parseFloat(formData.salaireTunisie) || 0;
         this.cooperantService.updateAffiliation(
           this.cooperantId,
           formData.numAffiliation || '',
-          formData.cleAffiliation || ''
+          formData.cleAffiliation || '',
+          salaire,
+          formData.dateEffet || ''
         ).subscribe({
           next: () => console.log('Affiliation sauvegardée dans le coopérant'),
           error: (err) => console.log('Erreur sauvegarde affiliation:', err.message)
