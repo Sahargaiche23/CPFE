@@ -46,6 +46,9 @@ public class Debit {
     @Column(name = "PAYE")
     private Boolean paye = false;
     
+    @Column(name = "COTISATIONS_JSON", length = 4000)
+    private String cotisationsJson;
+    
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
     

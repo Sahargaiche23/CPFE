@@ -61,6 +61,15 @@ export class DebitListComponent implements OnInit {
         
         // Mapper les débits (nouvelle structure Debit pour coopérants)
         this.debits = (result.debits as any[]).map(d => {
+          // Parser les cotisations sauvegardées
+          let cotisations = null;
+          if (d.cotisationsJson) {
+            try {
+              cotisations = JSON.parse(d.cotisationsJson);
+            } catch (e) {
+              console.error('Erreur parsing cotisationsJson:', e);
+            }
+          }
           return {
             id: d.id,
             number: d.numAffiliation || `DEB-${d.id?.toString().padStart(4, '0')}`,
@@ -75,7 +84,8 @@ export class DebitListComponent implements OnInit {
             matricule: d.matricule || '',
             salaire: d.salaire || 0,
             adresse: d.adresse || '',
-            annee: d.annee || new Date().getFullYear()
+            annee: d.annee || new Date().getFullYear(),
+            cotisations: cotisations
           };
         });
         this.loading = false;
@@ -93,22 +103,26 @@ export class DebitListComponent implements OnInit {
   }
 
   deleteDebit(id: number) {
+    console.log('deleteDebit called', id);
     if (!id) {
       alert('ID du débit non trouvé');
       return;
     }
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce débit ?')) {
-      this.debitService.delete(id).subscribe({
-        next: () => {
-          alert('Débit supprimé avec succès');
-          this.loadDebits();
-        },
-        error: (err) => {
-          console.error('Erreur suppression:', err);
-          alert('Erreur lors de la suppression: ' + (err.message || 'Erreur inconnue'));
-        }
-      });
-    }
+    setTimeout(() => {
+      const confirmed = window.confirm('Êtes-vous sûr de vouloir supprimer ce débit ?');
+      if (confirmed) {
+        this.debitService.delete(id).subscribe({
+          next: () => {
+            alert('Débit supprimé avec succès');
+            this.loadDebits();
+          },
+          error: (err) => {
+            console.error('Erreur suppression:', err);
+            alert('Erreur lors de la suppression: ' + (err.message || 'Erreur inconnue'));
+          }
+        });
+      }
+    }, 0);
   }
 
   getValidatedCount(): number {
@@ -124,6 +138,7 @@ export class DebitListComponent implements OnInit {
   }
 
   viewDebit(debit: any) {
+    console.log('viewDebit called', debit);
     this.selectedDebit = debit;
   }
 
@@ -136,15 +151,18 @@ export class DebitListComponent implements OnInit {
   }
 
   downloadDebit(debit: any) {
-    // Calculer les cotisations dynamiques à partir des régimes
-    const cotisations = this.calculateCotisations(debit.salaire || 0);
+    console.log('downloadDebit called', debit);
+    console.log('Cotisations sauvegardées:', debit.cotisations);
+    // Utiliser les cotisations sauvegardées ou recalculer si non disponibles
+    const cotisations = debit.cotisations || this.calculateCotisations(debit.salaire || 0);
+    console.log('Cotisations utilisées pour PDF:', cotisations);
     const debitWithCotisations = { ...debit, cotisations };
     this.pdfService.generateDebitPdf(debitWithCotisations);
   }
 
   printDebit(debit: any) {
-    // Calculer les cotisations dynamiques à partir des régimes
-    const cotisations = this.calculateCotisations(debit.salaire || 0);
+    // Utiliser les cotisations sauvegardées ou recalculer si non disponibles
+    const cotisations = debit.cotisations || this.calculateCotisations(debit.salaire || 0);
     const debitWithCotisations = { ...debit, cotisations };
     this.pdfService.generateDebitPdf(debitWithCotisations, true);
   }

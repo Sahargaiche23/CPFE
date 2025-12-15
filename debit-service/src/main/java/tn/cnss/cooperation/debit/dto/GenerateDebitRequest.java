@@ -17,4 +17,5 @@ public class GenerateDebitRequest {
     private String dateDebut;
     private String email;
     private String pdfBase64;
+    private String cotisationsJson;
 }

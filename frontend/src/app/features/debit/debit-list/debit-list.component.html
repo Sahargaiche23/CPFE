@@ -104,34 +104,22 @@
                   {{ debit.statusLabel }}
                 </span>
               </td>
-              <td style="position: relative; z-index: 100;">
-                <div class="flex items-center gap-1" style="position: relative; z-index: 101;">
-                  <button type="button" (click)="viewDebit(debit)" 
-                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
-                    class="flex items-center justify-center rounded hover:bg-blue-100 text-blue-600 bg-blue-50" title="Voir">
-                    <span class="material-icons text-lg">visibility</span>
-                  </button>
-                  <button type="button" (click)="printDebit(debit)" 
-                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
-                    class="flex items-center justify-center rounded hover:bg-purple-100 text-purple-600 bg-purple-50" title="Imprimer">
-                    <span class="material-icons text-lg">print</span>
-                  </button>
-                  <button type="button" (click)="downloadDebit(debit)" 
-                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
-                    class="flex items-center justify-center rounded hover:bg-green-100 text-green-600 bg-green-50" title="Télécharger">
-                    <span class="material-icons text-lg">download</span>
-                  </button>
-                  <button type="button" (click)="editDebit(debit)" 
-                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
-                    class="flex items-center justify-center rounded hover:bg-orange-100 text-orange-600 bg-orange-50" title="Modifier">
-                    <span class="material-icons text-lg">edit</span>
-                  </button>
-                  <button type="button" (click)="deleteDebit(debit.id)" 
-                    style="width: 32px; height: 32px; cursor: pointer; position: relative; z-index: 102;"
-                    class="flex items-center justify-center rounded hover:bg-red-100 text-red-600 bg-red-50" title="Supprimer">
-                    <span class="material-icons text-lg">delete</span>
-                  </button>
-                </div>
+              <td class="actions-cell">
+                <a (click)="viewDebit(debit); $event.preventDefault()" class="action-btn text-blue-600" title="Voir">
+                  <i class="material-icons">visibility</i>
+                </a>
+                <a (click)="printDebit(debit); $event.preventDefault()" class="action-btn text-purple-600" title="Imprimer">
+                  <i class="material-icons">print</i>
+                </a>
+                <a (click)="downloadDebit(debit); $event.preventDefault()" class="action-btn text-green-600" title="Télécharger">
+                  <i class="material-icons">download</i>
+                </a>
+                <a (click)="editDebit(debit); $event.preventDefault()" class="action-btn text-orange-600" title="Modifier">
+                  <i class="material-icons">edit</i>
+                </a>
+                <a (click)="deleteDebit(debit.id); $event.preventDefault()" class="action-btn text-red-600" title="Supprimer">
+                  <i class="material-icons">delete</i>
+                </a>
               </td>
             </tr>
           </tbody>

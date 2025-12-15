@@ -235,7 +235,18 @@ export class DebitGenerateComponent implements OnInit {
         // Mode création - générer l'avis de débit avec PDF arabe
         const nomCooperant = this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`;
         
-        // Générer le PDF arabe côté frontend
+        // Générer le PDF arabe côté frontend avec les cotisations sélectionnées
+        const selectedCotisations = this.cotisations
+          .filter(c => c.selected)
+          .map(c => ({
+            code: c.regime.code,
+            nomAr: c.regime.nomAr,
+            taux: c.regime.taux,
+            base: c.base,
+            montant: c.montant
+          }));
+        console.log('Cotisations sélectionnées pour PDF:', selectedCotisations);
+        
         const pdfData = {
           number: formData.numAffiliation,
           employerName: nomCooperant,
@@ -246,7 +257,8 @@ export class DebitGenerateComponent implements OnInit {
           matricule: this.selectedCooperant.matriculeComplet || '',
           salaire: salaire,
           adresse: this.selectedCooperant.adresseFr || '',
-          annee: formData.year
+          annee: formData.year,
+          cotisations: selectedCotisations
         };
         
         this.pdfService.generateDebitPdfBase64(pdfData).then((pdfBase64: string) => {
@@ -262,7 +274,8 @@ export class DebitGenerateComponent implements OnInit {
             montantCotisation: montantCotisation,
             dateDebut: formData.dateDebut,
             email: this.selectedCooperant!.email,
-            pdfBase64: pdfBase64
+            pdfBase64: pdfBase64,
+            cotisationsJson: JSON.stringify(selectedCotisations)
           };
           
           this.debitService.generate(debitData).subscribe({

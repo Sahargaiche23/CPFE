@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +58,7 @@ public class DebitService {
             debit.setDateEffet(LocalDate.parse(request.getDateDebut()));
         }
         debit.setPaye(false);
+        debit.setCotisationsJson(request.getCotisationsJson());
         debit.setCreatedAt(LocalDateTime.now());
         
         debit = debitRepository.save(debit);

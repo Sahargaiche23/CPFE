@@ -135,6 +135,35 @@ body {
   @apply bg-gray-50 transition-colors duration-200;
 }
 
+/* Action buttons in tables */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer !important;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.action-btn i {
+  font-size: 20px;
+  pointer-events: none;
+}
+
 /* Status badges */
 .badge {
   @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;

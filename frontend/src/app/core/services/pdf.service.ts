@@ -1550,6 +1550,7 @@ export class PdfService {
     salaire?: number;
     adresse?: string;
     annee?: number;
+    cotisations?: { code: string; nomAr: string; taux: number; base: number; montant: number }[];
   }): Promise<string> {
     return new Promise((resolve, reject) => {
       const today = new Date();
@@ -1560,7 +1561,10 @@ export class PdfService {
       const trimestreNum = trimestreMatch ? parseInt(trimestreMatch[1]) : 1;
       const annee = debit.annee || new Date().getFullYear();
       const salaire = debit.salaire || (debit.amount / 0.2575);
-      const total = debit.amount;
+      const hasDynamicCotisations = debit.cotisations && debit.cotisations.length > 0;
+      const total = hasDynamicCotisations 
+        ? debit.cotisations!.reduce((sum, c) => sum + c.montant, 0)
+        : debit.amount;
       
       const moisLimite = trimestreNum * 3 + 1;
       const dateLimite = new Date(annee, moisLimite > 12 ? 0 : moisLimite - 1, 15);
@@ -1640,10 +1644,23 @@ export class PdfService {
           </div>
           <table>
             <tr><th>المبلغ</th><th>النسبة (%)</th><th>قاعدة الإحتساب (د.ت)</th><th>النظام</th><th>الرمز</th></tr>
-            <tr><td>${(salaire * 0.135).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>13.5</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>جرايات الشيخوخة و العجز و الباقين على قيد الحياة</td><td>133</td></tr>
-            <tr><td>0.000</td><td>0</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>التأمينات الاجتماعية</td><td>0</td></tr>
-            <tr><td>${(salaire * 0.735 * 0.09).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>9</td><td>${(salaire * 0.735).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>(*) النظام التكميلي للجرايات</td><td>91</td></tr>
-            <tr><td>${(salaire * 0.02).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>2</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>لا يوجد تغطية تأمين صحي من قبل CNAM</td><td>134</td></tr>
+            ${hasDynamicCotisations 
+              ? debit.cotisations!.map(c => `
+                <tr>
+                  <td>${c.montant.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                  <td>${c.taux}</td>
+                  <td>${c.base.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td>
+                  <td>${c.nomAr}</td>
+                  <td>${c.code}</td>
+                </tr>
+              `).join('')
+              : `
+                <tr><td>${(salaire * 0.135).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>13.5</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>جرايات الشيخوخة و العجز و الباقين على قيد الحياة</td><td>133</td></tr>
+                <tr><td>0.000</td><td>0</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>التأمينات الاجتماعية</td><td>0</td></tr>
+                <tr><td>${(salaire * 0.735 * 0.09).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>9</td><td>${(salaire * 0.735).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>(*) النظام التكميلي للجرايات</td><td>91</td></tr>
+                <tr><td>${(salaire * 0.02).toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>2</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td>لا يوجد تغطية تأمين صحي من قبل CNAM</td><td>134</td></tr>
+              `
+            }
             <tr style="font-weight: bold; background: #fffacd;"><td>${total.toLocaleString('fr-FR', {minimumFractionDigits: 3})}</td><td colspan="4">المجملة</td></tr>
           </table>
           <div class="body-text">
