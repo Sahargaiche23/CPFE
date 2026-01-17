@@ -858,7 +858,7 @@ export class PdfService {
           <p>تحويل بريدي أو بنكي إلى الحساب الجاري للصندوق لدى الشركة التونسية للبنك عدد: 10104059103466578833</p>
           <p>أو إلى الحساب الجاري البريدي للصندوق عدد: 17001000000000733217</p>
           <p class="highlight">كما يمكنكم تكليف من تريدون بتسديد المساهمات مباشرة بشباليك المكتب الجهوري بتونس المدينة</p>
-          <p>يغرم الصندوق بتحميل مبالغها طبقا للنسب ب <strong>${dateLimiteStr.replace(/\d{4}/, (parseInt(dateLimiteStr.split('/')[2]) + 2).toString())}</strong> و في صورة عدم دفع مساهماتكم في أجل أقصاه</p>
+          <p>يغرم الصندوق بتحميل مبالغها طبقا للنسب ب <strong>${dateLimiteStr.replace(/\d{4}/, (parseInt(dateLimiteStr.split('/')[2]) + 1).toString())}</strong> و في صورة عدم دفع مساهماتكم في أجل أقصاه</p>
           <p>المنصوص</p>
           <p>عليها بالقانون عدد 105 لسنة 1995 المؤرخ في 14 ديسمبر 1995 و المتعلق بإحداث نظام موحد لضم الخدمات بعنوان</p>
           <p>أنظمة التقاعد و العجز والباقين على قيد الحياة</p>
@@ -1703,5 +1703,175 @@ export class PdfService {
         });
       }, 2000);
     });
+  }
+
+  /**
+   * Génère un extrait du coopérant en PDF
+   */
+  generateCooperantExtrait(cooperant: any, debits: any[] = []): void {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('fr-FR');
+    const logoUrl = window.location.origin + '/assets/images/logo-cnss.png';
+    
+    const totalDebits = debits.reduce((sum: number, d: any) => sum + (d.montantCotisation || 0), 0);
+    
+    const debitsRows = debits.map((d: any) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ddd;">${d.trimestre || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${d.createdAt ? new Date(d.createdAt).toLocaleDateString('fr-FR') : '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${(d.montantCotisation || 0).toFixed(3)} TND</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+          <span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; ${d.paye ? 'background: #d1fae5; color: #065f46;' : 'background: #fef3c7; color: #92400e;'}">
+            ${d.paye ? 'Payé' : 'En attente'}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; height: 1123px; border: none; z-index: -1; opacity: 0;';
+    document.body.appendChild(iframe);
+    
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+    
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; }
+          .header { display: flex; justify-content: space-between; border-bottom: 3px solid #8B0000; padding-bottom: 15px; margin-bottom: 20px; }
+          .header-left { text-align: left; }
+          .header-right { text-align: right; }
+          .title { color: #8B0000; font-size: 11px; }
+          .logo { text-align: center; }
+          .logo img { height: 60px; }
+          h1 { color: #8B0000; text-align: center; font-size: 18px; margin: 20px 0; border-bottom: 2px solid #8B0000; padding-bottom: 10px; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+          .info-item { border-bottom: 1px solid #eee; padding-bottom: 8px; }
+          .info-label { color: #666; font-size: 10px; margin-bottom: 2px; }
+          .info-value { font-weight: bold; font-size: 12px; }
+          .section-title { background: #8B0000; color: white; padding: 8px 15px; font-weight: bold; margin: 20px 0 10px 0; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { background: #f3f4f6; padding: 10px; text-align: left; border: 1px solid #ddd; font-size: 11px; }
+          .total-row { background: #f9fafb; font-weight: bold; }
+          .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; font-size: 10px; }
+          .status { display: inline-block; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
+          .status-valide { background: #d1fae5; color: #065f46; }
+          .status-attente { background: #fef3c7; color: #92400e; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="header-left">
+            <div class="title">République Tunisienne</div>
+            <div class="title">Ministère des Affaires Sociales</div>
+            <div style="font-weight: bold; color: #8B0000;">Caisse Nationale de Sécurité Sociale</div>
+          </div>
+          <div class="logo">
+            <img src="${logoUrl}" alt="CNSS" onerror="this.style.display='none'">
+          </div>
+          <div class="header-right">
+            <div class="title">الجمهورية التونسية</div>
+            <div class="title">وزارة الشؤون الاجتماعية</div>
+            <div style="font-weight: bold; color: #8B0000;">الصندوق الوطني للضمان الاجتماعي</div>
+          </div>
+        </div>
+        
+        <h1>EXTRAIT DU COOPÉRANT / مستخرج المتعاون</h1>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">N° Affiliation / رقم الانخراط</div>
+            <div class="info-value" style="color: #8B0000; font-size: 14px;">${cooperant.cleAffiliation || ''}-${cooperant.numAffiliation || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Matricule / الرقم التعريفي</div>
+            <div class="info-value">${cooperant.matriculeComplet || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Nom & Prénom / الإسم و اللقب</div>
+            <div class="info-value">${cooperant.nomCompletFr || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">الإسم و اللقب (AR)</div>
+            <div class="info-value" style="direction: rtl;">${cooperant.nomCompletAr || '-'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Régime / النظام</div>
+            <div class="info-value">${cooperant.codeRegime || ''} - ${cooperant.libelleRegime || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Date de Naissance / تاريخ الولادة</div>
+            <div class="info-value">${cooperant.dateNaissance ? new Date(cooperant.dateNaissance).toLocaleDateString('fr-FR') : '-'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Adresse / العنوان</div>
+            <div class="info-value">${cooperant.adresseFr || ''}, ${cooperant.codePostal || ''} ${cooperant.localiteFr || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Téléphone / الهاتف</div>
+            <div class="info-value">${cooperant.telephone || '-'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">${cooperant.email || '-'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Pièce d'identité / وثيقة الهوية</div>
+            <div class="info-value">${cooperant.typePieceIdentite || ''}: ${cooperant.numPieceIdentite || ''}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Salaire / الأجر</div>
+            <div class="info-value" style="color: #059669;">${(cooperant.salaire || 0).toFixed(3)} TND</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Statut / الحالة</div>
+            <div class="info-value">
+              <span class="status ${cooperant.statutValidation === 'VALIDE' ? 'status-valide' : 'status-attente'}">
+                ${cooperant.statutValidation || 'EN_ATTENTE'}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-title">Historique des Débits / سجل الديون</div>
+        
+        ${debits.length > 0 ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Période / الفترة</th>
+                <th>Date / التاريخ</th>
+                <th style="text-align: right;">Montant / المبلغ</th>
+                <th style="text-align: center;">Statut / الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${debitsRows}
+              <tr class="total-row">
+                <td colspan="2" style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Total / المجموع</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #8B0000;">${totalDebits.toFixed(3)} TND</td>
+                <td style="border: 1px solid #ddd;"></td>
+              </tr>
+            </tbody>
+          </table>
+        ` : '<p style="text-align: center; color: #666; padding: 20px;">Aucun débit enregistré / لا توجد ديون مسجلة</p>'}
+        
+        <div class="footer">
+          Document généré le ${dateStr} - © CNSS - Caisse Nationale de Sécurité Sociale
+        </div>
+      </body>
+      </html>
+    `);
+    iframeDoc.close();
+    
+    setTimeout(() => {
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 500);
   }
 }

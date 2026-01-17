@@ -18,6 +18,10 @@ export const COOPERANT_ROUTES: Routes = [
     path: 'validation',
     loadComponent: () => import('./cooperant-validation/cooperant-validation.component').then(m => m.CooperantValidationComponent)
   },
+  {
+    path: 'search',
+    loadComponent: () => import('./cooperant-search/cooperant-search.component').then(m => m.CooperantSearchComponent)
+  },
   // Routes Espace Coopérant
   {
     path: 'espace',

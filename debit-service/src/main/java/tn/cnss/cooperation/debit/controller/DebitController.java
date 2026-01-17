@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.cnss.cooperation.debit.dto.GenerateDebitRequest;
+import tn.cnss.cooperation.debit.dto.UpdateDebitRequest;
 import tn.cnss.cooperation.debit.entity.Debit;
 import tn.cnss.cooperation.debit.entity.EngagementEcheance;
 import tn.cnss.cooperation.debit.repository.DebitRepository;
@@ -83,15 +84,29 @@ public class DebitController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Debit> update(@PathVariable Long id, @RequestBody Debit debit) {
+    public ResponseEntity<Debit> update(@PathVariable Long id, @RequestBody UpdateDebitRequest request) {
         return debitRepository.findById(id)
             .map(existing -> {
-                existing.setNumAffiliation(debit.getNumAffiliation());
-                existing.setMontantCotisation(debit.getMontantCotisation());
-                existing.setTrimestre(debit.getTrimestre());
-                existing.setAnnee(debit.getAnnee());
-                existing.setPaye(debit.getPaye());
-                return ResponseEntity.ok(debitRepository.save(existing));
+                existing.setNumAffiliation(request.getNumAffiliation());
+                existing.setNomCooperant(request.getNomCooperant());
+                existing.setAdresse(request.getAdresse());
+                existing.setMatricule(request.getMatricule());
+                existing.setMontantCotisation(request.getMontantCotisation());
+                existing.setTrimestre(request.getTrimestre());
+                existing.setAnnee(request.getAnnee());
+                existing.setSalaire(request.getSalaire());
+                existing.setPaye(request.getPaye());
+                existing.setCotisationsJson(request.getCotisationsJson());
+                
+                Debit saved = debitRepository.save(existing);
+                
+                // Envoyer l'email avec le nouveau PDF si fourni
+                if (request.getEmail() != null && !request.getEmail().isEmpty() 
+                    && request.getPdfBase64() != null && !request.getPdfBase64().isEmpty()) {
+                    debitService.sendUpdateNotification(request, saved);
+                }
+                
+                return ResponseEntity.ok(saved);
             })
             .orElse(ResponseEntity.notFound().build());
     }

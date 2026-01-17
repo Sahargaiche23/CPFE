@@ -209,27 +209,68 @@ export class DebitGenerateComponent implements OnInit {
       const montantCotisation = this.totalCotisation;
       
       if (this.isEditMode && this.debitId && this.existingData) {
-        // Mode édition
-        const updateData = {
-          ...this.existingData,
-          cooperantId: this.selectedCooperant.id,
+        // Mode édition - régénérer le PDF et envoyer l'email
+        const nomCooperant = this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`;
+        
+        // Générer le PDF arabe avec les cotisations actuelles
+        const selectedCotisations = this.cotisations
+          .filter(c => c.selected)
+          .map(c => ({
+            code: c.regime.code,
+            nomAr: c.regime.nomAr,
+            taux: c.regime.taux,
+            base: c.base,
+            montant: c.montant
+          }));
+        
+        const pdfData = {
+          number: formData.numAffiliation,
+          employerName: nomCooperant,
+          trimestre: `T${trimestre}`,
+          generatedDate: new Date().toISOString(),
+          amount: parseFloat(formData.montant) || montantCotisation,
           numAffiliation: formData.numAffiliation,
-          trimestre: trimestre,
+          matricule: this.selectedCooperant.matriculeComplet || this.existingData.matricule || '',
+          salaire: salaire,
+          adresse: this.selectedCooperant.adresseFr || this.existingData.adresse || '',
           annee: formData.year,
-          montantCotisation: parseFloat(formData.montant) || montantCotisation
+          cotisations: selectedCotisations
         };
         
-        this.debitService.update(this.debitId, updateData).subscribe({
-          next: () => {
-            this.loading = false;
-            alert('Débit modifié avec succès !');
-            this.router.navigate(['/debit']);
-          },
-          error: (err: any) => {
-            console.error('Erreur modification débit:', err);
-            this.loading = false;
-            alert('Erreur lors de la modification du débit');
-          }
+        this.pdfService.generateDebitPdfBase64(pdfData).then((pdfBase64: string) => {
+          const updateData = {
+            id: this.debitId,
+            numAffiliation: formData.numAffiliation,
+            nomCooperant: nomCooperant,
+            adresse: this.selectedCooperant?.adresseFr || this.existingData.adresse,
+            matricule: this.selectedCooperant?.matriculeComplet || this.existingData.matricule,
+            trimestre: `T${trimestre}-${formData.year}`,
+            annee: formData.year,
+            dateEffet: this.existingData.dateEffet,
+            salaire: salaire,
+            montantCotisation: montantCotisation,
+            paye: this.existingData.paye,
+            cotisationsJson: JSON.stringify(selectedCotisations),
+            email: this.selectedCooperant?.email || '',
+            pdfBase64: pdfBase64
+          };
+          
+          this.debitService.update(this.debitId!, updateData).subscribe({
+            next: () => {
+              this.loading = false;
+              alert('Débit modifié avec succès ! Un nouvel email a été envoyé.');
+              this.router.navigate(['/debit']);
+            },
+            error: (err: any) => {
+              console.error('Erreur modification débit:', err);
+              this.loading = false;
+              alert('Erreur lors de la modification du débit');
+            }
+          });
+        }).catch((err: any) => {
+          console.error('Erreur génération PDF:', err);
+          this.loading = false;
+          alert('Erreur lors de la génération du PDF');
         });
       } else {
         // Mode création - générer l'avis de débit avec PDF arabe

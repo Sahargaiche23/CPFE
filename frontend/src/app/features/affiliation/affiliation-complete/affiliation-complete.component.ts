@@ -5,6 +5,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { CooperantService } from '../../../core/services/cooperant.service';
+import { AffiliationService } from '../../../core/services/affiliation.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { environment } from '../../../../environments/environment';
 
@@ -518,6 +519,9 @@ export class AffiliationCompleteComponent implements OnInit {
   loading = true;
   submitting = false;
   cooperantId: number | null = null;
+  isEditMode = false;
+  affiliationId: number | null = null;
+  existingAffiliation: any = null;
   activeTab = 'coop';
   empTab = 'employeur';
   today = new Date().toLocaleDateString('fr-FR');
@@ -532,6 +536,7 @@ export class AffiliationCompleteComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private cooperantService: CooperantService,
+    private affiliationService: AffiliationService,
     private pdfService: PdfService,
     private http: HttpClient
   ) {
@@ -621,12 +626,66 @@ export class AffiliationCompleteComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const url = this.router.url;
+    
+    // Détecter si on est en mode édition d'affiliation
+    this.isEditMode = url.includes('/edit/');
+    
     if (id) {
+      // Dans les deux cas, l'ID est celui d'un coopérant
       this.cooperantId = +id;
       this.loadCooperant(this.cooperantId);
     } else {
       this.loading = false;
     }
+  }
+
+  loadAffiliation(id: number) {
+    this.affiliationService.getByDcoId(id).subscribe({
+      next: (data: any) => {
+        console.log('Affiliation chargée:', data);
+        this.existingAffiliation = data;
+        this.prefillFormFromAffiliation(data);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement affiliation:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  prefillFormFromAffiliation(aff: any) {
+    // Créer un objet cooperant simulé pour l'affichage
+    this.cooperant = {
+      nomCompletFr: `${aff.assPrenom || ''} ${aff.assNom || ''}`.trim(),
+      nomCompletAr: aff.nomAr || '',
+      adresseAr: aff.adresseAr || '',
+      dateNaissance: aff.dateNaissance
+    };
+    
+    this.affiliationForm.patchValue({
+      numAffiliation: aff.dcoNumAffiliation || '',
+      cleAffiliation: aff.dcoClefAffiliation || '',
+      situation: 'ACTIF',
+      dateEffet: aff.dcoDateDebut || '',
+      matriculeAssure: aff.assureMat || '',
+      cleAssure: aff.assureCle || '',
+      empMatricule: aff.empMat || '',
+      empCle: aff.empCle || '',
+      codeRegimeCompl: '500',
+      periodeDebut: aff.dcoDateDebut || '',
+      periodeFin: aff.dcoDateFin || '',
+      salaireTunisie: aff.dcoSalaire || '',
+      raisonSocialeFr: `${aff.assPrenom || ''} ${aff.assNom || ''}`.trim(),
+      rlNomFr: aff.assNom || '',
+      rlPrenomFr: aff.assPrenom || '',
+      rlNumero: aff.numPasseport || '',
+      rlEmail: aff.email || '',
+      rlAdresse: aff.adresse || '',
+      rlTelephone: aff.telephone || '',
+      rlDateNaissance: aff.dateNaissance || ''
+    });
   }
 
   loadCooperant(id: number) {

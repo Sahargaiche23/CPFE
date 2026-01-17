@@ -281,4 +281,66 @@ public class DebitService {
         return debitRepository.findByNumAffiliationAndTrimestre(numAffiliation, trimestre)
                 .orElseThrow(() -> new RuntimeException("Débit non trouvé"));
     }
+    
+    public void sendUpdateNotification(tn.cnss.cooperation.debit.dto.UpdateDebitRequest request, Debit debit) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            // Extraire trimestre et année du format "T1-2025"
+            String trimestreStr = request.getTrimestre();
+            String trimNum = "1";
+            Integer annee = request.getAnnee();
+            if (trimestreStr != null && trimestreStr.contains("-")) {
+                trimNum = trimestreStr.substring(1, trimestreStr.indexOf("-"));
+            }
+            
+            String subject = "CNSS - Avis de Débit Modifié T" + trimNum + "/" + annee;
+            
+            Map<String, Object> emailRequest = new HashMap<>();
+            emailRequest.put("to", request.getEmail());
+            emailRequest.put("subject", subject);
+            emailRequest.put("content", buildUpdateEmailContent(request, debit));
+            emailRequest.put("pdfBase64", request.getPdfBase64());
+            emailRequest.put("fileName", "avis_debit_modifie_" + request.getNumAffiliation() + "_" + trimestreStr + ".pdf");
+            
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
+            restTemplate.postForEntity(
+                    notificationServiceUrl + "/notification/email-with-attachment",
+                    entity,
+                    Object.class
+            );
+            log.info("Email de modification envoyé à: {}", request.getEmail());
+            
+        } catch (Exception e) {
+            log.error("Erreur envoi email modification débit: {}", e.getMessage());
+        }
+    }
+    
+    private String buildUpdateEmailContent(tn.cnss.cooperation.debit.dto.UpdateDebitRequest request, Debit debit) {
+        return String.format("""
+            <html dir="rtl">
+            <body style="font-family: 'Traditional Arabic', Arial; text-align: right;">
+                <h2 style="color: #8B0000;">الصندوق الوطني للضمان الاجتماعي</h2>
+                <h3>Caisse Nationale de Sécurité Sociale</h3>
+                <hr>
+                <p>السيد(ة) <strong>%s</strong>,</p>
+                <p>نعلمكم أنه تم تعديل إشعار الخصم الخاص بكم.</p>
+                <p>يرجى الاطلاع على الملف المرفق للحصول على التفاصيل المحدثة.</p>
+                <br>
+                <p><strong>رقم الإنخراط:</strong> %s</p>
+                <p><strong>الفترة:</strong> %s</p>
+                <p><strong>المبلغ الجديد:</strong> %.3f د.ت</p>
+                <br>
+                <p>مع فائق الاحترام,</p>
+                <p>الصندوق الوطني للضمان الاجتماعي</p>
+            </body>
+            </html>
+            """,
+            request.getNomCooperant() != null ? request.getNomCooperant() : "-",
+            request.getNumAffiliation(),
+            request.getTrimestre(),
+            debit.getMontantCotisation() != null ? debit.getMontantCotisation().doubleValue() : 0.0
+        );
+    }
 }
