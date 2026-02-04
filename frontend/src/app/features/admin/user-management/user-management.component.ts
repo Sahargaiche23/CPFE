@@ -55,7 +55,9 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
             <select [(ngModel)]="filterRole" (change)="filterUsers()" class="px-4 py-2 border rounded-lg">
               <option value="">Tous les rôles</option>
               <option value="admin">Admin</option>
-              <option value="user">Agent</option>
+              <option value="user">Agent CNSS</option>
+              <option value="agent_atct">Agent ATCT</option>
+              <option value="cooperant">Coopérant</option>
             </select>
             <select [(ngModel)]="filterStatus" (change)="filterUsers()" class="px-4 py-2 border rounded-lg">
               <option value="">Tous les statuts</option>
@@ -96,7 +98,8 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
                   <span [ngClass]="{
                     'bg-purple-100 text-purple-800': user.profil?.toLowerCase() === 'admin',
                     'bg-teal-100 text-teal-800': user.profil?.toLowerCase() === 'cooperant',
-                    'bg-blue-100 text-blue-800': user.profil?.toLowerCase() !== 'admin' && user.profil?.toLowerCase() !== 'cooperant'
+                    'bg-orange-100 text-orange-800': user.profil?.toLowerCase() === 'agent_atct',
+                    'bg-blue-100 text-blue-800': user.profil?.toLowerCase() === 'user'
                   }" class="px-2 py-1 rounded-full text-xs font-medium">
                     {{ getRoleLabel(user.profil) }}
                   </span>
@@ -181,7 +184,9 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Rôle *</label>
                   <select formControlName="profil" class="w-full px-4 py-2 border rounded-lg">
-                    <option value="user">Agent</option>
+                    <option value="user">Agent CNSS</option>
+                    <option value="agent_atct">Agent ATCT</option>
+                    <option value="cooperant">Coopérant</option>
                     <option value="admin">Administrateur</option>
                   </select>
                 </div>
@@ -405,8 +410,9 @@ export class UserManagementComponent implements OnInit {
     if (!profil) return 'Utilisateur';
     const lower = profil.toLowerCase();
     if (lower === 'admin') return 'Admin';
+    if (lower === 'agent_atct') return 'Agent ATCT';
     if (lower === 'cooperant') return 'Coopérant';
-    if (lower.includes('agent')) return 'Agent';
+    if (lower === 'user') return 'Agent CNSS';
     return 'Utilisateur';
   }
 

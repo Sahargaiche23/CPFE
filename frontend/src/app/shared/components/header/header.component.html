@@ -25,6 +25,10 @@
           <span class="material-icons text-sm mr-1">person</span>
           Coopérants
         </a>
+        <a routerLink="/atct" class="nav-link" *ngIf="(user$ | async)?.profil?.toLowerCase() === 'admin' || (user$ | async)?.profil?.toLowerCase() === 'user' || (user$ | async)?.profil?.toLowerCase() === 'agent_atct'">
+          <span class="material-icons text-sm mr-1">assignment</span>
+          ATCT
+        </a>
         <a routerLink="/affiliation" class="nav-link">
           <span class="material-icons text-sm mr-1">person_add</span>
           {{ i18n.t('nav.affiliations') }}

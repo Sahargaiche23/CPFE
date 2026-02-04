@@ -9,6 +9,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import tn.cnss.cooperation.notification.dto.AtctRappelRequest;
 import tn.cnss.cooperation.notification.dto.EmailRequest;
 
 import java.util.Base64;
@@ -149,6 +150,33 @@ public class EmailService {
             log.info("Email débit avec PDF envoyé avec succès à: {}", to);
         } catch (Exception e) {
             log.error("Erreur envoi email débit: {}", e.getMessage());
+        }
+    }
+
+    public void sendAtctRappelWithPdf(AtctRappelRequest request) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setTo(request.getTo());
+            helper.setSubject(request.getSubject());
+            helper.setText(request.getContent(), false);
+            
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                helper.setFrom(fromEmail);
+            }
+            
+            // Générer le PDF du formulaire ATCT
+            byte[] pdfBytes = pdfGeneratorService.generateAtctFormulairePdf(request);
+            if (pdfBytes != null && pdfBytes.length > 0) {
+                ByteArrayResource pdfResource = new ByteArrayResource(pdfBytes);
+                helper.addAttachment("Formulaire_ATCT.pdf", pdfResource, "application/pdf");
+            }
+            
+            mailSender.send(message);
+            log.info("Rappel ATCT avec PDF envoyé à: {}", request.getTo());
+        } catch (Exception e) {
+            log.error("Erreur envoi rappel ATCT: {}", e.getMessage());
         }
     }
 

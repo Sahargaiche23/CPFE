@@ -56,6 +56,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/cooperant/cooperant.routes').then(m => m.COOPERANT_ROUTES)
   },
   {
+    path: 'atct',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/atct/atct.routes').then(m => m.ATCT_ROUTES)
+  },
+  {
     path: 'affiliation',
     canActivate: [authGuard],
     loadChildren: () => import('./features/affiliation/affiliation.routes').then(m => m.AFFILIATION_ROUTES)

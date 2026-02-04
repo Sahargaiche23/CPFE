@@ -54,5 +54,11 @@
             <artifactId>openhtmltopdf-pdfbox</artifactId>
             <version>1.0.10</version>
         </dependency>
+        <!-- iText HTML2PDF for Arabic support (same as affiliation-service) -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>5.0.2</version>
+        </dependency>
     </dependencies>
 </project>

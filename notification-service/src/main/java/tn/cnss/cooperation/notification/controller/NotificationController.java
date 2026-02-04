@@ -3,6 +3,7 @@ package tn.cnss.cooperation.notification.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.cnss.cooperation.notification.dto.AtctRappelRequest;
 import tn.cnss.cooperation.notification.dto.DebitEmailRequest;
 import tn.cnss.cooperation.notification.dto.EmailRequest;
 import tn.cnss.cooperation.notification.dto.EmailWithAttachmentRequest;
@@ -61,5 +62,23 @@ public class NotificationController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Notification Service is running");
+    }
+
+    @PostMapping("/atct-rappel")
+    public ResponseEntity<String> sendAtctRappel(@RequestBody AtctRappelRequest request) {
+        emailService.sendAtctRappelWithPdf(request);
+        return ResponseEntity.ok("Rappel ATCT avec PDF envoyé");
+    }
+
+    @PostMapping("/atct-rappel-pdf")
+    public ResponseEntity<String> sendAtctRappelAvecPdf(@RequestBody java.util.Map<String, String> request) {
+        emailService.sendEmailWithAttachment(
+            request.get("to"),
+            request.get("subject"),
+            request.get("content"),
+            request.get("pdfBase64"),
+            "Formulaire_ATCT.pdf"
+        );
+        return ResponseEntity.ok("Rappel ATCT avec PDF bilingue envoyé");
     }
 }

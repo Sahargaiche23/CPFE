@@ -4,10 +4,17 @@ server:
 spring:
   application:
     name: employer-service
+  codec:
+    max-in-memory-size: 50MB
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+    parser:
+      allow-comments: true
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/XEPDB1
     username: COPT
@@ -47,5 +54,5 @@ springdoc:
     path: /swagger-ui/index.html
 
 # URLs des services internes (Docker)
-auth.service.url: http://auth-service:8089
-notification.service.url: http://notification-service:8087
+auth.service.url: http://cooperation-auth:8089
+notification.service.url: http://cooperation-notification:8087

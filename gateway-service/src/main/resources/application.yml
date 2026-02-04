@@ -46,6 +46,13 @@ spring:
           uri: lb://employer-service
           predicates:
             - Path=/api/cooperants/**
+
+        - id: atct-service
+          uri: lb://employer-service
+          predicates:
+            - Path=/api/atct/**
+          filters:
+            - StripPrefix=1
             
         - id: salary-service
           uri: lb://salary-service
