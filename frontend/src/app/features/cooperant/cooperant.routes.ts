@@ -41,7 +41,19 @@ export const COOPERANT_ROUTES: Routes = [
   },
   {
     path: 'reclamations',
-    loadComponent: () => import('./reclamations/reclamations.component').then(m => m.ReclamationsComponent)
+    loadComponent: () => import('./mes-reclamations/mes-reclamations.component').then(m => m.MesReclamationsComponent)
+  },
+  {
+    path: 'depot-documents',
+    loadComponent: () => import('./depot-documents/depot-documents.component').then(m => m.DepotDocumentsComponent)
+  },
+  {
+    path: 'mes-depots',
+    loadComponent: () => import('./mes-depots/mes-depots.component').then(m => m.MesDepotsComponent)
+  },
+  {
+    path: 'suivi-dossier',
+    loadComponent: () => import('./suivi-dossier/suivi-dossier.component').then(m => m.SuiviDossierComponent)
   },
   {
     path: ':id',

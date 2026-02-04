@@ -80,6 +80,13 @@ public class CooperantService {
     }
     
     /**
+     * Récupérer le prochain matricule disponible
+     */
+    public Long getNextMatricule() {
+        return Objects.requireNonNullElse(cooperantRepository.getNextMatricule(), 1L);
+    }
+    
+    /**
      * Créer un nouveau coopérant
      */
     public CooperantDTO create(CreateCooperantRequest request) {
@@ -524,6 +531,48 @@ public class CooperantService {
         Cooperant saved = cooperantRepository.save(cooperant);
         log.info("Affiliation mise à jour pour coopérant {}: {}-{}", id, 
                 saved.getCleAffiliation(), saved.getNumAffiliation());
+        
+        return toDTO(saved);
+    }
+    
+    /**
+     * Créer un coopérant à partir des documents validés (email)
+     */
+    public CooperantDTO createFromDocuments(String email, Long agentId) {
+        // Vérifier si un coopérant existe déjà avec cet email
+        java.util.Optional<Cooperant> existing = cooperantRepository.findByEmail(email);
+        if (existing.isPresent()) {
+            log.info("Coopérant existant trouvé pour email: {}", email);
+            Cooperant coop = existing.get();
+            coop.setStatutValidation("VALIDE");
+            coop.setDateValidation(LocalDateTime.now());
+            coop.setValidePar(agentId);
+            return toDTO(cooperantRepository.save(coop));
+        }
+        
+        // Créer un nouveau coopérant
+        Cooperant cooperant = new Cooperant();
+        
+        // Générer matricule
+        Long nextMat = Objects.requireNonNullElse(cooperantRepository.getNextMatricule(), 1L);
+        cooperant.setMatricule(nextMat);
+        cooperant.setCle(calculateCle(nextMat));
+        
+        // Données de base
+        cooperant.setEmail(email);
+        cooperant.setCodeRegime("500"); // Régime par défaut
+        cooperant.setNomFr(email.split("@")[0]); // Temporaire
+        cooperant.setPrenomFr("Coopérant");
+        cooperant.setStatutValidation("VALIDE");
+        cooperant.setDateValidation(LocalDateTime.now());
+        cooperant.setValidePar(agentId);
+        cooperant.setActif(true);
+        cooperant.setCreatedAt(LocalDateTime.now());
+        cooperant.setUpdatedAt(LocalDateTime.now());
+        
+        Cooperant saved = cooperantRepository.save(cooperant);
+        log.info("Nouveau coopérant créé à partir des documents: {} avec matricule {}-{}", 
+                email, saved.getMatricule(), saved.getCle());
         
         return toDTO(saved);
     }

@@ -13,6 +13,42 @@
       </div>
     </div>
 
+    <!-- Coopérants ATCT validés en attente d'affiliation -->
+    <div *ngIf="pendingATCT.length > 0" class="card mb-6 border-l-4 border-l-orange-500">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">
+        <span class="material-icons text-orange-500 mr-2">pending_actions</span>
+        Coopérants ATCT validés - En attente d'affiliation ({{ pendingATCT.length }})
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-orange-50">
+            <tr>
+              <th class="px-4 py-2 text-left">Matricule</th>
+              <th class="px-4 py-2 text-left">Nom & Prénom</th>
+              <th class="px-4 py-2 text-left">Email</th>
+              <th class="px-4 py-2 text-left">Date Validation</th>
+              <th class="px-4 py-2 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dossier of pendingATCT" class="border-b hover:bg-orange-50">
+              <td class="px-4 py-3 font-mono">{{ dossier.matriculeEmployeurComplet }}</td>
+              <td class="px-4 py-3 font-semibold">{{ dossier.prenomFr }} {{ dossier.nomFr }}</td>
+              <td class="px-4 py-3 text-gray-600">{{ dossier.email }}</td>
+              <td class="px-4 py-3">{{ dossier.dateCreation | date:'dd/MM/yyyy' }}</td>
+              <td class="px-4 py-3 text-center">
+                <a [routerLink]="['/affiliation/complete']" [queryParams]="{email: dossier.email}" 
+                   class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center mx-auto">
+                  <span class="material-icons mr-1">add_circle</span>
+                  Créer Affiliation
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       <div class="card bg-gradient-to-r from-green-500 to-green-600 text-white">
@@ -102,7 +138,7 @@
               <th>Nom & Prénom</th>
               <th>Employeur</th>
               <th>Date Début</th>
-              <th>Salaire (TND)</th>
+              <th>Salaire Tunisie / الأجر بتونس</th>
               <th>Statut</th>
               <th>Actions</th>
             </tr>
@@ -112,6 +148,8 @@
               <td class="font-mono text-sm">{{ affiliation.numAffiliation }}</td>
               <td>
                 <div class="font-semibold text-gray-900">{{ affiliation.assureName }}</div>
+                <div class="text-sm text-gray-500" dir="rtl">{{ affiliation.assureNameAr }}</div>
+                <div class="text-xs text-blue-600">{{ affiliation.numSecuSociale }}</div>
               </td>
               <td>
                 <div class="font-semibold">{{ affiliation.employerName }}</div>
@@ -232,6 +270,58 @@
             Fermer
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+<!-- Modal Création Affiliation -->
+  <div *ngIf="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4">
+      <div class="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+        <h3 class="text-xl font-bold">Créer Affiliation</h3>
+        <button (click)="fermerCreationModal()" class="text-white hover:text-gray-200">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="p-6" *ngIf="selectedDossier">
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+          <p class="text-sm text-gray-500">Coopérant</p>
+          <p class="text-lg font-bold">{{ selectedDossier.prenomFr }} {{ selectedDossier.nomFr }}</p>
+          <p class="text-sm text-gray-600">{{ selectedDossier.email }}</p>
+          <p class="text-sm font-mono text-gray-500">{{ selectedDossier.matriculeEmployeurComplet }}</p>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Régime *</label>
+            <select [(ngModel)]="newAffiliation.regime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+              <option *ngFor="let regime of regimes" [value]="regime.code">{{ regime.code }} - {{ regime.label }}</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Salaire mensuel (TND) *</label>
+            <input type="number" [(ngModel)]="newAffiliation.salaire" 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                   placeholder="0.000">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Date d'effet *</label>
+            <input type="date" [(ngModel)]="newAffiliation.dateEffet" 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-100 px-6 py-4 rounded-b-xl flex justify-end gap-3">
+        <button (click)="fermerCreationModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-200">
+          Annuler
+        </button>
+        <button (click)="creerAffiliation()" 
+                [disabled]="!newAffiliation.salaire || !newAffiliation.dateEffet"
+                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
+          <span class="material-icons mr-1 text-sm">check</span>
+          Créer l'affiliation
+        </button>
       </div>
     </div>
   </div>

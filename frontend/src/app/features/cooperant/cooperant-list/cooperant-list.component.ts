@@ -2,9 +2,37 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { CooperantService, Cooperant } from '../../../core/services/cooperant.service';
 import { I18nService } from '../../../core/services/i18n.service';
+
+interface DossierATCT {
+  id: number;
+  email: string;
+  nomFr: string;
+  prenomFr: string;
+  nomAr: string;
+  prenomAr: string;
+  telephone: string;
+  paysEtranger: string;
+  dateDebutDetachement: string;
+  dateFinDetachement: string;
+  codeRegime: string;
+  statut: string;
+  dateCreation: string;
+  dateValidation: string;
+  matriculeEmployeurComplet: string;
+}
+
+interface Document {
+  id: number;
+  nomOriginal: string;
+  typeDocument: string;
+  mimeType: string;
+  tailleFichier: number;
+  statut: string;
+}
 
 @Component({
   selector: 'app-cooperant-list',
@@ -25,14 +53,34 @@ export class CooperantListComponent implements OnInit {
   // Suppression
   deleteId: number | null = null;
   deleteName = '';
+  
+  // Dossiers ATCT validés
+  dossiersATCTValides: DossierATCT[] = [];
+  
+  // Modal documents
+  showDocsModal = false;
+  selectedATCT: DossierATCT | null = null;
+  docsCooperant: Document[] = [];
 
   constructor(
     private cooperantService: CooperantService,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
     this.load();
+    this.loadDossiersATCTValides();
+  }
+
+  loadDossiersATCTValides() {
+    this.http.get<any[]>('/api/atct').subscribe({
+      next: (dossiers) => {
+        // Afficher tous les dossiers ATCT validés ou affiliés
+        this.dossiersATCTValides = dossiers.filter(d => d.statut === 'VALIDE' || d.statut === 'AFFILIE');
+      },
+      error: (err) => console.error('Erreur chargement dossiers ATCT:', err)
+    });
   }
 
   load() {
@@ -92,5 +140,38 @@ export class CooperantListComponent implements OnInit {
         alert('Erreur lors de la suppression');
       }
     });
+  }
+
+  voirDocsCooperant(dossier: DossierATCT) {
+    this.selectedATCT = dossier;
+    this.showDocsModal = true;
+    this.http.get<Document[]>(`/api/documents/cooperant/${dossier.email}`).subscribe({
+      next: (docs) => this.docsCooperant = docs,
+      error: () => this.docsCooperant = []
+    });
+  }
+
+  fermerDocsModal() {
+    this.showDocsModal = false;
+    this.selectedATCT = null;
+    this.docsCooperant = [];
+  }
+
+  getTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      'identite': 'Pièce d\'identité',
+      'contrat': 'Contrat de travail',
+      'diplome': 'Diplômes',
+      'attestation': 'Attestation détachement',
+      'atct': 'Formulaire ATCT',
+      'autres': 'Autres'
+    };
+    return labels[type] || type;
+  }
+
+  getFileExtension(filename: string | undefined): string {
+    if (!filename) return 'FILE';
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : 'FILE';
   }
 }

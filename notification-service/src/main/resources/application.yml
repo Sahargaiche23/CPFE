@@ -4,6 +4,12 @@ server:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+logging:
+  level:
+    org.springframework.mail: DEBUG
+    com.sun.mail: DEBUG
+    javax.mail: DEBUG
+
 spring:
   application:
     name: notification-service

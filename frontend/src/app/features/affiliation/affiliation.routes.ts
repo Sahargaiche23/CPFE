@@ -14,6 +14,10 @@ export const AFFILIATION_ROUTES: Routes = [
     loadComponent: () => import('./affiliation-complete/affiliation-complete.component').then(m => m.AffiliationCompleteComponent)
   },
   {
+    path: 'complete',
+    loadComponent: () => import('./affiliation-complete/affiliation-complete.component').then(m => m.AffiliationCompleteComponent)
+  },
+  {
     path: 'complete/:id',
     loadComponent: () => import('./affiliation-complete/affiliation-complete.component').then(m => m.AffiliationCompleteComponent)
   }

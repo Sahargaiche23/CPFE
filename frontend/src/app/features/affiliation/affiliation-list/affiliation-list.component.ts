@@ -2,10 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { CooperantService, Cooperant } from '../../../core/services/cooperant.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { I18nService } from '../../../core/services/i18n.service';
+
+interface DossierATCT {
+  id: number;
+  email: string;
+  nomFr: string;
+  prenomFr: string;
+  matriculeEmployeurComplet: string;
+  statut: string;
+  dateCreation: string;
+  affiliationId: number | null;
+  numAffiliation: string | null;
+}
 
 @Component({
   selector: 'app-affiliation-list',
@@ -21,6 +34,9 @@ export class AffiliationListComponent implements OnInit {
   employers: any[] = [];
   error: string | null = null;
   
+  // Coopérants ATCT validés en attente d'affiliation
+  pendingATCT: DossierATCT[] = [];
+  
   // Filtres
   searchTerm = '';
   selectedEmployer = '';
@@ -29,48 +45,151 @@ export class AffiliationListComponent implements OnInit {
   // Modal
   showDetailModal = false;
   selectedAffiliation: any = null;
+  
+  // Modal création affiliation
+  showCreateModal = false;
+  selectedDossier: DossierATCT | null = null;
+  newAffiliation = {
+    regime: '500',
+    salaire: 0,
+    dateEffet: ''
+  };
+  
+  regimes = [
+    { code: '500', label: 'Coopérant Général' },
+    { code: '510', label: 'Coopérant Agricole Amélioré' },
+    { code: '520', label: 'Régime Agricole' }
+  ];
 
   constructor(
     private cooperantService: CooperantService,
     private pdfService: PdfService,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
     this.loadAllData();
+    this.loadPendingATCT();
+  }
+
+  loadPendingATCT() {
+    this.http.get<DossierATCT[]>('/api/atct').subscribe({
+      next: (dossiers) => {
+        // Filtrer les dossiers ATCT validés qui n'ont pas encore d'affiliation
+        this.pendingATCT = dossiers.filter(d => d.statut === 'VALIDE' && !d.affiliationId);
+      },
+      error: (err) => console.error('Erreur chargement ATCT:', err)
+    });
+  }
+
+  ouvrirCreationAffiliation(dossier: DossierATCT) {
+    this.selectedDossier = dossier;
+    this.newAffiliation = {
+      regime: '500',
+      salaire: 0,
+      dateEffet: new Date().toISOString().split('T')[0]
+    };
+    this.showCreateModal = true;
+  }
+
+  fermerCreationModal() {
+    this.showCreateModal = false;
+    this.selectedDossier = null;
+  }
+
+  creerAffiliation() {
+    if (!this.selectedDossier) return;
+    
+    const payload = {
+      email: this.selectedDossier.email,
+      codeRegime: this.newAffiliation.regime,
+      salaire: this.newAffiliation.salaire,
+      dateEffetAffiliation: this.newAffiliation.dateEffet
+    };
+    
+    this.http.post('/api/affiliations/create-from-atct', payload).subscribe({
+      next: (result: any) => {
+        alert(`Affiliation créée avec succès ! N° ${result.numAffiliation || 'généré'}`);
+        this.fermerCreationModal();
+        this.loadAllData();
+        this.loadPendingATCT();
+      },
+      error: (err) => {
+        console.error('Erreur création affiliation:', err);
+        alert('Erreur lors de la création de l\'affiliation');
+      }
+    });
   }
 
   loadAllData() {
     this.loading = true;
     this.error = null;
     
-    // Charger les coopérants qui ont un numAffiliation
+    // Charger les coopérants et les dossiers ATCT en parallèle
     this.cooperantService.getAll().subscribe({
       next: (cooperants: Cooperant[]) => {
         // Filtrer uniquement ceux qui ont un numAffiliation
         const affiliatedCooperants = cooperants.filter(c => c.numAffiliation);
         
-        this.affiliations = affiliatedCooperants.map((c: Cooperant) => ({
-          id: c.id,
-          numAffiliation: c.cleAffiliation && c.numAffiliation 
-            ? `${c.cleAffiliation}-${c.numAffiliation}` 
-            : c.numAffiliation || '-',
-          employerName: c.nomCompletFr || '-',
-          employerId: c.matriculeComplet || '-',
-          assureName: c.nomCompletFr || c.nomCompletAr || '-',
-          dateDebut: c.dateEffetAffiliation 
-            ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
-            : (c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '-'),
-          dateFin: '-',
-          salaire: c.salaire || 0,
-          status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
-          statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
-          regime: c.codeRegime || '500',
-          email: c.email
-        }));
-        
-        this.filteredAffiliations = [...this.affiliations];
-        this.loading = false;
+        // Charger les dossiers ATCT pour récupérer les infos employeur
+        this.http.get<any[]>('/api/atct').subscribe({
+          next: (dossiers) => {
+            this.affiliations = affiliatedCooperants.map((c: Cooperant) => {
+              // Trouver le dossier ATCT correspondant
+              const dossier = dossiers.find(d => d.email === c.email);
+              
+              return {
+                id: c.id,
+                numAffiliation: c.cleAffiliation && c.numAffiliation 
+                  ? `${c.cleAffiliation}-${c.numAffiliation}` 
+                  : c.numAffiliation || '-',
+                employerName: dossier?.paysEtranger || 'Employeur étranger',
+                employerId: dossier?.matriculeEmployeurComplet || '-',
+                assureName: c.nomCompletFr || c.nomCompletAr || '-',
+                assureNameAr: c.nomCompletAr || '',
+                numSecuSociale: c.numPieceIdentite || '-',
+                dateDebut: c.dateEffetAffiliation 
+                  ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
+                  : (c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '-'),
+                dateFin: dossier?.dateFinDetachement 
+                  ? new Date(dossier.dateFinDetachement).toLocaleDateString('fr-FR') 
+                  : '-',
+                salaire: c.salaire || 0,
+                status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
+                statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
+                regime: c.codeRegime || '500',
+                email: c.email
+              };
+            });
+            
+            this.filteredAffiliations = [...this.affiliations];
+            this.loading = false;
+          },
+          error: () => {
+            // Fallback sans données ATCT
+            this.affiliations = affiliatedCooperants.map((c: Cooperant) => ({
+              id: c.id,
+              numAffiliation: c.cleAffiliation && c.numAffiliation 
+                ? `${c.cleAffiliation}-${c.numAffiliation}` 
+                : c.numAffiliation || '-',
+              employerName: '-',
+              employerId: '-',
+              assureName: c.nomCompletFr || c.nomCompletAr || '-',
+              dateDebut: c.dateEffetAffiliation 
+                ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
+                : '-',
+              dateFin: '-',
+              salaire: c.salaire || 0,
+              status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
+              statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
+              regime: c.codeRegime || '500',
+              email: c.email
+            }));
+            this.filteredAffiliations = [...this.affiliations];
+            this.loading = false;
+          }
+        });
       },
       error: (err: any) => {
         console.error('Erreur chargement données:', err);

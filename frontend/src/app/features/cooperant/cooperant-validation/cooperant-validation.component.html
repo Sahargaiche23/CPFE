@@ -23,7 +23,145 @@
       </div>
     </div>
 
-    <div class="card">
+    <!-- Onglets -->
+    <div class="flex border-b border-gray-200 mb-4">
+      <button (click)="activeTab = 'documents'" 
+              [class]="activeTab === 'documents' ? 'px-6 py-3 font-semibold text-cnss-primary border-b-2 border-cnss-primary' : 'px-6 py-3 text-gray-500 hover:text-gray-700'">
+        📁 Documents en attente ({{ pendingDocuments.length }})
+      </button>
+      <button (click)="activeTab = 'cooperants'" 
+              [class]="activeTab === 'cooperants' ? 'px-6 py-3 font-semibold text-cnss-primary border-b-2 border-cnss-primary' : 'px-6 py-3 text-gray-500 hover:text-gray-700'">
+        👥 Coopérants en attente ({{ pending.length }})
+      </button>
+          </div>
+
+    <!-- Tab Documents -->
+    <div *ngIf="activeTab === 'documents'" class="card mb-6">
+      <h2 class="text-xl font-bold mb-4">📁 Documents déposés en attente de validation</h2>
+      
+      <div *ngIf="documentsGroupes.length === 0" class="text-center py-12 text-gray-500">
+        <span class="material-icons text-6xl mb-4 block text-gray-300">folder_off</span>
+        <p class="text-lg font-semibold">Aucun document en attente</p>
+      </div>
+
+      <div *ngFor="let groupe of documentsGroupes" class="mb-6 border rounded-lg p-4 bg-gray-50">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-lg text-cnss-primary">📧 {{ groupe.email }}</h3>
+          <div class="flex gap-2">
+            <button (click)="voirTousDocuments(groupe)" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+              👁 Voir tous ({{ groupe.documents.length }})
+            </button>
+            <button (click)="ouvrirReclamation(groupe)" class="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600">
+              ⚠ Réclamation
+            </button>
+            <button (click)="validerTousDocuments(groupe)" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+              ✓ Valider tous
+            </button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <div *ngFor="let doc of groupe.documents" class="flex items-center justify-between p-3 bg-white rounded border">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded flex items-center justify-center"
+                   [ngClass]="{'bg-red-500': doc.mimeType.includes('pdf'), 'bg-blue-500': doc.mimeType.includes('word'), 'bg-green-500': doc.mimeType.includes('image'), 'bg-gray-500': !doc.mimeType}">
+                <span class="text-xs font-bold text-white">{{ getFileExtension(doc.nomOriginal) }}</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ doc.nomOriginal }}</p>
+                <p class="text-sm text-gray-500">{{ getTypeLabel(doc.typeDocument) }} • {{ formatSize(doc.tailleFichier) }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a [href]="'/api/documents/' + doc.id + '/download'" target="_blank" 
+                 class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                Télécharger
+              </a>
+              <button (click)="validerDocument(doc.id)" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                ✓ Valider
+              </button>
+              <button (click)="rejeterDocument(doc.id)" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                ✗ Rejeter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab ATCT Validés -->
+    <div *ngIf="activeTab === 'valides'" class="card mb-6">
+      <h2 class="text-xl font-bold mb-4 text-green-700">✅ Dossiers ATCT Validés - En attente d'affiliation</h2>
+      
+      <div *ngIf="dossiersATCTValides.length === 0" class="text-center py-12 text-gray-500">
+        <span class="material-icons text-6xl mb-4 block text-gray-300">check_circle</span>
+        <p class="text-lg font-semibold">Aucun dossier ATCT validé en attente</p>
+      </div>
+
+      <div *ngIf="dossiersATCTValides.length > 0" class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead class="bg-green-600 text-white">
+            <tr>
+              <th class="px-4 py-3 text-left">Coopérant</th>
+              <th class="px-4 py-3 text-left">Contact</th>
+              <th class="px-4 py-3 text-left">Détachement</th>
+              <th class="px-4 py-3 text-center">Régime</th>
+              <th class="px-4 py-3 text-center">Statut</th>
+              <th class="px-4 py-3 text-center">Date Validation</th>
+              <th class="px-4 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dossier of dossiersATCTValides" class="border-b hover:bg-green-50">
+              <td class="px-4 py-3">
+                <div class="font-semibold">{{ dossier.prenomFr }} {{ dossier.nomFr }}</div>
+                <div class="text-sm text-gray-500 font-arabic">{{ dossier.prenomAr }} {{ dossier.nomAr }}</div>
+                <div class="text-xs text-gray-400 font-mono">{{ dossier.matriculeEmployeurComplet }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="text-sm">{{ dossier.email }}</div>
+                <div class="text-sm text-gray-500">{{ dossier.telephone }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="font-medium">{{ dossier.paysEtranger || 'Non spécifié' }}</div>
+                <div class="text-xs text-gray-500">
+                  {{ dossier.dateDebutDetachement | date:'dd/MM/yyyy' }} - {{ dossier.dateFinDetachement | date:'dd/MM/yyyy' }}
+                </div>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
+                  {{ dossier.codeRegime || '500' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                  VALIDÉ
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center text-sm">
+                {{ dossier.dateValidation | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <a [routerLink]="['/affiliation/complete']" [queryParams]="{email: dossier.email}"
+                     class="px-3 py-2 bg-cnss-primary text-white rounded hover:bg-cnss-secondary inline-flex items-center text-sm">
+                    <span class="material-icons mr-1 text-base">assignment</span>
+                    Créer Affiliation
+                  </a>
+                  <button (click)="voirDocsCooperant(dossier)" 
+                          class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center text-sm">
+                    <span class="material-icons mr-1 text-base">folder</span>
+                    Documents
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab Coopérants -->
+    <div *ngIf="activeTab === 'cooperants'" class="card">
       <div *ngIf="loading" class="flex justify-center py-12">
         <div class="spinner"></div>
       </div>
@@ -46,10 +184,18 @@
               <td>{{ c.codeRegime }}</td>
               <td>{{ c.typePieceIdentite }} {{ c.numPieceIdentite }}</td>
               <td>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 flex-wrap gap-2">
+                  <button (click)="voirDocuments(c)" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">folder</span>
+                    Documents
+                  </button>
                   <button (click)="valider(c.id!)" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-all inline-flex items-center">
                     <span class="material-icons mr-1">check</span>
                     Valider
+                  </button>
+                  <button (click)="startRetour(c)" class="px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-all inline-flex items-center">
+                    <span class="material-icons mr-1">assignment_return</span>
+                    Retourner
                   </button>
                   <button (click)="startReject(c.id!)" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all inline-flex items-center">
                     <span class="material-icons mr-1">close</span>
@@ -87,6 +233,280 @@
         <div class="flex justify-end gap-3 mt-6">
           <button (click)="cancelReject()" class="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">Annuler</button>
           <button (click)="rejeter()" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Confirmer rejet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Voir Documents -->
+    <div *ngIf="showDocuments" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800">
+            📁 Documents de {{ selectedCooperant?.prenomFr }} {{ selectedCooperant?.nomFr }}
+          </h2>
+          <button (click)="closeDocuments()" class="text-gray-500 hover:text-gray-700">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        
+        <div *ngIf="loadingDocs" class="flex justify-center py-8">
+          <div class="spinner"></div>
+        </div>
+        
+        <div *ngIf="!loadingDocs && documents.length === 0" class="text-center py-8 text-gray-500">
+          <span class="material-icons text-5xl mb-2">folder_off</span>
+          <p>Aucun document déposé</p>
+        </div>
+        
+        <div *ngIf="!loadingDocs && documents.length > 0" class="space-y-3">
+          <div *ngFor="let doc of documents" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded flex items-center justify-center"
+                   [ngClass]="{'bg-red-500': doc.mimeType?.includes('pdf'), 'bg-blue-500': doc.mimeType?.includes('word') || doc.mimeType?.includes('doc'), 'bg-green-500': doc.mimeType?.includes('image'), 'bg-gray-500': !doc.mimeType}">
+                <span class="text-xs font-bold text-white">{{ getFileExtension(doc.nomOriginal) }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">{{ doc.nomOriginal }}</p>
+                <p class="text-sm text-gray-500">{{ getTypeLabel(doc.typeDocument) }} • {{ formatSize(doc.tailleFichier) }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs rounded-full"
+                    [ngClass]="{'bg-yellow-100 text-yellow-800': doc.statut === 'EN_ATTENTE', 'bg-green-100 text-green-800': doc.statut === 'VALIDE', 'bg-red-100 text-red-800': doc.statut === 'REJETE'}">
+                {{ doc.statut }}
+              </span>
+              <a [href]="'/api/documents/' + doc.id + '/download'" target="_blank" 
+                 class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                Télécharger
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end mt-6">
+          <button (click)="closeDocuments()" class="px-5 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Retourner - Manque de documents -->
+    <div *ngIf="showRetourModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          ⚠️ Retourner au coopérant - Documents manquants
+        </h2>
+        <p class="text-gray-600 mb-4">Cochez les documents manquants :</p>
+        
+        <div class="space-y-2 mb-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" (change)="toggleDocManquant('Piece identite')" 
+                   [checked]="documentsManquants.includes('Piece identite')"
+                   class="w-4 h-4 text-orange-500">
+            <span>Pièce d'identité</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" (change)="toggleDocManquant('Contrat de travail')"
+                   [checked]="documentsManquants.includes('Contrat de travail')"
+                   class="w-4 h-4 text-orange-500">
+            <span>Contrat de travail</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" (change)="toggleDocManquant('Attestation detachement')"
+                   [checked]="documentsManquants.includes('Attestation detachement')"
+                   class="w-4 h-4 text-orange-500">
+            <span>Attestation de détachement</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" (change)="toggleDocManquant('Formulaire ATCT signe')"
+                   [checked]="documentsManquants.includes('Formulaire ATCT signe')"
+                   class="w-4 h-4 text-orange-500">
+            <span>Formulaire ATCT signé</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" (change)="toggleDocManquant('Diplomes')"
+                   [checked]="documentsManquants.includes('Diplomes')"
+                   class="w-4 h-4 text-orange-500">
+            <span>Diplômes et certificats</span>
+          </label>
+        </div>
+        
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Commentaire (optionnel)</label>
+        <textarea rows="3" [(ngModel)]="retourMotif" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
+                  placeholder="Instructions supplémentaires..."></textarea>
+        
+        <div class="flex justify-end gap-3 mt-6">
+          <button (click)="cancelRetour()" class="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+            Annuler
+          </button>
+          <button (click)="envoyerRetour()" class="px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+            Envoyer demande de compléments
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Voir tous les documents -->
+    <div *ngIf="showVoirTousModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold">📁 Documents de {{ selectedGroupe?.email }}</h2>
+          <button (click)="fermerVoirTous()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[70vh]">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let doc of selectedGroupe?.documents" class="border rounded-lg p-4 bg-gray-50">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded flex items-center justify-center"
+                     [ngClass]="{'bg-red-500': doc.mimeType?.includes('pdf'), 'bg-blue-500': doc.mimeType?.includes('word'), 'bg-green-500': doc.mimeType?.includes('image'), 'bg-gray-500': !doc.mimeType}">
+                  <span class="text-sm font-bold text-white">{{ getFileExtension(doc.nomOriginal) }}</span>
+                </div>
+                <div class="flex-1">
+                  <p class="font-semibold text-gray-800">{{ doc.nomOriginal }}</p>
+                  <p class="text-sm text-gray-500">{{ getTypeLabel(doc.typeDocument) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">{{ formatSize(doc.tailleFichier) }}</span>
+                <div class="flex gap-1">
+                  <button (click)="previsualiserDocument(doc)" class="px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700">👁</button>
+                  <a [href]="'/api/documents/' + doc.id + '/download'" target="_blank" 
+                     class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">⬇</a>
+                  <button (click)="validerDocument(doc.id)" class="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">✓</button>
+                  <button (click)="rejeterDocument(doc.id)" class="px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">✗</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-100 px-6 py-4 flex justify-end gap-3">
+          <button (click)="fermerVoirTous()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-200">Fermer</button>
+          <button (click)="validerTousDocuments(selectedGroupe!)" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">✓ Valider tous</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Prévisualisation Document -->
+    <div *ngIf="showPreviewModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60]">
+      <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 max-h-[95vh] overflow-hidden">
+        <div class="bg-purple-600 text-white px-6 py-3 flex items-center justify-between">
+          <h2 class="text-lg font-bold">👁 {{ previewDocument?.nomOriginal }}</h2>
+          <div class="flex items-center gap-3">
+            <a [href]="'/api/documents/' + previewDocument?.id + '/download'" target="_blank" 
+               class="px-3 py-1 bg-white text-purple-600 rounded text-sm hover:bg-gray-100">⬇ Télécharger</a>
+            <button (click)="fermerPreview()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-900 flex items-center justify-center" style="min-height: 70vh;">
+          <!-- Image Preview -->
+          <img *ngIf="previewDocument?.mimeType?.includes('image')" 
+               [src]="'/api/documents/' + previewDocument?.id + '/download'" 
+               class="max-w-full max-h-[75vh] object-contain rounded shadow-lg"
+               alt="Prévisualisation">
+          <!-- PDF Preview -->
+          <iframe *ngIf="previewDocument?.mimeType?.includes('pdf')" 
+                  [src]="getPreviewUrl()"
+                  class="w-full h-[75vh] rounded"
+                  frameborder="0"></iframe>
+          <!-- Unsupported format -->
+          <div *ngIf="!previewDocument?.mimeType?.includes('image') && !previewDocument?.mimeType?.includes('pdf')" 
+               class="text-center text-white p-8">
+            <span class="text-6xl mb-4 block">📄</span>
+            <p class="text-xl mb-2">Aperçu non disponible</p>
+            <p class="text-gray-400">Ce type de fichier ne peut pas être prévisualisé.</p>
+            <a [href]="'/api/documents/' + previewDocument?.id + '/download'" target="_blank" 
+               class="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Télécharger le fichier
+            </a>
+          </div>
+        </div>
+        <div class="bg-gray-100 px-6 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">{{ getTypeLabel(previewDocument?.typeDocument || '') }} • {{ formatSize(previewDocument?.tailleFichier || 0) }}</span>
+          <div class="flex gap-2">
+            <button (click)="validerDocument(previewDocument!.id); fermerPreview()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">✓ Valider</button>
+            <button (click)="rejeterDocument(previewDocument!.id); fermerPreview()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">✗ Rejeter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Réclamation -->
+    <div *ngIf="showReclamationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
+        <div class="bg-orange-500 text-white px-6 py-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold">⚠ Réclamation - Documents manquants</h2>
+          <button (click)="fermerReclamation()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-600 mb-4">Coopérant: <strong>{{ selectedGroupe?.email }}</strong></p>
+          
+          <label class="block text-sm font-semibold text-gray-700 mb-3">Documents manquants ou incorrects:</label>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <label *ngFor="let type of typesDocuments" class="flex items-center gap-2 cursor-pointer p-2 border rounded hover:bg-gray-50">
+              <input type="checkbox" (change)="toggleDocManquantReclamation(type)"
+                     [checked]="reclamationDocsManquants.includes(type)"
+                     class="w-4 h-4 text-orange-500">
+              <span class="text-sm">{{ getTypeLabel(type) }}</span>
+            </label>
+          </div>
+          
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Motif de la réclamation:</label>
+          <textarea rows="3" [(ngModel)]="reclamationMotif" 
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500" 
+                    placeholder="Décrivez le problème ou les instructions..."></textarea>
+        </div>
+        <div class="bg-gray-100 px-6 py-4 flex justify-end gap-3">
+          <button (click)="fermerReclamation()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-200">Annuler</button>
+          <button (click)="envoyerReclamation()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+            Envoyer la réclamation
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Documents Coopérant ATCT -->
+    <div *ngIf="showDocsCooperantModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold">📁 Documents de {{ selectedATCT?.prenomFr }} {{ selectedATCT?.nomFr }}</h2>
+          <button (click)="fermerDocsCooperant()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div *ngIf="docsCooperant.length === 0" class="text-center py-8 text-gray-500">
+            <span class="material-icons text-5xl mb-2">folder_off</span>
+            <p>Aucun document trouvé</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let doc of docsCooperant" class="border rounded-lg p-4 bg-gray-50">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded flex items-center justify-center"
+                     [ngClass]="{'bg-red-500': doc.mimeType?.includes('pdf'), 'bg-blue-500': doc.mimeType?.includes('word'), 'bg-green-500': doc.mimeType?.includes('image'), 'bg-gray-500': !doc.mimeType}">
+                  <span class="text-sm font-bold text-white">{{ getFileExtension(doc.nomOriginal) }}</span>
+                </div>
+                <div class="flex-1">
+                  <p class="font-semibold text-gray-800">{{ doc.nomOriginal }}</p>
+                  <p class="text-sm text-gray-500">{{ getTypeLabel(doc.typeDocument) }}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-1 text-xs rounded-full"
+                      [ngClass]="{'bg-yellow-100 text-yellow-800': doc.statut === 'EN_ATTENTE', 'bg-green-100 text-green-800': doc.statut === 'VALIDE', 'bg-red-100 text-red-800': doc.statut === 'REJETE'}">
+                  {{ doc.statut }}
+                </span>
+                <div class="flex gap-1">
+                  <a [href]="'/api/documents/' + doc.id + '/download'" target="_blank" 
+                     class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                    Télécharger
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-100 px-6 py-4 flex justify-end">
+          <button (click)="fermerDocsCooperant()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Fermer</button>
         </div>
       </div>
     </div>

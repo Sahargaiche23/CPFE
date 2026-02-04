@@ -16,33 +16,56 @@
       </div>
 
       <!-- Navigation & User -->
-      <nav class="hidden md:flex items-center space-x-6">
-        <a routerLink="/dashboard" class="nav-link">
-          <span class="material-icons text-sm mr-1">dashboard</span>
-          {{ i18n.t('nav.dashboard') }}
-        </a>
-        <a routerLink="/cooperant" class="nav-link">
-          <span class="material-icons text-sm mr-1">person</span>
-          Coopérants
-        </a>
-        <a routerLink="/atct" class="nav-link" *ngIf="(user$ | async)?.profil?.toLowerCase() === 'admin' || (user$ | async)?.profil?.toLowerCase() === 'user' || (user$ | async)?.profil?.toLowerCase() === 'agent_atct'">
-          <span class="material-icons text-sm mr-1">assignment</span>
-          ATCT
-        </a>
-        <a routerLink="/affiliation" class="nav-link">
-          <span class="material-icons text-sm mr-1">person_add</span>
-          {{ i18n.t('nav.affiliations') }}
-        </a>
-        <a routerLink="/debit" class="nav-link">
-          <span class="material-icons text-sm mr-1">receipt</span>
-          {{ i18n.t('nav.debits') }}
-        </a>
-        <a routerLink="/payment" class="nav-link">
-          <span class="material-icons text-sm mr-1">payment</span>
-          {{ i18n.t('nav.payments') }}
-        </a>
+      <nav class="hidden md:flex items-center space-x-6" *ngIf="user$ | async as user">
+        <!-- Menu Agent/Admin uniquement -->
+        <ng-container *ngIf="user.profil?.toLowerCase() !== 'cooperant'">
+          <a routerLink="/dashboard" class="nav-link">
+            <span class="material-icons text-sm mr-1">dashboard</span>
+            {{ i18n.t('nav.dashboard') }}
+          </a>
+          <a routerLink="/cooperant" class="nav-link">
+            <span class="material-icons text-sm mr-1">person</span>
+            Coopérants
+          </a>
+          <a routerLink="/atct" class="nav-link" *ngIf="user.profil?.toLowerCase() === 'admin' || user.profil?.toLowerCase() === 'user' || user.profil?.toLowerCase() === 'agent_atct'">
+            <span class="material-icons text-sm mr-1">assignment</span>
+            ATCT
+          </a>
+          <a routerLink="/affiliation" class="nav-link">
+            <span class="material-icons text-sm mr-1">person_add</span>
+            {{ i18n.t('nav.affiliations') }}
+          </a>
+          <a routerLink="/debit" class="nav-link">
+            <span class="material-icons text-sm mr-1">receipt</span>
+            {{ i18n.t('nav.debits') }}
+          </a>
+          <a routerLink="/payment" class="nav-link">
+            <span class="material-icons text-sm mr-1">payment</span>
+            {{ i18n.t('nav.payments') }}
+          </a>
+        </ng-container>
         
-        <div class="relative" *ngIf="user$ | async as user">
+        <!-- Menu Coopérant uniquement -->
+        <ng-container *ngIf="user.profil?.toLowerCase() === 'cooperant'">
+          <a routerLink="/cooperant/espace" class="nav-link">
+            <span class="material-icons text-sm mr-1">home</span>
+            Mon Espace
+          </a>
+          <a routerLink="/cooperant/depot-documents" class="nav-link">
+            <span class="material-icons text-sm mr-1">upload_file</span>
+            Mes Dépôts
+          </a>
+          <a routerLink="/cooperant/suivi-dossier" class="nav-link">
+            <span class="material-icons text-sm mr-1">track_changes</span>
+            Suivi Dossier
+          </a>
+          <a routerLink="/cooperant/reclamations" class="nav-link">
+            <span class="material-icons text-sm mr-1">report_problem</span>
+            Réclamations
+          </a>
+        </ng-container>
+        
+        <div class="relative">
           <button (click)="toggleMenu()" class="flex items-center space-x-2 bg-cnss-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all">
             <span class="material-icons">account_circle</span>
             <span>{{ user.username }}</span>

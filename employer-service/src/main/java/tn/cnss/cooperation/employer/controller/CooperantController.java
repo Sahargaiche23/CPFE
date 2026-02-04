@@ -63,6 +63,16 @@ public class CooperantController {
     }
     
     /**
+     * Récupérer le prochain numéro de matricule disponible
+     */
+    @GetMapping("/next-matricule")
+    public ResponseEntity<Map<String, Object>> getNextMatricule() {
+        log.info("GET /api/cooperants/next-matricule");
+        Long nextMat = cooperantService.getNextMatricule();
+        return ResponseEntity.ok(Map.of("nextMatricule", nextMat));
+    }
+    
+    /**
      * Créer un nouveau coopérant
      */
     @PostMapping
@@ -164,6 +174,17 @@ public class CooperantController {
             @RequestParam String motif) {
         log.info("POST /api/cooperants/{}/rejeter par agent {}, motif: {}", id, agentId, motif);
         return ResponseEntity.ok(cooperantService.rejeter(id, agentId, motif));
+    }
+    
+    /**
+     * Créer un coopérant à partir des documents validés
+     */
+    @PostMapping("/from-documents")
+    public ResponseEntity<CooperantDTO> createFromDocuments(@RequestBody Map<String, Object> request) {
+        String email = (String) request.get("email");
+        Long agentId = request.get("agentId") != null ? Long.valueOf(request.get("agentId").toString()) : 1L;
+        log.info("POST /api/cooperants/from-documents - Création coopérant pour email: {} par agent: {}", email, agentId);
+        return ResponseEntity.ok(cooperantService.createFromDocuments(email, agentId));
     }
     
     // ===== ENDPOINTS FICHIERS =====

@@ -62,7 +62,7 @@ import { environment } from '../../../../environments/environment';
               </div>
               <div class="col-span-3 text-right">
                 <label class="block text-xs font-medium text-gray-600">العنوان</label>
-                <input type="text" [value]="cooperant.adresseAr || ''" disabled dir="rtl" class="w-full px-2 py-1 bg-gray-100 border rounded text-sm">
+                <input type="text" formControlName="adresseAssure" dir="rtl" class="w-full px-2 py-1 border rounded text-sm" placeholder="العنوان">
               </div>
               
               <div class="col-span-4">
@@ -548,6 +548,7 @@ export class AffiliationCompleteComponent implements OnInit {
       dateEffet: [''],
       matriculeAssure: [''],
       cleAssure: [''],
+      adresseAssure: [''],
       
       // Entreprise employeur
       empMatricule: [''],
@@ -626,18 +627,80 @@ export class AffiliationCompleteComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const email = this.route.snapshot.queryParamMap.get('email');
     const url = this.router.url;
     
     // Détecter si on est en mode édition d'affiliation
     this.isEditMode = url.includes('/edit/');
     
-    if (id) {
+    if (email) {
+      // Nouveau flux: créer affiliation depuis dossier ATCT validé
+      this.loadFromATCT(email);
+    } else if (id) {
       // Dans les deux cas, l'ID est celui d'un coopérant
       this.cooperantId = +id;
       this.loadCooperant(this.cooperantId);
     } else {
       this.loading = false;
     }
+  }
+
+  loadFromATCT(email: string) {
+    this.http.get<any[]>('/api/atct').subscribe({
+      next: (dossiers) => {
+        const dossier = dossiers.find(d => d.email === email && (d.statut === 'VALIDE' || d.statut === 'AFFILIE'));
+        if (dossier) {
+          this.cooperant = {
+            nomCompletFr: `${dossier.prenomFr || ''} ${dossier.nomFr || ''}`.trim(),
+            nomCompletAr: `${dossier.prenomAr || ''} ${dossier.nomAr || ''}`.trim(),
+            adresseAr: '',
+            dateNaissance: dossier.dateNaissance,
+            email: dossier.email
+          };
+          // Récupérer le prochain numéro d'affiliation
+          this.http.get<any>('/api/cooperants/next-matricule').subscribe({
+            next: (result) => {
+              const nextNum = result?.nextMatricule || (dossier.numSecuSociale ? dossier.numSecuSociale.substring(0, 8) : dossier.id);
+              this.prefillFormFromATCT(dossier, nextNum);
+            },
+            error: () => this.prefillFormFromATCT(dossier, dossier.numSecuSociale || dossier.id)
+          });
+        }
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
+  }
+
+  prefillFormFromATCT(dossier: any, nextMatricule?: any) {
+    const numAff = String(nextMatricule || dossier.numSecuSociale || dossier.id).padStart(8, '0');
+    
+    this.affiliationForm.patchValue({
+      numAffiliation: numAff,
+      cleAffiliation: '50',
+      situation: 'ACTIF',
+      dateEffet: new Date().toISOString().split('T')[0],
+      empMatricule: dossier.matriculeEmployeurComplet?.split('-')[1] || '',
+      empCle: dossier.matriculeEmployeurComplet?.split('-')[0] || '',
+      codeRegimeCompl: dossier.codeRegime || '500',
+      adresseAssure: dossier.adresseTunisie || '',
+      raisonSocialeFr: `${dossier.prenomFr || ''} ${dossier.nomFr || ''}`.trim(),
+      raisonSocialeAr: `${dossier.prenomAr || ''} ${dossier.nomAr || ''}`.trim(),
+      rlNomFr: dossier.nomFr || '',
+      rlPrenomFr: dossier.prenomFr || '',
+      rlNomAr: dossier.nomAr || '',
+      rlPrenomAr: dossier.prenomAr || '',
+      rlEmail: dossier.email || '',
+      rlNumero: dossier.numPasseport || dossier.numCin || '',
+      rlDateNaissance: dossier.dateNaissance || '',
+      paysNom: dossier.paysEtranger || '',
+      periodeDebut: dossier.dateDebutDetachement || '',
+      periodeFin: dossier.dateFinDetachement || '',
+      adresseEmp: dossier.adresseTunisie || '',
+      localiteEmp: dossier.villeTunisie || '',
+      codePostalEmp: dossier.codePostalTunisie || '',
+      telephone: dossier.telephone || ''
+    });
   }
 
   loadAffiliation(id: number) {
@@ -950,8 +1013,8 @@ export class AffiliationCompleteComponent implements OnInit {
       });
 
       // Sauvegarder le numAffiliation, salaire et date dans le coopérant
+      const salaire = parseFloat(formData.salaireTunisie) || 0;
       if (this.cooperantId) {
-        const salaire = parseFloat(formData.salaireTunisie) || 0;
         this.cooperantService.updateAffiliation(
           this.cooperantId,
           formData.numAffiliation || '',
@@ -962,13 +1025,28 @@ export class AffiliationCompleteComponent implements OnInit {
           next: () => console.log('Affiliation sauvegardée dans le coopérant'),
           error: (err) => console.log('Erreur sauvegarde affiliation:', err.message)
         });
+      } else if (this.cooperant?.email) {
+        // Créer le coopérant depuis les données ATCT puis sauvegarder l'affiliation
+        const affiliationData = {
+          email: this.cooperant.email,
+          nomCompletFr: formData.raisonSocialeFr || this.cooperant.nomCompletFr,
+          nomCompletAr: formData.raisonSocialeAr || this.cooperant.nomCompletAr,
+          codeRegime: formData.codeRegimeCompl || '500',
+          salaire: salaire,
+          dateEffetAffiliation: formData.dateEffet || '',
+          adresse: formData.adresseAssure || formData.adresseEmp || ''
+        };
+        this.http.post('/api/affiliations/create-from-atct', affiliationData).subscribe({
+          next: (result: any) => console.log('Affiliation créée:', result),
+          error: (err) => console.log('Erreur création affiliation:', err.message)
+        });
       }
 
       // Télécharger aussi le PDF localement
       this.pdfService.generateAffiliationAttestation(certificatData);
       this.submitting = false;
       alert('Affiliation enregistrée avec succès!\n\n- Email avec attestation PDF envoyé\n- Certificat d\'affiliation généré');
-      this.router.navigate(['/cooperant/validation']);
+      this.router.navigate(['/affiliation']);
     }).catch(err => {
       console.error('Erreur génération PDF:', err);
       this.submitting = false;

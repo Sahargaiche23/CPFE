@@ -1,10 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { CooperantService, Cooperant } from '../../../core/services/cooperant.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DebitService, Debit } from '../../../core/services/debit.service';
 import { PaymentService } from '../../../core/services/payment.service';
+
+interface DossierATCT {
+  id: number;
+  nomFr: string;
+  prenomFr: string;
+  email: string;
+  statut: string;
+  dateCreation: string;
+  dateValidation?: string;
+  motifRejet?: string;
+  matriculeEmployeurComplet?: string;
+}
 
 @Component({
   selector: 'app-suivi-dossier',
@@ -23,7 +36,13 @@ import { PaymentService } from '../../../core/services/payment.service';
         <div class="bg-white rounded-xl shadow-lg p-6">
           <h2 class="text-2xl font-bold text-gray-800 mb-6">Suivi de mon dossier</h2>
           
-          <div *ngIf="cooperant" class="space-y-6">
+          <div *ngIf="dossierAtct || cooperant" class="space-y-6">
+            <!-- Info coopérant -->
+            <div class="bg-teal-50 p-4 rounded-lg mb-4">
+              <p class="font-semibold text-teal-800">{{ getNom() }}</p>
+              <p class="text-sm text-teal-600" *ngIf="dossierAtct?.matriculeEmployeurComplet">Matricule: {{ dossierAtct?.matriculeEmployeurComplet }}</p>
+            </div>
+            
             <!-- Timeline -->
             <div class="relative">
               <!-- Dépôt -->
@@ -31,7 +50,7 @@ import { PaymentService } from '../../../core/services/payment.service';
                 <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">✓</div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-800">Dossier déposé</h4>
-                  <p class="text-sm text-gray-500">{{ cooperant.createdAt | date:'dd/MM/yyyy à HH:mm' }}</p>
+                  <p class="text-sm text-gray-500">{{ getDateCreation() | date:'dd/MM/yyyy à HH:mm' }}</p>
                   <p class="text-sm text-gray-600 mt-1">Votre dossier a été enregistré avec succès</p>
                 </div>
               </div>
@@ -39,13 +58,13 @@ import { PaymentService } from '../../../core/services/payment.service';
               <!-- En cours de traitement -->
               <div class="flex items-start gap-4 mb-8">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                     [ngClass]="cooperant.statutValidation === 'EN_ATTENTE' ? 'bg-yellow-500 text-white animate-pulse' : 'bg-green-500 text-white'">
-                  {{ cooperant.statutValidation === 'EN_ATTENTE' ? '⏳' : '✓' }}
+                     [ngClass]="getStatut() === 'EN_ATTENTE' ? 'bg-yellow-500 text-white animate-pulse' : 'bg-green-500 text-white'">
+                  {{ getStatut() === 'EN_ATTENTE' ? '⏳' : '✓' }}
                 </div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-800">Examen du dossier</h4>
-                  <p class="text-sm text-gray-500" *ngIf="cooperant.statutValidation === 'EN_ATTENTE'">En cours...</p>
-                  <p class="text-sm text-gray-500" *ngIf="cooperant.statutValidation !== 'EN_ATTENTE'">Traité</p>
+                  <p class="text-sm text-gray-500" *ngIf="getStatut() === 'EN_ATTENTE'">En cours...</p>
+                  <p class="text-sm text-gray-500" *ngIf="getStatut() !== 'EN_ATTENTE'">Traité</p>
                   <p class="text-sm text-gray-600 mt-1">Votre dossier est examiné par nos services</p>
                 </div>
               </div>
@@ -54,47 +73,47 @@ import { PaymentService } from '../../../core/services/payment.service';
               <div class="flex items-start gap-4 mb-8">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
                      [ngClass]="{
-                       'bg-green-500 text-white': cooperant.statutValidation === 'VALIDE',
-                       'bg-red-500 text-white': cooperant.statutValidation === 'REJETE',
-                       'bg-gray-300 text-gray-500': cooperant.statutValidation === 'EN_ATTENTE'
+                       'bg-green-500 text-white': getStatut() === 'VALIDE',
+                       'bg-red-500 text-white': getStatut() === 'REJETE',
+                       'bg-gray-300 text-gray-500': getStatut() === 'EN_ATTENTE'
                      }">
-                  {{ cooperant.statutValidation === 'VALIDE' ? '✓' : cooperant.statutValidation === 'REJETE' ? '✗' : '?' }}
+                  {{ getStatut() === 'VALIDE' ? '✓' : getStatut() === 'REJETE' ? '✗' : '?' }}
                 </div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-800">Décision</h4>
-                  <p class="text-sm text-gray-500" *ngIf="cooperant.dateValidation">{{ cooperant.dateValidation | date:'dd/MM/yyyy à HH:mm' }}</p>
-                  <p class="text-sm text-gray-500" *ngIf="!cooperant.dateValidation">En attente</p>
+                  <p class="text-sm text-gray-500" *ngIf="dossierAtct?.dateValidation || cooperant?.dateValidation">{{ (dossierAtct?.dateValidation || cooperant?.dateValidation) | date:'dd/MM/yyyy à HH:mm' }}</p>
+                  <p class="text-sm text-gray-500" *ngIf="!dossierAtct?.dateValidation && !cooperant?.dateValidation">En attente</p>
                   
-                  <div class="mt-2 p-3 rounded-lg" *ngIf="cooperant.statutValidation !== 'EN_ATTENTE'"
-                       [ngClass]="cooperant.statutValidation === 'VALIDE' ? 'bg-green-50' : 'bg-red-50'">
-                    <p class="font-medium" [ngClass]="cooperant.statutValidation === 'VALIDE' ? 'text-green-700' : 'text-red-700'">
-                      {{ cooperant.statutValidation === 'VALIDE' ? 'Votre dossier a été validé !' : 'Votre dossier a été rejeté' }}
+                  <div class="mt-2 p-3 rounded-lg" *ngIf="getStatut() !== 'EN_ATTENTE'"
+                       [ngClass]="getStatut() === 'VALIDE' ? 'bg-green-50' : 'bg-red-50'">
+                    <p class="font-medium" [ngClass]="getStatut() === 'VALIDE' ? 'text-green-700' : 'text-red-700'">
+                      {{ getStatut() === 'VALIDE' ? 'Votre dossier a été validé !' : 'Votre dossier a été rejeté' }}
                     </p>
-                    <p class="text-sm mt-1" *ngIf="cooperant.motifRejet">Motif: {{ cooperant.motifRejet }}</p>
+                    <p class="text-sm mt-1" *ngIf="dossierAtct?.motifRejet || cooperant?.motifRejet">Motif: {{ dossierAtct?.motifRejet || cooperant?.motifRejet }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Affiliation -->
-              <div class="flex items-start gap-4 mb-8" *ngIf="cooperant.statutValidation === 'VALIDE'">
+              <div class="flex items-start gap-4 mb-8" *ngIf="getStatut() === 'VALIDE' && cooperant">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                     [ngClass]="cooperant.numAffiliation ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white animate-pulse'">
-                  {{ cooperant.numAffiliation ? '✓' : '⏳' }}
+                     [ngClass]="cooperant?.numAffiliation ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white animate-pulse'">
+                  {{ cooperant?.numAffiliation ? '✓' : '⏳' }}
                 </div>
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-800">Affiliation</h4>
-                  <p class="text-sm text-gray-500" *ngIf="cooperant.numAffiliation">Complétée</p>
-                  <p class="text-sm text-gray-500" *ngIf="!cooperant.numAffiliation">En cours...</p>
-                  <div class="mt-2 p-3 rounded-lg bg-blue-50" *ngIf="cooperant.numAffiliation">
-                    <p class="font-medium text-blue-700">N° Affiliation: {{ cooperant.numAffiliation }}</p>
+                  <p class="text-sm text-gray-500" *ngIf="cooperant?.numAffiliation">Complétée</p>
+                  <p class="text-sm text-gray-500" *ngIf="!cooperant?.numAffiliation">En cours...</p>
+                  <div class="mt-2 p-3 rounded-lg bg-blue-50" *ngIf="cooperant?.numAffiliation">
+                    <p class="font-medium text-blue-700">N° Affiliation: {{ cooperant?.numAffiliation }}</p>
                     <p class="text-sm text-blue-600 mt-1">Votre attestation d'affiliation a été générée</p>
                   </div>
-                  <p class="text-sm text-gray-600 mt-1" *ngIf="!cooperant.numAffiliation">Attribution du numéro d'affiliation CNSS</p>
+                  <p class="text-sm text-gray-600 mt-1" *ngIf="!cooperant?.numAffiliation">Attribution du numéro d'affiliation CNSS</p>
                 </div>
               </div>
 
               <!-- Débit / Cotisation -->
-              <div class="flex items-start gap-4" *ngIf="cooperant.statutValidation === 'VALIDE' && cooperant.numAffiliation">
+              <div class="flex items-start gap-4" *ngIf="getStatut() === 'VALIDE' && cooperant?.numAffiliation">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
                      [ngClass]="getDebitStatusClass()">
                   {{ getDebitStatusIcon() }}
@@ -129,7 +148,7 @@ import { PaymentService } from '../../../core/services/payment.service';
             </div>
           </div>
 
-          <div *ngIf="!cooperant && !loading" class="text-center py-8 text-gray-500">
+          <div *ngIf="!cooperant && !dossierAtct && !loading" class="text-center py-8 text-gray-500">
             Aucun dossier trouvé
           </div>
         </div>
@@ -139,6 +158,7 @@ import { PaymentService } from '../../../core/services/payment.service';
 })
 export class SuiviDossierComponent implements OnInit {
   cooperant: Cooperant | null = null;
+  dossierAtct: DossierATCT | null = null;
   debits: Debit[] = [];
   loading = true;
 
@@ -146,25 +166,48 @@ export class SuiviDossierComponent implements OnInit {
     private cooperantService: CooperantService,
     private authService: AuthService,
     private debitService: DebitService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     const username = user?.username || '';
     
-    this.cooperantService.getAll().subscribe({
-      next: (cooperants) => {
-        this.cooperant = cooperants.find(c => c.email === username) || null;
+    // Charger le dossier ATCT d'abord
+    this.http.get<DossierATCT[]>('/api/atct').subscribe({
+      next: (dossiers) => {
+        this.dossierAtct = dossiers.find(d => d.email === username) || null;
         this.loading = false;
-        
-        // Charger les débits du coopérant
-        if (this.cooperant?.numAffiliation) {
-          this.loadDebits();
-        }
       },
-      error: () => this.loading = false
+      error: () => {
+        // Fallback sur coopérant classique
+        this.cooperantService.getAll().subscribe({
+          next: (cooperants) => {
+            this.cooperant = cooperants.find(c => c.email === username) || null;
+            this.loading = false;
+            if (this.cooperant?.numAffiliation) {
+              this.loadDebits();
+            }
+          },
+          error: () => this.loading = false
+        });
+      }
     });
+  }
+
+  getStatut(): string {
+    return this.dossierAtct?.statut || this.cooperant?.statutValidation || 'EN_ATTENTE';
+  }
+
+  getDateCreation(): string {
+    return this.dossierAtct?.dateCreation || this.cooperant?.createdAt || '';
+  }
+
+  getNom(): string {
+    if (this.dossierAtct) return `${this.dossierAtct.prenomFr} ${this.dossierAtct.nomFr}`;
+    if (this.cooperant) return `${this.cooperant.prenomFr} ${this.cooperant.nomFr}`;
+    return '';
   }
 
   loadDebits() {

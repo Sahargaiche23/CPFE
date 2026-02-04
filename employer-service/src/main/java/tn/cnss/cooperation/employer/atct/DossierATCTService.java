@@ -137,6 +137,7 @@ public class DossierATCTService {
         // Générer mot de passe temporaire
         String tempPassword = generateTempPassword();
         dossier.setMotDePasseTemp(tempPassword);
+        log.info("Mot de passe temporaire généré pour {} : {}", dossier.getEmail(), tempPassword);
         
         // Créer le compte utilisateur dans auth-service
         boolean compteCree = createUserAccount(dossier, tempPassword);
@@ -144,8 +145,10 @@ public class DossierATCTService {
         
         log.info("Dossier {} validé par agent {}, compte créé: {}", id, agentId, compteCree);
         
-        // Envoyer email avec identifiants
+        // Sauvegarder d'abord pour persister le mot de passe
         DossierATCT savedDossier = repository.save(dossier);
+        
+        // Envoyer email avec identifiants (utiliser le même mot de passe)
         if (compteCree) {
             sendWelcomeEmail(savedDossier, tempPassword);
         }
@@ -154,27 +157,85 @@ public class DossierATCTService {
     }
     
     private boolean createUserAccount(DossierATCT dossier, String password) {
+        log.info("Création compte pour {} vers {}", dossier.getEmail(), authServiceUrl);
+        
         try {
-            String url = authServiceUrl + "/api/users";
-            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             
-            Map<String, Object> body = new HashMap<>();
-            body.put("username", dossier.getEmail());
-            body.put("password", password);
-            body.put("email", dossier.getEmail());
-            body.put("firstName", dossier.getPrenomFr());
-            body.put("lastName", dossier.getNomFr());
-            body.put("profil", "COOPERANT");
+            // D'abord, vérifier si l'utilisateur existe déjà
+            Long existingUserId = findUserIdByEmail(dossier.getEmail());
             
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-            restTemplate.postForEntity(url, request, String.class);
+            if (existingUserId != null) {
+                // Utilisateur existe -> réinitialiser le mot de passe
+                log.info("Utilisateur {} existe (id={}), réinitialisation du mot de passe", dossier.getEmail(), existingUserId);
+                return resetUserPassword(existingUserId, password, headers);
+            }
             
-            log.info("Compte utilisateur créé pour {}", dossier.getEmail());
+            // Utilisateur n'existe pas -> créer le compte
+            String createUrl = authServiceUrl + "/api/users";
+            Map<String, Object> createBody = new HashMap<>();
+            createBody.put("username", dossier.getEmail());
+            createBody.put("password", password);
+            createBody.put("email", dossier.getEmail());
+            createBody.put("firstName", dossier.getPrenomFr() != null ? dossier.getPrenomFr() : "");
+            createBody.put("lastName", dossier.getNomFr() != null ? dossier.getNomFr() : "");
+            createBody.put("profil", "COOPERANT");
+            
+            log.info("Création compte: POST {} avec body: {}", createUrl, createBody);
+            HttpEntity<Map<String, Object>> createRequest = new HttpEntity<>(createBody, headers);
+            restTemplate.postForEntity(createUrl, createRequest, String.class);
+            log.info("Compte utilisateur créé avec succès pour {}", dossier.getEmail());
+            return true;
+            
+        } catch (Exception e) {
+            log.error("Erreur création/mise à jour compte pour {} : {}", dossier.getEmail(), e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    private Long findUserIdByEmail(String email) {
+        try {
+            String getUsersUrl = authServiceUrl + "/api/users";
+            String usersJson = restTemplate.getForObject(getUsersUrl, String.class);
+            
+            if (usersJson != null && usersJson.contains(email)) {
+                // Recherche par username ou email
+                int emailIndex = usersJson.indexOf("\"username\":\"" + email + "\"");
+                if (emailIndex < 0) {
+                    emailIndex = usersJson.indexOf("\"email\":\"" + email + "\"");
+                }
+                
+                if (emailIndex > 0) {
+                    // Trouver le début de l'objet JSON
+                    int objectStart = usersJson.lastIndexOf("{", emailIndex);
+                    int idIndex = usersJson.indexOf("\"id\":", objectStart);
+                    if (idIndex > 0 && idIndex < emailIndex + 100) {
+                        int idEnd = usersJson.indexOf(",", idIndex);
+                        String idStr = usersJson.substring(idIndex + 5, idEnd).trim();
+                        return Long.parseLong(idStr);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Erreur recherche utilisateur {} : {}", email, e.getMessage());
+        }
+        return null;
+    }
+    
+    private boolean resetUserPassword(Long userId, String newPassword, HttpHeaders headers) {
+        try {
+            String resetUrl = authServiceUrl + "/api/users/" + userId + "/reset-password";
+            Map<String, String> resetBody = new HashMap<>();
+            resetBody.put("newPassword", newPassword);
+            
+            log.info("Reset password: PUT {} pour userId={}, password={}", resetUrl, userId, newPassword);
+            HttpEntity<Map<String, String>> resetRequest = new HttpEntity<>(resetBody, headers);
+            restTemplate.put(resetUrl, resetRequest);
+            log.info("Mot de passe réinitialisé avec succès pour userId={}, password={}", userId, newPassword);
             return true;
         } catch (Exception e) {
-            log.error("Erreur création compte pour {} : {}", dossier.getEmail(), e.getMessage());
+            log.error("Erreur reset password pour userId={} : {}", userId, e.getMessage());
             return false;
         }
     }
@@ -226,11 +287,18 @@ public class DossierATCTService {
     @Transactional
     public DossierATCT envoyerEmail(Long id) {
         DossierATCT dossier = findById(id);
-        String tempPassword = dossier.getMotDePasseTemp();
-        if (tempPassword == null) {
-            tempPassword = generateTempPassword();
-            dossier.setMotDePasseTemp(tempPassword);
-        }
+        
+        // Toujours générer un nouveau mot de passe et le synchroniser
+        String tempPassword = generateTempPassword();
+        dossier.setMotDePasseTemp(tempPassword);
+        log.info("Nouveau mot de passe généré pour envoi email {} : {}", dossier.getEmail(), tempPassword);
+        
+        // Créer ou mettre à jour le compte utilisateur avec le nouveau mot de passe
+        boolean compteCree = createUserAccount(dossier, tempPassword);
+        dossier.setCompteCree(compteCree);
+        log.info("Compte synchronisé pour {} : {}", dossier.getEmail(), compteCree);
+        
+        // Envoyer l'email avec le même mot de passe
         sendWelcomeEmail(dossier, tempPassword);
         return repository.save(dossier);
     }
