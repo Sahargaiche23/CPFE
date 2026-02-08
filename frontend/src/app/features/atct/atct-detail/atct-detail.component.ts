@@ -376,7 +376,7 @@ import { PdfService } from '../../../core/services/pdf.service';
                 Imprimer / PDF
               </button>
 
-              @if (dossier.statut === 'VALIDE') {
+              @if (dossier.statut === 'VALIDE' || dossier.statut === 'AFFILIE') {
                 <!-- Bouton Envoyer Email -->
                 <button (click)="envoyerEmail()" 
                         [disabled]="loadingEmail"
@@ -412,7 +412,7 @@ import { PdfService } from '../../../core/services/pdf.service';
                 </button>
               }
 
-              @if (dossier.statut === 'VALIDE' && dossier.documentsDeposes && !dossier.affiliationId) {
+              @if ((dossier.statut === 'VALIDE' || dossier.statut === 'AFFILIE') && dossier.documentsDeposes && !dossier.affiliationId) {
                 <a routerLink="/affiliation/new" [queryParams]="{atctId: dossier.id}"
                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -178,7 +178,18 @@ export class SuiviDossierComponent implements OnInit {
     this.http.get<DossierATCT[]>('/api/atct').subscribe({
       next: (dossiers) => {
         this.dossierAtct = dossiers.find(d => d.email === username) || null;
-        this.loading = false;
+        
+        // Aussi charger les données coopérant pour l'affiliation
+        this.cooperantService.getAll().subscribe({
+          next: (cooperants) => {
+            this.cooperant = cooperants.find(c => c.email === username) || null;
+            this.loading = false;
+            if (this.cooperant?.numAffiliation) {
+              this.loadDebits();
+            }
+          },
+          error: () => this.loading = false
+        });
       },
       error: () => {
         // Fallback sur coopérant classique
@@ -197,7 +208,10 @@ export class SuiviDossierComponent implements OnInit {
   }
 
   getStatut(): string {
-    return this.dossierAtct?.statut || this.cooperant?.statutValidation || 'EN_ATTENTE';
+    const statut = this.dossierAtct?.statut || this.cooperant?.statutValidation || 'EN_ATTENTE';
+    // AFFILIE est considéré comme VALIDE pour l'affichage
+    if (statut === 'AFFILIE') return 'VALIDE';
+    return statut;
   }
 
   getDateCreation(): string {
