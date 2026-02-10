@@ -17,8 +17,8 @@
 
       <!-- Navigation & User -->
       <nav class="hidden md:flex items-center space-x-6" *ngIf="user$ | async as user">
-        <!-- Menu Agent/Admin uniquement -->
-        <ng-container *ngIf="user.profil?.toLowerCase() !== 'cooperant'">
+        <!-- Menu Admin et Agent CNSS - accès complet -->
+        <ng-container *ngIf="user.profil?.toLowerCase() === 'admin' || user.profil?.toLowerCase() === 'user' || user.profil?.toLowerCase() === 'agent_cnss'">
           <a routerLink="/dashboard" class="nav-link">
             <span class="material-icons text-sm mr-1">dashboard</span>
             {{ i18n.t('nav.dashboard') }}
@@ -27,7 +27,7 @@
             <span class="material-icons text-sm mr-1">person</span>
             Coopérants
           </a>
-          <a routerLink="/atct" class="nav-link" *ngIf="user.profil?.toLowerCase() === 'admin' || user.profil?.toLowerCase() === 'user' || user.profil?.toLowerCase() === 'agent_atct'">
+          <a routerLink="/atct" class="nav-link">
             <span class="material-icons text-sm mr-1">assignment</span>
             ATCT
           </a>
@@ -42,6 +42,26 @@
           <a routerLink="/payment" class="nav-link">
             <span class="material-icons text-sm mr-1">payment</span>
             {{ i18n.t('nav.payments') }}
+          </a>
+          <a routerLink="/ged" class="nav-link">
+            <span class="material-icons text-sm mr-1">folder</span>
+            GED
+          </a>
+        </ng-container>
+        
+        <!-- Menu Agent ATCT - uniquement ATCT et GED -->
+        <ng-container *ngIf="user.profil?.toLowerCase() === 'agent_atct' || user.profil?.toLowerCase() === 'agent_coop_tech'">
+          <a routerLink="/dashboard" class="nav-link">
+            <span class="material-icons text-sm mr-1">dashboard</span>
+            {{ i18n.t('nav.dashboard') }}
+          </a>
+          <a routerLink="/atct" class="nav-link">
+            <span class="material-icons text-sm mr-1">assignment</span>
+            ATCT
+          </a>
+          <a routerLink="/ged" class="nav-link">
+            <span class="material-icons text-sm mr-1">folder</span>
+            GED
           </a>
         </ng-container>
         

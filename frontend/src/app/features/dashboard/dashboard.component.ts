@@ -5,6 +5,9 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
 import { CooperantService } from '../../core/services/cooperant.service';
 import { DebitService } from '../../core/services/debit.service';
 import { PaymentService } from '../../core/services/payment.service';
+import { AtctService } from '../../core/services/atct.service';
+import { GedService } from '../../core/services/ged.service';
+import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { forkJoin } from 'rxjs';
 
@@ -23,19 +26,97 @@ export class DashboardComponent implements OnInit {
     totalPayments: 0
   };
 
+  // Stats pour agent ATCT
+  atctStats = {
+    totalDossiers: 0,
+    enAttente: 0,
+    valides: 0,
+    rejetes: 0,
+    retoursCnss: 0,
+    totalDocuments: 0,
+    totalTailleGed: 0
+  };
+
+  // Réclamations/Retours CNSS
+  retoursCnss: any[] = [];
+
   recentActivities: any[] = [];
   loading = true;
   error: string | null = null;
+  isAgentAtct = false;
+  userProfil = '';
 
   constructor(
     private cooperantService: CooperantService,
     private debitService: DebitService,
     private paymentService: PaymentService,
+    private atctService: AtctService,
+    private gedService: GedService,
+    private authService: AuthService,
     public i18n: I18nService
   ) {}
 
   ngOnInit() {
-    this.loadDashboardData();
+    // Vérifier le profil utilisateur
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.userProfil = user.profil?.toLowerCase() || '';
+        this.isAgentAtct = this.userProfil === 'agent_atct' || this.userProfil === 'agent_coop_tech';
+        
+        if (this.isAgentAtct) {
+          this.loadAtctDashboard();
+        } else {
+          this.loadDashboardData();
+        }
+      }
+    });
+  }
+
+  loadAtctDashboard() {
+    this.loading = true;
+    forkJoin({
+      atctStats: this.atctService.getStats(),
+      gedStats: this.gedService.getStats(),
+      dossiers: this.atctService.getAll()
+    }).subscribe({
+      next: (data) => {
+        // Compter les retours CNSS (dossiers avec statut RETOUR ou INCOMPLET)
+        const dossiersRetour = (data.dossiers || []).filter((d: any) => 
+          d.statut === 'RETOUR' || d.statut === 'INCOMPLET' || d.statut === 'DOCUMENTS_MANQUANTS'
+        );
+        this.retoursCnss = dossiersRetour;
+        
+        this.atctStats = {
+          totalDossiers: data.atctStats?.total || 0,
+          enAttente: data.atctStats?.en_attente || 0,
+          valides: data.atctStats?.valides || 0,
+          rejetes: data.atctStats?.rejetes || 0,
+          retoursCnss: dossiersRetour.length,
+          totalDocuments: data.gedStats?.totalDocuments || 0,
+          totalTailleGed: data.gedStats?.totalTaille || 0
+        };
+        
+        // Activités récentes ATCT
+        this.recentActivities = this.generateAtctActivities(data.dossiers || []);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  private generateAtctActivities(dossiers: any[]): any[] {
+    return dossiers
+      .sort((a, b) => new Date(b.dateCreation || 0).getTime() - new Date(a.dateCreation || 0).getTime())
+      .slice(0, 8)
+      .map(d => ({
+        type: 'atct',
+        description: `Dossier ${d.nomFr || d.nomAr || 'N/A'} - ${d.statut || 'En cours'}`,
+        time: this.formatDate(d.dateCreation),
+        icon: d.statut === 'VALIDE' ? 'check_circle' : d.statut === 'REJETE' ? 'cancel' : 'hourglass_empty',
+        color: d.statut === 'VALIDE' ? 'text-green-600' : d.statut === 'REJETE' ? 'text-red-600' : 'text-yellow-600'
+      }));
   }
 
   loadDashboardData() {

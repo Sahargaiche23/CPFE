@@ -12,6 +12,15 @@ import { AtctService, DossierATCT, ATCTStats } from '../../../core/services/atct
   template: `
     <app-main-layout>
       <div class="p-6">
+        <!-- Logo ATCT -->
+        <div class="flex items-center gap-4 mb-6">
+          <img src="https://www.atct.tn/sites/default/files/logofr_0.png" alt="ATCT Logo" class="h-16 w-auto object-contain">
+          <div class="border-l-2 border-teal-600 pl-4">
+            <h2 class="text-lg font-bold text-teal-700">Agence Tunisienne de Coopération Technique</h2>
+            <p class="text-sm text-gray-600">Module de gestion des dossiers ATCT</p>
+          </div>
+        </div>
+
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>

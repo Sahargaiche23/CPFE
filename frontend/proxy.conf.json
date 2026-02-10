@@ -1,4 +1,11 @@
 {
+  "/api/ged": {
+    "target": "http://localhost:8088",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api/ged": "/ged" },
+    "logLevel": "debug"
+  },
   "/api/auth": {
     "target": "http://localhost:8089",
     "secure": false,

@@ -81,6 +81,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/payment/payment.routes').then(m => m.PAYMENT_ROUTES)
   },
   {
+    path: 'ged',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/ged/ged.routes').then(m => m.GED_ROUTES)
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
