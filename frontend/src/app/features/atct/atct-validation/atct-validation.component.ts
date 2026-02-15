@@ -227,7 +227,7 @@ import { AtctService, DossierATCT } from '../../../core/services/atct.service';
                          class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-center text-sm">
                         👁️ Voir détails
                       </a>
-                      <button (click)="validerEtCreerAffiliation(dossier)"
+                      <button (click)="valider(dossier)"
                               [disabled]="processing === dossier.id"
                               class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 text-sm">
                         @if (processing === dossier.id) {
@@ -238,7 +238,7 @@ import { AtctService, DossierATCT } from '../../../core/services/atct.service';
                             </svg>
                           </span>
                         } @else {
-                          ✓ Valider & Créer N° Affiliation
+                          ✓ Valider le dossier
                         }
                       </button>
                       <button (click)="openReclamationModal(dossier)"

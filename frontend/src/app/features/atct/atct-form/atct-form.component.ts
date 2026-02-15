@@ -878,10 +878,9 @@ export class AtctFormComponent implements OnInit {
     // 2. Uploader les 4 documents comme enfants du dossier
     const uploads: Promise<any>[] = [];
 
-    // Décision d'Affectation (auto-générée)
-    const decisionHtml = this.generateDecisionHtml(dossierId);
-    const decisionBlob = new Blob([decisionHtml], { type: 'text/html' });
-    const decisionFile = new File([decisionBlob], `Decision_Affectation.html`, { type: 'text/html' });
+    // Décision d'Affectation (auto-générée en PDF)
+    const decisionPdfBlob = await this.generateDecisionPdf(dossierId);
+    const decisionFile = new File([decisionPdfBlob], `Decision_Affectation.pdf`, { type: 'application/pdf' });
     uploads.push(lastValueFrom(this.gedService.uploadDocumentSimple(decisionFile, {
       titre: `Décision d'Affectation`,
       description: `Dossier ATCT N°${dossierId}`,
@@ -958,6 +957,50 @@ export class AtctFormComponent implements OnInit {
       dateFinDetachement: f.dateFinDetachement ? new Date(f.dateFinDetachement).toLocaleDateString('fr-FR') : '',
       modePaiement: f.modePaiement || '',
       assuranceMaladie: f.assuranceMaladie || false
+    });
+  }
+
+  private generateDecisionPdf(dossierId: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const html = this.generateDecisionHtml(dossierId);
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '794px';
+      iframe.style.height = '1123px';
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) { document.body.removeChild(iframe); reject('No iframe doc'); return; }
+
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
+
+      setTimeout(() => {
+        const html2canvas = (window as any).html2canvas;
+        if (!html2canvas) { document.body.removeChild(iframe); reject('html2canvas not loaded'); return; }
+
+        html2canvas(iframeDoc.body, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 794,
+          windowHeight: 1123
+        }).then((canvas: HTMLCanvasElement) => {
+          const { jsPDF } = (window as any).jspdf;
+          const doc = new jsPDF('p', 'mm', 'a4');
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+          const pdfBlob = doc.output('blob');
+          document.body.removeChild(iframe);
+          resolve(pdfBlob);
+        }).catch((err: any) => {
+          document.body.removeChild(iframe);
+          reject(err);
+        });
+      }, 500);
     });
   }
 }
