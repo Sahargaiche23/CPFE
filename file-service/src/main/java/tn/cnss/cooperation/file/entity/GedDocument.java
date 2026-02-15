@@ -48,6 +48,8 @@ public class GedDocument {
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
     
+    private Long parentId;
+    
     @Column(nullable = false)
     private String creePar;
     

@@ -21,6 +21,10 @@ public interface GedDocumentRepository extends JpaRepository<GedDocument, Long> 
     
     List<GedDocument> findAllByOrderByDateCreationDesc();
     
+    List<GedDocument> findByParentId(Long parentId);
+    
+    List<GedDocument> findByParentIdIsNullOrderByDateCreationDesc();
+    
     @Query("SELECT SUM(d.fichierTaille) FROM GedDocument d")
     Long getTotalSize();
     

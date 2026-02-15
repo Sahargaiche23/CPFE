@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 import { AtctService, DossierATCT } from '../../../core/services/atct.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { GedService, GedDocument } from '../../../core/services/ged.service';
 
 @Component({
   selector: 'app-atct-detail',
@@ -40,14 +41,17 @@ import { PdfService } from '../../../core/services/pdf.service';
                         'bg-yellow-100 text-yellow-800': dossier.statut === 'EN_ATTENTE',
                         'bg-green-100 text-green-800': dossier.statut === 'VALIDE',
                         'bg-red-100 text-red-800': dossier.statut === 'REJETE',
+                        'bg-orange-100 text-orange-800': dossier.statut === 'RECLAMATION',
                         'bg-blue-100 text-blue-800': dossier.statut === 'AFFILIE'
                       }">
                   {{ getStatutLabel(dossier.statut) }}
                 </span>
-                @if (dossier.statut === 'EN_ATTENTE') {
+                @if (dossier.statut === 'EN_ATTENTE' || dossier.statut === 'RECLAMATION') {
                   <a [routerLink]="['/atct/edit', dossier.id]"
-                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    Modifier
+                     class="px-4 py-2 text-white rounded-lg"
+                     [class.bg-blue-600]="dossier.statut === 'EN_ATTENTE'" [class.hover:bg-blue-700]="dossier.statut === 'EN_ATTENTE'"
+                     [class.bg-orange-600]="dossier.statut === 'RECLAMATION'" [class.hover:bg-orange-700]="dossier.statut === 'RECLAMATION'">
+                    {{ dossier.statut === 'RECLAMATION' ? 'Corriger & Re-déposer' : 'Modifier' }}
                   </a>
                 }
               </div>
@@ -80,6 +84,7 @@ import { PdfService } from '../../../core/services/pdf.service';
                      [ngClass]="{
                        'bg-green-500 text-white': dossier.statut === 'VALIDE' || dossier.statut === 'AFFILIE',
                        'bg-red-500 text-white': dossier.statut === 'REJETE',
+                       'bg-orange-500 text-white': dossier.statut === 'RECLAMATION',
                        'bg-gray-200 text-gray-400': dossier.statut === 'EN_ATTENTE'
                      }">
                   @if (dossier.statut === 'VALIDE' || dossier.statut === 'AFFILIE') {
@@ -89,6 +94,10 @@ import { PdfService } from '../../../core/services/pdf.service';
                   } @else if (dossier.statut === 'REJETE') {
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  } @else if (dossier.statut === 'RECLAMATION') {
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                     </svg>
                   } @else {
                     <span class="text-lg">2</span>
@@ -341,6 +350,237 @@ import { PdfService } from '../../../core/services/pdf.service';
             </div>
           </div>
 
+          <!-- Documents du dossier -->
+          <div class="mt-6 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <span class="w-8 h-8 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mr-3 text-sm">📋</span>
+              Documents du dossier / وثائق الملف
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Décision d'Affectation (auto-généré du formulaire) -->
+              <div class="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">📋</span>
+                    <div>
+                      <p class="font-medium text-blue-800">Décision d'Affectation</p>
+                      <p class="text-xs text-blue-600">مقرر الإلحاق - Généré du formulaire</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-xs">Auto ✓</span>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1 mb-3 bg-white rounded p-3">
+                  <p><strong>Coopérant:</strong> {{ dossier.nomCompletFr }}</p>
+                  <p><strong>N° Sécu:</strong> {{ dossier.numSecuSociale || 'N/A' }}</p>
+                  <p><strong>Établissement:</strong> {{ dossier.etablissementOrigine || 'N/A' }}</p>
+                  <p><strong>Pays:</strong> {{ dossier.paysEtranger }}</p>
+                  <p><strong>Période:</strong> {{ dossier.dateDebutDetachement | date:'dd/MM/yyyy' }} 
+                    @if (dossier.dateFinDetachement) { - {{ dossier.dateFinDetachement | date:'dd/MM/yyyy' }} }
+                  </p>
+                  <p><strong>Régime:</strong> {{ dossier.codeRegime }}</p>
+                </div>
+                <div class="flex gap-2">
+                  <button (click)="imprimerPdf()" class="flex-1 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Télécharger PDF
+                  </button>
+                  <button (click)="previewDecision()" class="flex-1 py-1.5 border border-blue-600 text-blue-600 text-xs rounded hover:bg-blue-50 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Aperçu
+                  </button>
+                </div>
+              </div>
+
+              <!-- Contrat de coopérant -->
+              <div class="border rounded-lg p-4" [class.bg-green-50]="gedDocuments.contrat" [class.border-green-200]="gedDocuments.contrat" [class.bg-gray-50]="!gedDocuments.contrat" [class.border-gray-200]="!gedDocuments.contrat">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">📄</span>
+                    <div>
+                      <p class="font-medium" [class.text-green-800]="gedDocuments.contrat" [class.text-gray-600]="!gedDocuments.contrat">Contrat de Coopérant</p>
+                      <p class="text-xs" [class.text-green-600]="gedDocuments.contrat" [class.text-gray-400]="!gedDocuments.contrat">عقد التعاون الفني</p>
+                    </div>
+                  </div>
+                  <span *ngIf="gedDocuments.contrat" class="px-2 py-0.5 bg-green-200 text-green-800 rounded text-xs">Déposé ✓</span>
+                  <span *ngIf="!gedDocuments.contrat && !gedLoaded" class="px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded text-xs">Chargement...</span>
+                  <span *ngIf="!gedDocuments.contrat && gedLoaded" class="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">Non déposé</span>
+                </div>
+                @if (gedDocuments.contrat) {
+                  <p class="text-xs text-green-700 bg-green-100 rounded px-2 py-1 mb-2">📎 {{ gedDocuments.contrat.fichierNom }} ({{ formatSize(gedDocuments.contrat.fichierTaille) }})</p>
+                  <div class="flex gap-2">
+                    <button (click)="previewDocument('contrat')" class="flex-1 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      Aperçu
+                    </button>
+                    <button (click)="downloadDocument('contrat')" class="flex-1 py-1.5 border border-green-600 text-green-600 text-xs rounded hover:bg-green-50 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      Télécharger
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <!-- Attestation de salaire -->
+              <div class="border rounded-lg p-4" [class.bg-green-50]="gedDocuments.attestationSalaire" [class.border-green-200]="gedDocuments.attestationSalaire" [class.bg-gray-50]="!gedDocuments.attestationSalaire" [class.border-gray-200]="!gedDocuments.attestationSalaire">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">💰</span>
+                    <div>
+                      <p class="font-medium" [class.text-green-800]="gedDocuments.attestationSalaire" [class.text-gray-600]="!gedDocuments.attestationSalaire">Attestation de Salaire</p>
+                      <p class="text-xs" [class.text-green-600]="gedDocuments.attestationSalaire" [class.text-gray-400]="!gedDocuments.attestationSalaire">شهادة في الأجر</p>
+                    </div>
+                  </div>
+                  <span *ngIf="gedDocuments.attestationSalaire" class="px-2 py-0.5 bg-green-200 text-green-800 rounded text-xs">Déposé ✓</span>
+                  <span *ngIf="!gedDocuments.attestationSalaire && !gedLoaded" class="px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded text-xs">Chargement...</span>
+                  <span *ngIf="!gedDocuments.attestationSalaire && gedLoaded" class="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">Non déposé</span>
+                </div>
+                @if (gedDocuments.attestationSalaire) {
+                  <p class="text-xs text-green-700 bg-green-100 rounded px-2 py-1 mb-2">📎 {{ gedDocuments.attestationSalaire.fichierNom }} ({{ formatSize(gedDocuments.attestationSalaire.fichierTaille) }})</p>
+                  <div class="flex gap-2">
+                    <button (click)="previewDocument('attestationSalaire')" class="flex-1 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      Aperçu
+                    </button>
+                    <button (click)="downloadDocument('attestationSalaire')" class="flex-1 py-1.5 border border-green-600 text-green-600 text-xs rounded hover:bg-green-50 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      Télécharger
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <!-- CIN -->
+              <div class="border rounded-lg p-4" [class.bg-green-50]="gedDocuments.cin" [class.border-green-200]="gedDocuments.cin" [class.bg-gray-50]="!gedDocuments.cin" [class.border-gray-200]="!gedDocuments.cin">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">🪪</span>
+                    <div>
+                      <p class="font-medium" [class.text-green-800]="gedDocuments.cin" [class.text-gray-600]="!gedDocuments.cin">Carte d'Identité Nationale</p>
+                      <p class="text-xs" [class.text-green-600]="gedDocuments.cin" [class.text-gray-400]="!gedDocuments.cin">بطاقة التعريف الوطنية</p>
+                    </div>
+                  </div>
+                  <span *ngIf="gedDocuments.cin" class="px-2 py-0.5 bg-green-200 text-green-800 rounded text-xs">Déposé ✓</span>
+                  <span *ngIf="!gedDocuments.cin && !gedLoaded" class="px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded text-xs">Chargement...</span>
+                  <span *ngIf="!gedDocuments.cin && gedLoaded" class="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">Non déposé</span>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">N° CIN: {{ dossier.numCin || 'N/A' }}</p>
+                @if (gedDocuments.cin) {
+                  <p class="text-xs text-green-700 bg-green-100 rounded px-2 py-1 mb-2">📎 {{ gedDocuments.cin.fichierNom }} ({{ formatSize(gedDocuments.cin.fichierTaille) }})</p>
+                  <div class="flex gap-2">
+                    <button (click)="previewDocument('cin')" class="flex-1 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      Aperçu
+                    </button>
+                    <button (click)="downloadDocument('cin')" class="flex-1 py-1.5 border border-green-600 text-green-600 text-xs rounded hover:bg-green-50 flex items-center justify-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      Télécharger
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Autre Document -->
+            @if (gedDocuments.autre) {
+              <div class="mt-4 border rounded-lg p-4 bg-purple-50 border-purple-200">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">📎</span>
+                    <div>
+                      <p class="font-medium text-purple-800">Autre Document</p>
+                      <p class="text-xs text-purple-600">وثيقة أخرى</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-purple-200 text-purple-800 rounded text-xs">Déposé ✓</span>
+                </div>
+                <p class="text-xs text-purple-700 bg-purple-100 rounded px-2 py-1 mb-2">📎 {{ gedDocuments.autre.fichierNom }} ({{ formatSize(gedDocuments.autre.fichierTaille) }})</p>
+                <div class="flex gap-2">
+                  <button (click)="previewDocument('autre')" class="flex-1 py-1.5 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Aperçu
+                  </button>
+                  <button (click)="downloadDocument('autre')" class="flex-1 py-1.5 border border-purple-600 text-purple-600 text-xs rounded hover:bg-purple-50 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Télécharger
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Aperçu Décision d'Affectation -->
+            @if (showDecisionPreview) {
+              <div class="mt-4 border-2 border-blue-300 rounded-lg overflow-hidden">
+                <div class="bg-blue-600 text-white px-4 py-2 flex items-center justify-between">
+                  <span class="font-medium text-sm">Aperçu - Décision d'Affectation / مقرر الإلحاق</span>
+                  <button (click)="showDecisionPreview = false" class="text-white hover:text-blue-200">✕</button>
+                </div>
+                <div class="p-6 bg-white text-sm">
+                  <div class="text-center mb-6">
+                    <h3 class="text-lg font-bold text-gray-900">CNSS - Caisse Nationale de Sécurité Sociale</h3>
+                    <p class="text-gray-600">Décision d'Affectation - Coopération Technique</p>
+                    <p class="text-gray-500 text-xs mt-1">الصندوق الوطني للضمان الاجتماعي - مقرر الإلحاق</p>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-x-8 gap-y-2 border-t pt-4">
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Nom complet:</span> <strong>{{ dossier.nomCompletFr }}</strong></div>
+                    <div class="py-1 border-b border-gray-100 text-right" dir="rtl"><span class="text-gray-500">الاسم الكامل:</span> <strong>{{ dossier.nomCompletAr || '-' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">N° Sécu Sociale:</span> <strong>{{ dossier.numSecuSociale || 'N/A' }}</strong></div>
+                    <div class="py-1 border-b border-gray-100 text-right" dir="rtl"><span class="text-gray-500">رقم الضمان:</span> <strong>{{ dossier.numSecuSociale || '-' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">N° CIN:</span> <strong>{{ dossier.numCin || 'N/A' }}</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Nationalité:</span> <strong>{{ dossier.nationalite || 'Tunisienne' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Établissement:</span> <strong>{{ dossier.etablissementOrigine || 'N/A' }}</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Organisme étranger:</span> <strong>{{ dossier.organismeEtranger || 'N/A' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Pays détachement:</span> <strong>{{ dossier.paysEtranger }}</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Mission/Poste:</span> <strong>{{ dossier.missionPoste || 'N/A' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Début détachement:</span> <strong>{{ dossier.dateDebutDetachement | date:'dd/MM/yyyy' }}</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Fin détachement:</span> <strong>{{ dossier.dateFinDetachement ? (dossier.dateFinDetachement | date:'dd/MM/yyyy') : 'En cours' }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Salaire TND:</span> <strong>{{ dossier.salaireTunisie | number:'1.3-3' }} TND</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Salaire étranger:</span> <strong>{{ dossier.salaireEtranger | number:'1.2-2' }} {{ dossier.deviseEtranger }}</strong></div>
+                    
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Régime:</span> <strong>{{ dossier.codeRegime }}</strong></div>
+                    <div class="py-1 border-b border-gray-100"><span class="text-gray-500">Mode paiement:</span> <strong>{{ getModePaiementLabel(dossier.modePaiement) }}</strong></div>
+                  </div>
+
+                  @if (dossier.assuranceMaladie || dossier.capitalDeces) {
+                    <div class="mt-3 flex gap-2">
+                      @if (dossier.assuranceMaladie) { <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">🏥 Assurance Maladie</span> }
+                      @if (dossier.capitalDeces) { <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">💼 Capital Décès</span> }
+                    </div>
+                  }
+
+                  <div class="mt-4 text-center text-xs text-gray-400 border-t pt-3">
+                    Dossier N° {{ dossier.id }} • Créé le {{ dossier.dateCreation | date:'dd/MM/yyyy HH:mm' }} • CNSS - Système de Gestion
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (dossier.statut === 'RECLAMATION' && dossier.motifRejet) {
+            <div class="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                <span>⚠️</span> Réclamation CNSS - Documents manquants
+              </h3>
+              <p class="text-orange-700 mb-3">{{ dossier.motifRejet }}</p>
+              <a [routerLink]="['/atct/edit', dossier.id]"
+                 class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                <span>📝</span> Corriger & Re-déposer les documents
+              </a>
+            </div>
+          }
+
           @if (dossier.statut === 'REJETE' && dossier.motifRejet) {
             <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-6">
               <h3 class="text-lg font-semibold text-red-800 mb-2">Motif du rejet</h3>
@@ -463,11 +703,17 @@ export class AtctDetailComponent implements OnInit {
   loadingPdf = false;
   successMessage = '';
   errorMessage = '';
+  showDecisionPreview = false;
+
+  // Documents GED liés au dossier
+  gedDocuments: {decisionAffectation?: GedDocument, contrat?: GedDocument, attestationSalaire?: GedDocument, cin?: GedDocument, autre?: GedDocument} = {};
+  gedLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
     private atctService: AtctService,
-    private pdfService: PdfService
+    private pdfService: PdfService,
+    private gedService: GedService
   ) {}
 
   ngOnInit(): void {
@@ -483,10 +729,72 @@ export class AtctDetailComponent implements OnInit {
       next: (data) => {
         this.dossier = data;
         this.loading = false;
+        this.loadGedDocuments(id);
       },
       error: (err) => {
         console.error('Erreur chargement:', err);
         this.loading = false;
+      }
+    });
+  }
+
+  loadGedDocuments(dossierId: number): void {
+    // Chercher tous les dossiers parents (type=folder) par catégorie "Dossiers ATCT"
+    this.gedService.getDocuments(undefined, 'Dossiers ATCT').subscribe({
+      next: (docs) => {
+        const idStr = String(dossierId);
+        // Trouver TOUS les dossiers parents liés à ce dossier ATCT
+        const folders = docs.filter(d =>
+          d.fichierType === 'folder' &&
+          ((d.tags || []).join(' ').includes(`dossier-${idStr}`) ||
+           (d.description || '').includes(`N°${idStr}`))
+        );
+        if (folders.length > 0) {
+          // Charger les sous-documents de tous les dossiers et les fusionner
+          let allChildren: GedDocument[] = [];
+          let loaded = 0;
+          folders.forEach(folder => {
+            this.gedService.getChildren(folder.id).subscribe({
+              next: (children) => {
+                allChildren = allChildren.concat(children);
+                loaded++;
+                if (loaded === folders.length) {
+                  this.matchDocuments(allChildren);
+                  this.gedLoaded = true;
+                }
+              },
+              error: () => {
+                loaded++;
+                if (loaded === folders.length) {
+                  this.matchDocuments(allChildren);
+                  this.gedLoaded = true;
+                }
+              }
+            });
+          });
+        } else {
+          this.gedLoaded = true;
+        }
+      },
+      error: () => { this.gedLoaded = true; }
+    });
+  }
+
+  private matchDocuments(docs: GedDocument[]): void {
+    docs.forEach(doc => {
+      const titre = (doc.titre || '').toLowerCase();
+      const tagsStr = (doc.tags || []).join(' ').toLowerCase();
+
+      if (titre.includes('decision') || titre.includes('décision') || tagsStr.includes('decision-affectation')) {
+        this.gedDocuments.decisionAffectation = doc;
+      } else if (titre.includes('contrat') || tagsStr.includes('contrat')) {
+        this.gedDocuments.contrat = doc;
+      } else if (titre.includes('attestation') || titre.includes('salaire') || tagsStr.includes('attestation-salaire')) {
+        this.gedDocuments.attestationSalaire = doc;
+      } else if (titre.includes('cin') || tagsStr.includes('cin')) {
+        this.gedDocuments.cin = doc;
+      } else if (titre.includes('autre') || tagsStr.includes('autre-document')) {
+        this.gedDocuments.autre = doc;
       }
     });
   }
@@ -496,6 +804,7 @@ export class AtctDetailComponent implements OnInit {
       'EN_ATTENTE': 'En attente de validation',
       'VALIDE': 'Validé',
       'REJETE': 'Rejeté',
+      'RECLAMATION': 'Réclamation',
       'AFFILIE': 'Affilié'
     };
     return labels[statut || ''] || statut || '';
@@ -586,14 +895,9 @@ export class AtctDetailComponent implements OnInit {
     }
   }
 
-  imprimerPdf(): void {
-    if (!this.dossier) return;
-    this.loadingPdf = true;
-    this.clearMessages();
-
-    // Générer le PDF bilingue FR/AR avec le même design que attestation_affiliation
-    const d = this.dossier;
-    this.pdfService.generateAtctFormulaire({
+  private getDecisionData() {
+    const d = this.dossier!;
+    return {
       nomComplet: d.nomCompletFr || d.nomFr + ' ' + d.prenomFr,
       nomCompletAr: d.nomCompletAr || (d.nomAr ? d.prenomAr + ' ' + d.nomAr : ''),
       numSecuSociale: d.numSecuSociale || '',
@@ -610,9 +914,21 @@ export class AtctDetailComponent implements OnInit {
       dateFinDetachement: d.dateFinDetachement ? new Date(d.dateFinDetachement).toLocaleDateString('fr-FR') : '',
       modePaiement: d.modePaiement || '',
       assuranceMaladie: d.assuranceMaladie || false
-    });
+    };
+  }
 
-    // Le PDF est généré de manière asynchrone, on arrête le loader après un délai
+  previewDecision(): void {
+    if (!this.dossier) return;
+    this.pdfService.previewAtctFormulaire(this.getDecisionData());
+  }
+
+  imprimerPdf(): void {
+    if (!this.dossier) return;
+    this.loadingPdf = true;
+    this.clearMessages();
+
+    this.pdfService.generateAtctFormulaire(this.getDecisionData());
+
     setTimeout(() => {
       this.loadingPdf = false;
       this.successMessage = 'PDF généré avec succès (bilingue FR/AR)';
@@ -693,6 +1009,49 @@ export class AtctDetailComponent implements OnInit {
       </body>
       </html>
     `;
+  }
+
+  previewDocument(docType: string): void {
+    const gedDoc = (this.gedDocuments as any)[docType] as GedDocument | undefined;
+    if (gedDoc) {
+      this.gedService.downloadDocument(gedDoc.id).subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
+        },
+        error: () => alert('Erreur lors de l\'ouverture du document')
+      });
+    } else {
+      alert('Document non trouvé dans la GED. Veuillez re-déposer le dossier.');
+    }
+  }
+
+  downloadDocument(docType: string): void {
+    const gedDoc = (this.gedDocuments as any)[docType] as GedDocument | undefined;
+    if (gedDoc) {
+      this.gedService.downloadDocument(gedDoc.id).subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = gedDoc.fichierNom || `${docType}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        },
+        error: () => alert('Erreur lors du téléchargement')
+      });
+    } else {
+      alert('Document non trouvé dans la GED. Veuillez re-déposer le dossier.');
+    }
+  }
+
+  formatSize(bytes: number): string {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
   private clearMessages(): void {

@@ -40,4 +40,7 @@ public interface DossierATCTRepository extends JpaRepository<DossierATCT, Long> 
     
     @Query("SELECT COUNT(d) FROM DossierATCT d WHERE d.actif = true AND d.statut = 'REJETE'")
     long countRejetes();
+
+    @Query("SELECT COUNT(d) FROM DossierATCT d WHERE d.actif = true AND d.statut = 'RECLAMATION'")
+    long countReclamations();
 }

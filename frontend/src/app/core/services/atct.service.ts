@@ -224,6 +224,13 @@ export class AtctService {
     });
   }
 
+  // Envoyer une réclamation (retour CNSS)
+  reclamer(id: number, motif: string): Observable<DossierATCT> {
+    return this.http.post<DossierATCT>(`${this.apiUrl}/${id}/reclamation`, null, {
+      params: new HttpParams().set('motif', motif)
+    });
+  }
+
   // Marquer documents déposés
   marquerDocumentsDeposes(id: number): Observable<DossierATCT> {
     return this.http.post<DossierATCT>(`${this.apiUrl}/${id}/documents-deposes`, null);

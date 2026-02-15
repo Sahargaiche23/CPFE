@@ -101,7 +101,7 @@
                 <span class="px-3 py-1 bg-red-200 text-red-800 rounded-full text-xs font-semibold">
                   {{ dossier.statut || 'Documents manquants' }}
                 </span>
-                <a [routerLink]="['/atct', dossier.id]" class="block mt-2 text-red-600 text-sm hover:underline">
+                <a [routerLink]="['/atct/edit', dossier.id]" class="block mt-2 text-red-600 text-sm hover:underline">
                   Traiter →
                 </a>
               </div>
@@ -259,6 +259,44 @@
           {{ i18n.t('dashboard.viewDetails') }}
           <span class="material-icons text-sm ml-1">arrow_forward</span>
         </a>
+      </div>
+    </div>
+
+    <!-- Dossiers ATCT reçus -->
+    <div *ngIf="dossiersAtctRecus.length > 0" class="card mb-8 border-l-4 border-teal-500">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-cnss-dark flex items-center">
+          <span class="material-icons mr-2 text-teal-600">inbox</span>
+          Dossiers ATCT reçus
+          <span class="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-sm">{{ dossiersAtctRecus.length }}</span>
+        </h2>
+        <a routerLink="/atct/validation" class="text-teal-600 text-sm font-semibold hover:underline flex items-center">
+          Voir tous
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+      <div class="space-y-3">
+        <div *ngFor="let dossier of dossiersAtctRecus.slice(0, 5)" 
+             class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-teal-600">folder_shared</span>
+            </div>
+            <div>
+              <p class="font-medium text-gray-800">{{ dossier.nomCompletFr || (dossier.prenomFr + ' ' + dossier.nomFr) }}</p>
+              <p class="text-xs text-gray-500">{{ dossier.paysEtranger }} • Régime {{ dossier.codeRegime }} • {{ dossier.email }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">En attente</span>
+              <p class="text-xs text-gray-400 mt-1">{{ dossier.documentsDeposes ? '📄 Documents joints' : 'Sans documents' }}</p>
+            </div>
+            <a [routerLink]="['/atct/detail', dossier.id]" class="p-2 text-teal-600 hover:bg-teal-50 rounded">
+              <span class="material-icons">visibility</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 

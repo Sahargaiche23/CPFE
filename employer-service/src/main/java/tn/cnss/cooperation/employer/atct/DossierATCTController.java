@@ -80,6 +80,14 @@ public class DossierATCTController {
         return ResponseEntity.ok(service.rejeter(id, motif, agentId));
     }
 
+    @PostMapping("/{id}/reclamation")
+    public ResponseEntity<DossierATCT> reclamation(
+            @PathVariable Long id,
+            @RequestParam String motif,
+            @RequestHeader(value = "X-Agent-Id", defaultValue = "1") Long agentId) {
+        return ResponseEntity.ok(service.reclamation(id, motif, agentId));
+    }
+
     @PostMapping("/{id}/documents-deposes")
     public ResponseEntity<DossierATCT> marquerDocumentsDeposes(@PathVariable Long id) {
         return ResponseEntity.ok(service.marquerDocumentsDeposes(id));

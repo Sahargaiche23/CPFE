@@ -561,7 +561,8 @@ export class GedComponent implements OnInit {
     this.loading = true;
     this.gedService.getDocuments(this.searchTerm, this.categorieActive, this.selectedTags).subscribe({
       next: (docs) => {
-        this.documents = docs;
+        // Ne montrer que les documents racine (pas les enfants)
+        this.documents = docs.filter(d => !d.parentId);
         this.totalTaille = docs.reduce((sum, d) => sum + (d.fichierTaille || 0), 0);
         this.updateCategoryCounts();
         this.sortDocuments();

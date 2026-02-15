@@ -111,6 +111,30 @@ public class GedService {
         return Files.readAllBytes(filePath);
     }
     
+    public GedDocument save(GedDocument doc) {
+        return documentRepository.save(doc);
+    }
+    
+    public List<GedDocument> getChildren(Long parentId) {
+        return documentRepository.findByParentId(parentId);
+    }
+    
+    public GedDocument createFolder(String titre, String description, String categorie, List<String> tags, String creePar) {
+        GedDocument folder = GedDocument.builder()
+                .titre(titre)
+                .description(description)
+                .fichierNom(titre)
+                .fichierType("folder")
+                .fichierTaille(0L)
+                .cheminFichier("folder")
+                .categorie(categorie != null ? categorie : "AUTRE")
+                .tags(tags != null ? tags : List.of())
+                .creePar(creePar != null ? creePar : "system")
+                .build();
+        log.info("Dossier créé: {} par {}", titre, creePar);
+        return documentRepository.save(folder);
+    }
+    
     public Long getTotalSize() {
         Long size = documentRepository.getTotalSize();
         return size != null ? size : 0L;

@@ -16,6 +16,7 @@ export interface GedDocument {
   dateModification?: string;
   creePar: string;
   cheminFichier?: string;
+  parentId?: number;
 }
 
 export interface GedTag {
@@ -93,8 +94,23 @@ export class GedService {
     formData.append('description', metadata.description || '');
     formData.append('categorie', metadata.categorie || 'AUTRE');
     formData.append('tags', JSON.stringify(metadata.tags || []));
-
+    if (metadata.parentId) {
+      formData.append('parentId', String(metadata.parentId));
+    }
     return this.http.post<GedDocument>(`${this.apiUrl}/documents/upload`, formData);
+  }
+
+  createFolder(titre: string, metadata: Partial<GedDocument>): Observable<GedDocument> {
+    const formData = new FormData();
+    formData.append('titre', titre);
+    formData.append('description', metadata.description || '');
+    formData.append('categorie', metadata.categorie || 'AUTRE');
+    formData.append('tags', JSON.stringify(metadata.tags || []));
+    return this.http.post<GedDocument>(`${this.apiUrl}/documents/create-folder`, formData);
+  }
+
+  getChildren(parentId: number): Observable<GedDocument[]> {
+    return this.http.get<GedDocument[]>(`${this.apiUrl}/documents/${parentId}/children`);
   }
 
   deleteDocument(id: number): Observable<void> {

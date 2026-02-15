@@ -24,7 +24,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
           </div>
           <div class="px-4 pb-4">
             <div class="relative">
-              <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher..." class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm">
+              <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher..." class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
               <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -156,25 +156,47 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                 </div>
 
                 <!-- Vue fichiers -->
-                <div class="flex gap-2 mb-4">
-                  <button (click)="fileViewMode = 'list'" 
-                          class="p-2 rounded"
-                          [class.bg-gray-200]="fileViewMode === 'list'">
+                <div class="flex gap-2 mb-4 border border-gray-200 rounded-lg p-1 w-fit">
+                  <button (click)="setViewMode('list')" 
+                          class="p-2 rounded transition-all"
+                          [ngClass]="{'bg-teal-600 text-white': fileViewMode === 'list', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'list'}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
                   </button>
-                  <button (click)="fileViewMode = 'grid'" 
-                          class="p-2 rounded"
-                          [class.bg-gray-200]="fileViewMode === 'grid'">
+                  <button (click)="setViewMode('grid')" 
+                          class="p-2 rounded transition-all"
+                          [ngClass]="{'bg-teal-600 text-white': fileViewMode === 'grid', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'grid'}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
                   </button>
                 </div>
 
-                <!-- Grille de fichiers -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
+                <!-- Vue Grille - Dossier avec sous-documents -->
+                <div *ngIf="document.fichierType === 'folder' && childDocs.length > 0" class="grid grid-cols-2 gap-4 mb-6">
+                  <div *ngFor="let child of childDocs" class="bg-white border rounded-lg p-4 hover:shadow-md transition cursor-pointer" (click)="previewChild(child)">
+                    <div class="w-full h-32 bg-gray-100 rounded flex items-center justify-center mb-3 overflow-hidden">
+                      <img *ngIf="isImage(child.fichierType)" 
+                           [src]="getDocumentPreviewUrl(child.id)" 
+                           [alt]="child.fichierNom"
+                           class="max-w-full max-h-full object-contain"
+                           (error)="onImageError($event)">
+                      <span *ngIf="!isImage(child.fichierType)" class="text-5xl">{{ getFileIcon(child.fichierType) }}</span>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium truncate" [title]="child.titre">{{ child.titre }}</p>
+                      <p class="text-xs text-gray-500">{{ child.fichierNom }} - {{ formatFileSize(child.fichierTaille) }}</p>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                      <button (click)="previewChild(child); $event.stopPropagation()" class="flex-1 py-1 bg-teal-600 text-white text-xs rounded hover:bg-teal-700">Aperçu</button>
+                      <button (click)="downloadChild(child); $event.stopPropagation()" class="flex-1 py-1 border border-teal-600 text-teal-600 text-xs rounded hover:bg-teal-50">Télécharger</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vue Grille - Document simple -->
+                <div *ngIf="document.fichierType !== 'folder' && fileViewMode === 'grid'" class="grid grid-cols-2 gap-4 mb-6">
                   <div class="bg-white border rounded-lg p-4 hover:shadow-md transition cursor-pointer" (click)="downloadDocument()">
                     <div class="w-full h-32 bg-gray-100 rounded flex items-center justify-center mb-3 overflow-hidden">
                       <img *ngIf="isImage(document.fichierType)" 
@@ -186,6 +208,36 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                     </div>
                     <div class="flex justify-between items-center">
                       <span class="text-sm font-medium truncate" [title]="document.fichierNom">{{ document.fichierNom }}</span>
+                      <button class="text-gray-400 hover:text-gray-600" (click)="$event.stopPropagation()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vue Liste -->
+                <div *ngIf="fileViewMode === 'list'" class="space-y-2 mb-6">
+                  <div class="bg-white border rounded-lg p-3 hover:shadow-md transition cursor-pointer flex items-center gap-4" (click)="downloadDocument()">
+                    <div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img *ngIf="isImage(document.fichierType)" 
+                           [src]="getDocumentPreviewUrl(document.id)" 
+                           [alt]="document.fichierNom"
+                           class="w-full h-full object-cover"
+                           (error)="onImageError($event)">
+                      <span *ngIf="!isImage(document.fichierType)" class="text-2xl">{{ getFileIcon(document.fichierType) }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-800 truncate">{{ document.fichierNom }}</p>
+                      <p class="text-xs text-gray-500">{{ formatFileSize(document.fichierTaille) }} • {{ document.fichierType }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button class="p-2 text-teal-600 hover:bg-teal-50 rounded" (click)="$event.stopPropagation(); downloadDocument()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                      </button>
                       <button class="text-gray-400 hover:text-gray-600" (click)="$event.stopPropagation()">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
@@ -465,16 +517,21 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 export class GedDetailComponent implements OnInit {
   document: GedDocument | null = null;
   allDocs: any[] = [];
+  filteredDocs: any[] = [];
+  childDocs: GedDocument[] = [];
   loading = false;
   searchTerm = '';
 
-  get filteredDocs(): any[] {
-    if (!this.searchTerm.trim()) return this.allDocs;
-    const term = this.searchTerm.toLowerCase();
-    return this.allDocs.filter(d => 
-      d.titre?.toLowerCase().includes(term) || 
-      d.fichierNom?.toLowerCase().includes(term)
-    );
+  filterDocs(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredDocs = [...this.allDocs];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredDocs = this.allDocs.filter(d => 
+        d.titre?.toLowerCase().includes(term) || 
+        d.fichierNom?.toLowerCase().includes(term)
+      );
+    }
   }
 
   activeTab = 'contenu';
@@ -516,17 +573,37 @@ export class GedDetailComponent implements OnInit {
 
   loadAllDocs(): void {
     this.gedService.getDocuments().subscribe({
-      next: (docs) => this.allDocs = docs,
+      next: (docs) => {
+        // Ne montrer que les documents racine (pas les enfants)
+        this.allDocs = docs.filter(d => !d.parentId);
+        this.filterDocs();
+      },
       error: () => {}
     });
   }
 
+  onSearchChange(): void {
+    this.filterDocs();
+  }
+
+  setViewMode(mode: 'list' | 'grid'): void {
+    this.fileViewMode = mode;
+  }
+
   loadDocument(id: number): void {
     this.loading = true;
+    this.childDocs = [];
     this.gedService.getDocumentById(id).subscribe({
       next: (doc) => {
         this.document = doc;
         this.loading = false;
+        // Si c'est un dossier, charger les sous-documents
+        if (doc.fichierType === 'folder') {
+          this.gedService.getChildren(doc.id).subscribe({
+            next: (children) => this.childDocs = children,
+            error: () => {}
+          });
+        }
       },
       error: () => {
         this.loading = false;
@@ -554,6 +631,32 @@ export class GedDetailComponent implements OnInit {
     this.gedService.deleteDocument(this.document.id).subscribe({
       next: () => this.router.navigate(['/ged']),
       error: () => alert('Erreur lors de la suppression')
+    });
+  }
+
+  previewChild(child: GedDocument): void {
+    this.gedService.downloadDocument(child.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: () => alert('Erreur lors de l\'ouverture du document')
+    });
+  }
+
+  downloadChild(child: GedDocument): void {
+    this.gedService.downloadDocument(child.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = child.fichierNom;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: () => alert('Erreur lors du téléchargement')
     });
   }
 
@@ -591,6 +694,13 @@ export class GedDetailComponent implements OnInit {
     return new Date(dateStr).toLocaleDateString('fr-FR', {
       day: '2-digit', month: '2-digit', year: 'numeric'
     });
+  }
+
+  formatFileSize(bytes: number): string {
+    if (!bytes) return 'N/A';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
   formatRelativeDate(dateStr: string): string {

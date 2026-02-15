@@ -2201,6 +2201,183 @@ export class PdfService {
   }
 
   /**
+   * Ouvre un aperçu du formulaire ATCT dans un nouvel onglet du navigateur
+   */
+  previewAtctFormulaire(data: {
+    nomComplet: string;
+    nomCompletAr?: string;
+    numSecuSociale: string;
+    email: string;
+    adresseTunisie: string;
+    codePostal: string;
+    villeTunisie: string;
+    adresseEtranger: string;
+    villeEtranger: string;
+    paysEtranger: string;
+    etablissementOrigine: string;
+    organismeEtranger: string;
+    dateDebutDetachement: string;
+    dateFinDetachement: string;
+    modePaiement: string;
+    assuranceMaladie: boolean;
+  }): void {
+    const html = this.buildAtctFormulaireHtml(data);
+    const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
+
+  /**
+   * Construit le HTML du formulaire ATCT officiel bilingue
+   */
+  buildAtctFormulaireHtml(data: {
+    nomComplet: string;
+    nomCompletAr?: string;
+    numSecuSociale: string;
+    email: string;
+    adresseTunisie: string;
+    codePostal: string;
+    villeTunisie: string;
+    adresseEtranger: string;
+    villeEtranger: string;
+    paysEtranger: string;
+    etablissementOrigine: string;
+    organismeEtranger: string;
+    dateDebutDetachement: string;
+    dateFinDetachement: string;
+    modePaiement: string;
+    assuranceMaladie: boolean;
+  }): string {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('fr-FR');
+    const logoUrl = window.location.origin + '/assets/images/logo-cnss.png';
+    
+    const checkAnticipe = data.modePaiement === 'ANTICIPE' ? '☒' : '☐';
+    const checkTrimestriel = data.modePaiement === 'TRIMESTRIEL' ? '☒' : '☐';
+    const checkAnnuel = data.modePaiement === 'ANNUEL' ? '☒' : '☐';
+    const checkMensuel = data.modePaiement === 'MENSUEL' ? '☒' : '☐';
+    const checkAssurance = data.assuranceMaladie ? '☒' : '☐';
+    const checkNoAssurance = !data.assuranceMaladie ? '☒' : '☐';
+
+    return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulaire ATCT - ${data.nomComplet}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Amiri', 'Traditional Arabic', 'Arial', serif; font-size: 12px; line-height: 1.6; padding: 25px 35px; background: white; }
+    @media print { body { padding: 20px; } @page { margin: 15mm; } }
+    .header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .header-fr { text-align: left; font-size: 10px; direction: ltr; }
+    .header-ar { text-align: right; font-size: 11px; }
+    .logo-box { border: 2px solid #8B0000; padding: 12px 20px; margin: 12px 0; display: flex; align-items: center; justify-content: center; gap: 15px; }
+    .logo-fr { color: #8B0000; font-size: 16px; font-weight: bold; direction: ltr; }
+    .logo-ar { color: #8B0000; font-size: 13px; font-weight: bold; margin-top: 3px; }
+    .logo-img { width: 55px; height: auto; }
+    .title-box { border: 2px solid #000; padding: 10px; margin: 15px 0; text-align: center; }
+    .title-ar { font-size: 15px; font-weight: bold; }
+    .title-fr { font-size: 12px; font-weight: bold; margin-top: 5px; direction: ltr; }
+    .title-sub { font-size: 9px; margin-top: 5px; color: #666; }
+    .ref { font-size: 9px; margin: 8px 0; direction: ltr; }
+    .section { margin: 12px 0; }
+    .section-title { font-weight: bold; font-size: 11px; margin-bottom: 8px; background: #f0f0f0; padding: 5px 8px; }
+    .section-title-ar { float: right; }
+    .section-title-fr { float: left; direction: ltr; }
+    .clear { clear: both; }
+    .field-row { display: flex; margin: 6px 0; font-size: 11px; }
+    .field-label { font-weight: bold; width: 45%; }
+    .field-label-ar { text-align: right; }
+    .field-label-fr { direction: ltr; font-size: 10px; color: #555; }
+    .field-value { width: 55%; color: #000080; font-weight: bold; border-bottom: 1px dotted #999; padding-left: 5px; }
+    .commitment { font-size: 10px; margin: 15px 0; padding: 10px; background: #fffde7; border: 1px solid #ffc107; line-height: 1.8; }
+    .commitment-ar { text-align: right; margin-bottom: 8px; }
+    .commitment-fr { direction: ltr; text-align: left; font-style: italic; }
+    .checkbox-section { margin: 12px 0; }
+    .checkbox-row { margin: 5px 0; font-size: 11px; }
+    .checkbox { font-size: 14px; margin: 0 5px; }
+    .option-box { border: 1px solid #666; padding: 10px; margin: 12px 0; background: #fafafa; }
+    .signature-section { margin-top: 25px; }
+    .notes { font-size: 8px; margin-top: 15px; border-top: 1px dashed #999; padding-top: 8px; color: #666; }
+    .footer { font-size: 8px; text-align: center; margin-top: 15px; border-top: 2px solid #8B0000; padding-top: 8px; direction: ltr; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-fr">
+      République Tunisienne<br>Ministère des Affaires Sociales,<br>de la Solidarité<br>et des Tunisiens à l'Étranger<br><br><strong>Caisse Nationale<br>de Sécurité Sociale</strong>
+    </div>
+    <div class="header-ar">
+      الجمهورية التونسية<br>وزارة الشؤون الاجتماعية والتضامن<br>والتونسيين بالخارج<br><br><strong>الصندوق الوطني للضمان الاجتماعي</strong>
+    </div>
+  </div>
+  <div class="logo-box">
+    <img class="logo-img" src="${logoUrl}" alt="CNSS">
+    <div>
+      <div class="logo-fr">Caisse Nationale de Sécurité Sociale</div>
+      <div class="logo-ar">الصندوق الوطني للضمان الاجتماعي</div>
+    </div>
+  </div>
+  <div class="title-box">
+    <div class="title-ar">تسوية فترات الإلحاق في إطار التعاون الفني</div>
+    <div class="title-fr">FORMULAIRE DE COOPÉRATION TECHNIQUE (ATCT)</div>
+    <div class="title-sub">Décret n° 1879 de 2007 du 23 juillet 2007 | الفصل 6 من الأمر عدد 1879 لسنة 2007</div>
+  </div>
+  <p class="ref"><strong>Réf:</strong> PM54 &nbsp;&nbsp;&nbsp; <strong>Date:</strong> ${dateStr}</p>
+  <p style="text-align: center; font-size: 12px; margin: 10px 0;"><strong>إني الممضي )ة() أسفله / Je soussigné(e)</strong></p>
+  <div class="section">
+    <div class="section-title"><span class="section-title-ar">المعلومات الشخصية</span><span class="section-title-fr">INFORMATIONS PERSONNELLES</span><div class="clear"></div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">الإسم و اللقب</span><br><span class="field-label-fr">Nom et Prénom</span></div><div class="field-value">${data.nomComplet || '..............................'}</div></div>
+    ${data.nomCompletAr ? `<div class="field-row"><div class="field-label"><span class="field-label-fr">)en arabe(</span></div><div class="field-value">${data.nomCompletAr}</div></div>` : ''}
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">رقم الضمان الاجتماعي</span><br><span class="field-label-fr">N° Sécurité Sociale</span></div><div class="field-value">${data.numSecuSociale || '..............................'}</div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">العنوان الإلكتروني</span><br><span class="field-label-fr">Email</span></div><div class="field-value">${data.email || '..............................'}</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title"><span class="section-title-ar">العناوين</span><span class="section-title-fr">ADRESSES</span><div class="clear"></div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">العنوان بتونس</span><br><span class="field-label-fr">Adresse en Tunisie</span></div><div class="field-value">${data.adresseTunisie || ''} ${data.codePostal || ''} ${data.villeTunisie || ''}</div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">العنوان بالخارج</span><br><span class="field-label-fr">Adresse à l'Étranger</span></div><div class="field-value">${data.adresseEtranger || ''} ${data.villeEtranger || ''} - ${data.paysEtranger || ''}</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title"><span class="section-title-ar">الإلحاق</span><span class="section-title-fr">DÉTACHEMENT</span><div class="clear"></div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">المؤسسة الأصلية بتونس</span><br><span class="field-label-fr">Établissement d'origine</span></div><div class="field-value">${data.etablissementOrigine || '..............................'}</div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">الهيئة المستقبلة بالخارج</span><br><span class="field-label-fr">Organisme d'accueil</span></div><div class="field-value">${data.organismeEtranger || '..............................'}</div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">بداية الإلحاق</span><br><span class="field-label-fr">Début détachement</span></div><div class="field-value">${data.dateDebutDetachement || '....../....../......'}</div></div>
+    <div class="field-row"><div class="field-label"><span class="field-label-ar">نهاية الإلحاق</span><br><span class="field-label-fr">Fin détachement</span></div><div class="field-value">${data.dateFinDetachement || '....../....../......'}</div></div>
+  </div>
+  <div class="commitment">
+    <div class="commitment-ar">ألتزم بتسوية وضعيتي إزاء نظام التقاعد والعجز خلال فترة الإلحاق للعمل في إطار التعاون الفني</div>
+    <div class="commitment-fr">Je m'engage à régulariser ma situation vis-à-vis du régime de retraite et d'invalidité pendant la période de détachement.</div>
+  </div>
+  <div class="section">
+    <div class="section-title"><span class="section-title-ar">طريقة الدفع</span><span class="section-title-fr">MODE DE PAIEMENT</span><div class="clear"></div></div>
+    <div class="checkbox-section">
+      <div class="checkbox-row"><span class="checkbox">${checkAnticipe}</span> مسبقا / Par anticipation &nbsp;&nbsp;&nbsp;&nbsp; <span class="checkbox">${checkTrimestriel}</span> كل ثلاثة أشهر / Trimestriel</div>
+      <div class="checkbox-row"><span class="checkbox">${checkAnnuel}</span> سنويا / Annuel &nbsp;&nbsp;&nbsp;&nbsp; <span class="checkbox">${checkMensuel}</span> شهريا / Mensuel</div>
+    </div>
+  </div>
+  <div class="option-box">
+    <div class="checkbox-row"><span class="checkbox">${checkAssurance}</span> <strong>التأمين على المرض / Assurance Maladie</strong><br><span style="font-size:10px;margin-right:20px;">أرغب في الإنتفاع بنظام الحيطة الإجتماعية</span><br><span style="font-size:10px;direction:ltr;">Je souhaite bénéficier du régime de prévoyance sociale</span></div>
+    <div class="checkbox-row" style="margin-top:10px;"><span class="checkbox">${checkNoAssurance}</span> لا أرغب في الإنتفاع / Je ne souhaite pas bénéficier</div>
+  </div>
+  <div class="signature-section">
+    <p>حررت في .................. في ${dateStr} &nbsp;&nbsp;&nbsp; Fait à .................. le ${dateStr}</p><br><br>
+    <p><strong>الإمضاء / Signature :</strong> _______________________</p>
+  </div>
+  <div class="notes">
+    <p>(1) فتر اليوم والشهر والسنة / Indiquer jour, mois et année</p>
+    <p>(2) ضع علامة X في المربع الموافق / Cocher la case correspondante</p>
+  </div>
+  <div class="footer">
+    المقر الإجتماعي: 49 شارع الطيب المهيري - 1002 تونس البلفيدير<br>
+    Siège social: 49, Avenue Taïeb MHIRI - 1002 Tunis Belvédère - Tél: (216) 71 796 744
+  </div>
+</body>
+</html>`;
+  }
+
+  /**
    * Génère le formulaire ATCT et retourne le PDF en base64 (pour envoi email)
    */
   generateAtctFormulaireBase64(data: {

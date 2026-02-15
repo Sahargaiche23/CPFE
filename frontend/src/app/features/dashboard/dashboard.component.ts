@@ -41,6 +41,7 @@ export class DashboardComponent implements OnInit {
   retoursCnss: any[] = [];
 
   recentActivities: any[] = [];
+  dossiersAtctRecus: any[] = [];
   loading = true;
   error: string | null = null;
   isAgentAtct = false;
@@ -82,7 +83,7 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         // Compter les retours CNSS (dossiers avec statut RETOUR ou INCOMPLET)
         const dossiersRetour = (data.dossiers || []).filter((d: any) => 
-          d.statut === 'RETOUR' || d.statut === 'INCOMPLET' || d.statut === 'DOCUMENTS_MANQUANTS'
+          d.statut === 'RECLAMATION' || d.statut === 'RETOUR' || d.statut === 'INCOMPLET' || d.statut === 'DOCUMENTS_MANQUANTS'
         );
         this.retoursCnss = dossiersRetour;
         
@@ -114,14 +115,20 @@ export class DashboardComponent implements OnInit {
         type: 'atct',
         description: `Dossier ${d.nomFr || d.nomAr || 'N/A'} - ${d.statut || 'En cours'}`,
         time: this.formatDate(d.dateCreation),
-        icon: d.statut === 'VALIDE' ? 'check_circle' : d.statut === 'REJETE' ? 'cancel' : 'hourglass_empty',
-        color: d.statut === 'VALIDE' ? 'text-green-600' : d.statut === 'REJETE' ? 'text-red-600' : 'text-yellow-600'
+        icon: d.statut === 'VALIDE' ? 'check_circle' : d.statut === 'REJETE' ? 'cancel' : d.statut === 'RECLAMATION' ? 'assignment_return' : 'hourglass_empty',
+        color: d.statut === 'VALIDE' ? 'text-green-600' : d.statut === 'REJETE' ? 'text-red-600' : d.statut === 'RECLAMATION' ? 'text-orange-600' : 'text-yellow-600'
       }));
   }
 
   loadDashboardData() {
     this.loading = true;
     this.error = null;
+
+    // Charger aussi les dossiers ATCT en attente pour l'agent CNSS
+    this.atctService.getEnAttente().subscribe({
+      next: (data) => this.dossiersAtctRecus = data || [],
+      error: () => this.dossiersAtctRecus = []
+    });
 
     forkJoin({
       employers: this.cooperantService.getAll(),

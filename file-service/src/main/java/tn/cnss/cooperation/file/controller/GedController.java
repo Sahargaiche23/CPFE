@@ -49,10 +49,14 @@ public class GedController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @PostMapping("/documents/upload")
-    public ResponseEntity<GedDocument> uploadDocument(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "titre", required = false) String titre,
+    @GetMapping("/documents/{id}/children")
+    public ResponseEntity<List<GedDocument>> getChildren(@PathVariable Long id) {
+        return ResponseEntity.ok(gedService.getChildren(id));
+    }
+    
+    @PostMapping("/documents/create-folder")
+    public ResponseEntity<GedDocument> createFolder(
+            @RequestParam("titre") String titre,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "categorie", required = false, defaultValue = "AUTRE") String categorie,
             @RequestParam(value = "tags", required = false) String tagsJson,
@@ -62,7 +66,32 @@ public class GedController {
             if (tagsJson != null && !tagsJson.isEmpty()) {
                 tags = objectMapper.readValue(tagsJson, new TypeReference<List<String>>() {});
             }
+            GedDocument folder = gedService.createFolder(titre, description, categorie, tags, user);
+            return ResponseEntity.ok(folder);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    @PostMapping("/documents/upload")
+    public ResponseEntity<GedDocument> uploadDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "titre", required = false) String titre,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "categorie", required = false, defaultValue = "AUTRE") String categorie,
+            @RequestParam(value = "tags", required = false) String tagsJson,
+            @RequestParam(value = "parentId", required = false) Long parentId,
+            @RequestHeader(value = "X-User", required = false, defaultValue = "system") String user) {
+        try {
+            List<String> tags = null;
+            if (tagsJson != null && !tagsJson.isEmpty()) {
+                tags = objectMapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+            }
             GedDocument doc = gedService.uploadDocument(file, titre, description, categorie, tags, user);
+            if (parentId != null) {
+                doc.setParentId(parentId);
+                doc = gedService.save(doc);
+            }
             return ResponseEntity.ok(doc);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();

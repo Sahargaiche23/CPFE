@@ -64,6 +64,7 @@ public class DossierATCTService {
         stats.put("en_attente", repository.countEnAttente());
         stats.put("valides", repository.countValides());
         stats.put("rejetes", repository.countRejetes());
+        stats.put("reclamations", repository.countReclamations());
         return stats;
     }
 
@@ -249,6 +250,18 @@ public class DossierATCTService {
         dossier.setValidePar(agentId);
         
         log.info("Dossier {} rejeté par agent {} - Motif: {}", id, agentId, motif);
+        return repository.save(dossier);
+    }
+
+    @Transactional
+    public DossierATCT reclamation(Long id, String motif, Long agentId) {
+        DossierATCT dossier = findById(id);
+        dossier.setStatut("RECLAMATION");
+        dossier.setMotifRejet(motif);
+        dossier.setDateValidation(LocalDateTime.now());
+        dossier.setValidePar(agentId);
+        
+        log.info("Dossier {} réclamation par agent {} - Motif: {}", id, agentId, motif);
         return repository.save(dossier);
     }
 
