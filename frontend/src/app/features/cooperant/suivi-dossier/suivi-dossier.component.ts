@@ -105,7 +105,7 @@ interface DossierATCT {
                   <p class="text-sm text-gray-500" *ngIf="cooperant?.numAffiliation">Complétée</p>
                   <p class="text-sm text-gray-500" *ngIf="!cooperant?.numAffiliation">En cours...</p>
                   <div class="mt-2 p-3 rounded-lg bg-blue-50" *ngIf="cooperant?.numAffiliation">
-                    <p class="font-medium text-blue-700">N° Affiliation: {{ cooperant?.numAffiliation }}</p>
+                    <p class="font-medium text-blue-700">N° Affiliation: {{ cooperant?.cleAffiliation }}-{{ cooperant?.numAffiliation }}</p>
                     <p class="text-sm text-blue-600 mt-1">Votre attestation d'affiliation a été générée</p>
                   </div>
                   <p class="text-sm text-gray-600 mt-1" *ngIf="!cooperant?.numAffiliation">Attribution du numéro d'affiliation CNSS</p>
