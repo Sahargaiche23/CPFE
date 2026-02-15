@@ -513,6 +513,33 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
               </div>
             }
 
+            <!-- Attestation d'Affiliation -->
+            @if (gedDocuments.attestationAffiliation) {
+              <div class="mt-4 border rounded-lg p-4 bg-blue-50 border-blue-200">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">📄</span>
+                    <div>
+                      <p class="font-medium text-blue-800">Attestation d'Affiliation</p>
+                      <p class="text-xs text-blue-600">شهادة الإنخراط</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-xs">Déposé ✓</span>
+                </div>
+                <p class="text-xs text-blue-700 bg-blue-100 rounded px-2 py-1 mb-2">📎 {{ gedDocuments.attestationAffiliation.fichierNom }} ({{ formatSize(gedDocuments.attestationAffiliation.fichierTaille) }})</p>
+                <div class="flex gap-2">
+                  <button (click)="previewDocument('attestationAffiliation')" class="flex-1 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Aperçu
+                  </button>
+                  <button (click)="downloadDocument('attestationAffiliation')" class="flex-1 py-1.5 border border-blue-600 text-blue-600 text-xs rounded hover:bg-blue-50 flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Télécharger
+                  </button>
+                </div>
+              </div>
+            }
+
             <!-- Aperçu Décision d'Affectation -->
             @if (showDecisionPreview) {
               <div class="mt-4 border-2 border-blue-300 rounded-lg overflow-hidden">
@@ -706,7 +733,7 @@ export class AtctDetailComponent implements OnInit {
   showDecisionPreview = false;
 
   // Documents GED liés au dossier
-  gedDocuments: {decisionAffectation?: GedDocument, contrat?: GedDocument, attestationSalaire?: GedDocument, cin?: GedDocument, autre?: GedDocument} = {};
+  gedDocuments: {decisionAffectation?: GedDocument, contrat?: GedDocument, attestationSalaire?: GedDocument, cin?: GedDocument, autre?: GedDocument, attestationAffiliation?: GedDocument} = {};
   gedLoaded = false;
 
   constructor(
@@ -789,6 +816,8 @@ export class AtctDetailComponent implements OnInit {
         this.gedDocuments.decisionAffectation = doc;
       } else if (titre.includes('contrat') || tagsStr.includes('contrat')) {
         this.gedDocuments.contrat = doc;
+      } else if (tagsStr.includes('attestation-affiliation') || (titre.includes('attestation') && titre.includes('affiliation'))) {
+        this.gedDocuments.attestationAffiliation = doc;
       } else if (titre.includes('attestation') || titre.includes('salaire') || tagsStr.includes('attestation-salaire')) {
         this.gedDocuments.attestationSalaire = doc;
       } else if (titre.includes('cin') || tagsStr.includes('cin')) {

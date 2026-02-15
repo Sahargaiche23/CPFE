@@ -122,6 +122,9 @@ public class DossierATCTService {
         dossier.setAssuranceMaladie(updates.getAssuranceMaladie());
         dossier.setCapitalDeces(updates.getCapitalDeces());
         dossier.setDateEffetAssurance(updates.getDateEffetAssurance());
+        dossier.setStatut(updates.getStatut() != null ? updates.getStatut() : dossier.getStatut());
+        dossier.setAffiliationId(updates.getAffiliationId());
+        dossier.setNumAffiliation(updates.getNumAffiliation());
         dossier.setModifiePar(agentId);
         dossier.setDateModification(LocalDateTime.now());
         
@@ -279,6 +282,15 @@ public class DossierATCTService {
         dossier.setAffiliationId(affiliationId);
         dossier.setNumAffiliation(numAffiliation);
         dossier.setStatut("AFFILIE");
+        return repository.save(dossier);
+    }
+
+    @Transactional
+    public DossierATCT delierAffiliation(Long id) {
+        DossierATCT dossier = findById(id);
+        dossier.setAffiliationId(null);
+        dossier.setNumAffiliation(null);
+        dossier.setStatut("VALIDE");
         return repository.save(dossier);
     }
 

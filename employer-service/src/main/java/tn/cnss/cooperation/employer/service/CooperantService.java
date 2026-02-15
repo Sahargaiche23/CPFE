@@ -526,6 +526,14 @@ public class CooperantService {
                 cooperant.setDateEffetAffiliation(java.time.LocalDate.parse(dateStr));
             }
         }
+        if (updates.containsKey("actif")) {
+            cooperant.setActif("true".equalsIgnoreCase(updates.get("actif")));
+        }
+        
+        // Toujours réactiver le coopérant quand on met à jour son affiliation
+        if (updates.containsKey("numAffiliation") && updates.get("numAffiliation") != null && !updates.get("numAffiliation").isEmpty()) {
+            cooperant.setActif(true);
+        }
         
         cooperant.setUpdatedAt(LocalDateTime.now());
         Cooperant saved = cooperantRepository.save(cooperant);

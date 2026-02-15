@@ -7,7 +7,9 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 import { CooperantService } from '../../../core/services/cooperant.service';
 import { AffiliationService } from '../../../core/services/affiliation.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { GedService } from '../../../core/services/ged.service';
 import { environment } from '../../../../environments/environment';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-affiliation-complete',
@@ -538,6 +540,7 @@ export class AffiliationCompleteComponent implements OnInit {
     private cooperantService: CooperantService,
     private affiliationService: AffiliationService,
     private pdfService: PdfService,
+    private gedService: GedService,
     private http: HttpClient
   ) {
     this.affiliationForm = this.fb.group({
@@ -850,183 +853,30 @@ export class AffiliationCompleteComponent implements OnInit {
     this.nationalitesArray.removeAt(i);
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.submitting = true;
     const formData = this.affiliationForm.value;
-    const data = { cooperantId: this.cooperantId, ...formData };
-    console.log('Données affiliation:', data);
+    console.log('Données affiliation:', formData);
     
-    // Préparer les données pour le certificat
     const numAff = `${formData.cleAffiliation || '54'}-${formData.numAffiliation || '500380'}`;
     const adresseCooperant = this.cooperant?.adresseAr || this.cooperant?.adresseFr || 
       `${formData.codePostalEmp || ''} ${formData.localiteEmpAr || formData.localiteEmp || ''}`.trim();
-    const certificatData = {
-      affiliationNumber: numAff,
-      employerName: formData.raisonSocialeFr || this.cooperant?.nomCompletFr,
-      employerNumber: `${formData.empMatricule || ''}-${formData.empCle || ''}`,
-      employeeName: this.cooperant?.nomCompletAr || this.cooperant?.nomCompletFr,
-      startDate: formData.dateEffet || new Date().toLocaleDateString('fr-FR'),
-      regime: formData.codeRegimeCompl || '500',
-      address: adresseCooperant,
-      registrationNumber: `${formData.matriculeAssure || ''}-${formData.cleAssure || ''}`
-    };
-
-    // Calculer le montant cotisation trimestrielle (exemple: 25% du salaire)
     const salaire = parseFloat(formData.salaireTunisie) || 0;
-    const tauxCotisation = 0.2575; // 25.75% taux cotisation
+    const tauxCotisation = 0.2575;
     const montantCotisation = (salaire * tauxCotisation).toFixed(3);
 
-    // Envoyer email HTML formaté comme attestation officielle
-    const emailHtml = `
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body { font-family: 'Amiri', 'Traditional Arabic', Arial, serif; direction: rtl; }
-    .container { max-width: 700px; margin: 0 auto; padding: 20px; border: 2px solid #8B0000; }
-    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #8B0000; padding-bottom: 15px; margin-bottom: 20px; }
-    .header-fr { text-align: left; font-size: 11px; direction: ltr; }
-    .header-ar { text-align: right; font-size: 13px; }
-    .logo-section { text-align: center; margin: 20px 0; }
-    .logo-text-fr { color: #8B0000; font-size: 18px; font-weight: bold; font-style: italic; }
-    .logo-text-ar { color: #8B0000; font-size: 16px; font-weight: bold; }
-    .info-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 12px; }
-    .title { text-align: center; color: #8B0000; font-size: 16px; font-weight: bold; margin: 25px 0; text-decoration: underline; }
-    .content { direction: rtl; text-align: right; line-height: 2; font-size: 13px; margin: 20px 0; }
-    .signature { text-align: left; margin-top: 40px; font-size: 12px; direction: ltr; }
-    .footer { border-top: 1px solid #ccc; margin-top: 30px; padding-top: 10px; font-size: 10px; text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    td { padding: 8px; border: 1px solid #ddd; }
-    .label { background: #f5f5f5; font-weight: bold; width: 40%; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="header-fr">
-        République Tunisienne<br>
-        Ministère des Affaires Sociales et de solidarité<br>
-        et des Tunisiens à l'Étranger
-      </div>
-      <div class="header-ar">
-        الجمهورية التونسية<br>
-        وزارة الشؤون الاجتماعية و التضامن<br>
-        و التونسيين بالخارج
-      </div>
-    </div>
-    
-    <div class="logo-section">
-      <div class="logo-text-fr">Caisse Nationale de Sécurité Sociale</div>
-      <div class="logo-text-ar">الصندوق الوطني للضمان الاجتماعي</div>
-    </div>
-    
-    <div class="info-row">
-      <span>المكتب الجهوي بتونس المدينة</span>
-      <span style="direction:ltr">Tunis, le ${this.today}</span>
-    </div>
-    
-    <div class="info-row">
-      <span>شارع مدريد - تونس 12</span>
-      <span style="direction:ltr">رقم الإنخراط: ${numAff}</span>
-    </div>
-    
-    <div class="info-row">
-      <span>(السيد/ة): ${this.cooperant?.nomCompletAr || this.cooperant?.nomCompletFr || ''}</span>
-      <span style="direction:ltr">رقم التسجيل: ${formData.matriculeAssure || ''}-${formData.cleAssure || ''}</span>
-    </div>
-    
-    <div class="title">الموضوع: إعلام بالإنخراط</div>
-    
-    <div class="content">
-      <p>أما بعد،</p>
-      <p>
-        أتشرف بإعلامكم بقبول مطلب إنخراطكم بالصندوق الوطني للضمان الاجتماعي في إطار التغطية الاجتماعية
-        للأعوان الموفدين في حالة إلحاق للعمل في نطاق التعاون الفني وإسنادكم رقم الإنخراط المبين أعلاه والذي
-        تبدأ فاعليته بعنوان نظام جرايات الشيخوخة والعجز والباقين على قيد الحياة من تاريخ
-        <strong>${formData.dateEffet || '-'}</strong> فاعليته بعنوان نظام التأمينات الاجتماعية من تاريخ
-        <strong>${formData.periodeDebut || '-'}</strong>.
-      </p>
-      <p>
-        لذا فالمرغوب منكم ذكر رقم إنخراطكم، بإضافة إلى رقم تسجيلكم، في مختلف تعاملاتكم مع مصالح
-        الصندوق الوطني للضمان الاجتماعي المتعلقة بالتغطية الاجتماعية بعنوان فترات الإلحاق في نطاق التعاون الفني
-        ولضمان مواصلة التمتع بمنافع الضمان الاجتماعي في أحسن الظروف، المرغوب منكم دفع
-        مساهماتكم قبل انقضاء الأجل القانوني المحدد باليوم الخامس عشر الموالي لكل ثلاثية، كما يمكنكم دفع
-        مساهماتكم مسبقا أو شهريا.
-      </p>
-    </div>
-    
-    <table>
-      <tr><td class="label">رقم الإنخراط</td><td>${numAff}</td></tr>
-      <tr><td class="label">النظام</td><td>${formData.codeRegimeCompl || '500'} - التعاون الفني</td></tr>
-      <tr><td class="label">المبلغ الثلاثي</td><td>${salaire.toLocaleString('fr-FR', {minimumFractionDigits: 3})} د.ت</td></tr>
-      <tr><td class="label">نسبة المساهمة</td><td>25.75%</td></tr>
-      <tr><td class="label">المبلغ المستوجب</td><td><strong>${montantCotisation} د.ت</strong></td></tr>
-      <tr><td class="label">RIB</td><td style="direction:ltr">03 000 0000 000012345 67</td></tr>
-    </table>
-    
-    <div class="signature">
-      <p>مع فائق الاحترام والتقدير</p>
-      <p>والسلام</p>
-      <br><br>
-      <p><strong>رئيس المكتب الجهوي بتونس المدينة</strong></p>
-    </div>
-    
-    <div class="footer">
-      CNSS - Caisse Nationale de Sécurité Sociale | Tél: +216 71 123 456 | cooperation@cnss.tn
-    </div>
-  </div>
-</body>
-</html>`;
-
-    const emailData = {
-      to: this.cooperant?.email,
-      subject: 'إعلام بالإنخراط - Certificat d\'Affiliation CNSS',
-      body: emailHtml
-    };
-
-    // Générer le PDF et l'envoyer en pièce jointe
-    this.pdfService.generateAttestationPdfBase64({
-      affiliationNumber: numAff,
-      employeeName: this.cooperant?.nomCompletFr || '',
-      employeeNameAr: this.cooperant?.nomCompletAr,
-      registrationNumber: `${formData.matriculeAssure || ''}-${formData.cleAssure || ''}`,
-      regime: formData.codeRegimeCompl || '500',
-      dateEffet: formData.dateEffet || '',
-      periodeDebut: formData.periodeDebut || '',
-      periodeFin: formData.periodeFin || '',
-      salaire: salaire,
-      montantCotisation: montantCotisation,
-      address: adresseCooperant
-    }).then(pdfBase64 => {
-      // Envoyer email avec PDF en pièce jointe
-      const emailPayload = {
-        to: this.cooperant?.email,
-        subject: 'إعلام بالإنخراط - Attestation d\'Affiliation CNSS',
-        content: `Bonjour ${this.cooperant?.nomCompletFr || ''},\n\nVeuillez trouver ci-joint votre attestation d'affiliation CNSS.\n\nN° Affiliation: ${numAff}\nRégime: ${formData.codeRegimeCompl || '500'} - Coopération Technique\n\nCordialement,\nCNSS - Caisse Nationale de Sécurité Sociale`,
-        pdfBase64: pdfBase64,
-        fileName: `attestation_affiliation_${numAff}.pdf`
-      };
-      
-      this.http.post(`${environment.apiUrl}/notification/email-with-attachment`, emailPayload).subscribe({
-        next: () => console.log('Email avec PDF envoyé avec succès'),
-        error: (err) => console.log('Email non envoyé:', err.message)
-      });
-
-      // Sauvegarder le numAffiliation, salaire et date dans le coopérant
-      const salaire = parseFloat(formData.salaireTunisie) || 0;
+    try {
+      // ========== 1. Sauvegarder l'affiliation dans le backend (ATTENDRE la réponse) ==========
       if (this.cooperantId) {
-        this.cooperantService.updateAffiliation(
+        await lastValueFrom(this.cooperantService.updateAffiliation(
           this.cooperantId,
           formData.numAffiliation || '',
           formData.cleAffiliation || '',
           salaire,
           formData.dateEffet || ''
-        ).subscribe({
-          next: () => console.log('Affiliation sauvegardée dans le coopérant'),
-          error: (err) => console.log('Erreur sauvegarde affiliation:', err.message)
-        });
+        ));
+        console.log('Affiliation sauvegardée dans le coopérant');
       } else if (this.cooperant?.email) {
-        // Créer le coopérant depuis les données ATCT puis sauvegarder l'affiliation
         const affiliationData = {
           email: this.cooperant.email,
           nomCompletFr: formData.raisonSocialeFr || this.cooperant.nomCompletFr,
@@ -1036,22 +886,107 @@ export class AffiliationCompleteComponent implements OnInit {
           dateEffetAffiliation: formData.dateEffet || '',
           adresse: formData.adresseAssure || formData.adresseEmp || ''
         };
-        this.http.post('/api/affiliations/create-from-atct', affiliationData).subscribe({
-          next: (result: any) => console.log('Affiliation créée:', result),
-          error: (err) => console.log('Erreur création affiliation:', err.message)
-        });
+        const result: any = await lastValueFrom(this.http.post('/api/affiliations/create-from-atct', affiliationData));
+        console.log('Affiliation créée:', result);
       }
 
-      // Télécharger aussi le PDF localement
-      this.pdfService.generateAffiliationAttestation(certificatData);
+      // ========== 2. Générer le PDF attestation ==========
+      const pdfBase64 = await this.pdfService.generateAttestationPdfBase64({
+        affiliationNumber: numAff,
+        employeeName: this.cooperant?.nomCompletFr || '',
+        employeeNameAr: this.cooperant?.nomCompletAr,
+        registrationNumber: `${formData.matriculeAssure || ''}-${formData.cleAssure || ''}`,
+        regime: formData.codeRegimeCompl || '500',
+        dateEffet: formData.dateEffet || '',
+        periodeDebut: formData.periodeDebut || '',
+        periodeFin: formData.periodeFin || '',
+        salaire: salaire,
+        montantCotisation: montantCotisation,
+        address: adresseCooperant
+      });
+
+      // ========== 3. Uploader l'attestation dans la GED du coopérant ==========
+      try {
+        // Chercher le dossier du coopérant dans la GED
+        const allDocs = await lastValueFrom(this.gedService.getDocuments());
+        const nomComplet = this.cooperant?.nomCompletFr || '';
+        const email = this.cooperant?.email || '';
+        console.log('Recherche dossier GED pour:', nomComplet, '- email:', email, '- docs trouvés:', allDocs.length);
+        
+        // Chercher le dossier du coopérant par nom (fichierType = 'folder')
+        let folder = allDocs.find(d => 
+          d.fichierType === 'folder' && 
+          d.titre?.toLowerCase().includes(nomComplet.toLowerCase())
+        );
+        // Fallback: chercher un dossier par catégorie Dossiers ATCT contenant le nom
+        if (!folder) {
+          folder = allDocs.find(d => 
+            d.fichierType === 'folder' && 
+            d.categorie === 'Dossiers ATCT'
+          );
+        }
+        
+        console.log('Dossier GED trouvé:', folder ? `id=${folder.id}, titre=${folder.titre}` : 'AUCUN');
+        
+        // Convertir base64 en File
+        const byteCharacters = atob(pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+        const pdfFile = new File([pdfBlob], `attestation_affiliation_${numAff}.pdf`, { type: 'application/pdf' });
+        
+        const uploadMetadata: any = {
+          titre: `Attestation d'Affiliation - ${numAff}`,
+          description: `Attestation d'affiliation CNSS - ${nomComplet}`,
+          categorie: 'Dossiers ATCT',
+          tags: ['attestation-affiliation']
+        };
+        if (folder) {
+          uploadMetadata.parentId = folder.id;
+        }
+        
+        await lastValueFrom(this.gedService.uploadDocumentSimple(pdfFile, uploadMetadata));
+        console.log('Attestation uploadée dans la GED');
+      } catch (gedErr) {
+        console.log('Upload GED non effectué:', gedErr);
+      }
+
+      // ========== 4. Envoyer email avec PDF en pièce jointe ==========
+      const emailPayload = {
+        to: this.cooperant?.email,
+        subject: 'إعلام بالإنخراط - Attestation d\'Affiliation CNSS',
+        content: `Bonjour ${this.cooperant?.nomCompletFr || ''},\n\nVeuillez trouver ci-joint votre attestation d'affiliation CNSS.\n\nN° Affiliation: ${numAff}\nRégime: ${formData.codeRegimeCompl || '500'} - Coopération Technique\n\nCordialement,\nCNSS - Caisse Nationale de Sécurité Sociale`,
+        pdfBase64: pdfBase64,
+        fileName: `attestation_affiliation_${numAff}.pdf`
+      };
+      this.http.post(`${environment.apiUrl}/notification/email-with-attachment`, emailPayload).subscribe({
+        next: () => console.log('Email avec PDF envoyé'),
+        error: (err) => console.log('Email non envoyé:', err.message)
+      });
+
+      // ========== 5. Télécharger le PDF localement ==========
+      this.pdfService.generateAffiliationAttestation({
+        affiliationNumber: numAff,
+        employerName: formData.raisonSocialeFr || this.cooperant?.nomCompletFr,
+        employerNumber: `${formData.empMatricule || ''}-${formData.empCle || ''}`,
+        employeeName: this.cooperant?.nomCompletAr || this.cooperant?.nomCompletFr,
+        startDate: formData.dateEffet || new Date().toLocaleDateString('fr-FR'),
+        regime: formData.codeRegimeCompl || '500',
+        address: adresseCooperant,
+        registrationNumber: `${formData.matriculeAssure || ''}-${formData.cleAssure || ''}`
+      });
+
       this.submitting = false;
       alert('Affiliation enregistrée avec succès!\n\n- Email avec attestation PDF envoyé\n- Certificat d\'affiliation généré');
       this.router.navigate(['/affiliation']);
-    }).catch(err => {
-      console.error('Erreur génération PDF:', err);
+    } catch (err: any) {
+      console.error('Erreur création affiliation:', err);
       this.submitting = false;
-      alert('Erreur lors de la génération du PDF');
-    });
+      alert('Erreur lors de la création de l\'affiliation: ' + (err.message || err));
+    }
   }
 
   getMatricule(): string {

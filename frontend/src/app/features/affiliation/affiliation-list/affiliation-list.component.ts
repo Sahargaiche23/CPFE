@@ -126,90 +126,171 @@ export class AffiliationListComponent implements OnInit {
     this.loading = true;
     this.error = null;
     
-    // Charger les coopérants et les dossiers ATCT en parallèle
-    this.cooperantService.getAll().subscribe({
-      next: (cooperants: Cooperant[]) => {
-        // Filtrer uniquement ceux qui ont un numAffiliation
-        const affiliatedCooperants = cooperants.filter(c => c.numAffiliation);
-        
-        // Charger les dossiers ATCT pour récupérer les infos employeur
-        this.http.get<any[]>('/api/atct').subscribe({
-          next: (dossiers) => {
-            this.affiliations = affiliatedCooperants.map((c: Cooperant) => {
-              // Trouver le dossier ATCT correspondant
-              const dossier = dossiers.find(d => d.email === c.email);
-              
-              return {
-                id: c.id,
-                numAffiliation: c.cleAffiliation && c.numAffiliation 
-                  ? `${c.cleAffiliation}-${c.numAffiliation}` 
-                  : c.numAffiliation || '-',
-                employerName: dossier?.paysEtranger || 'Employeur étranger',
-                employerId: dossier?.matriculeEmployeurComplet || '-',
-                assureName: c.nomCompletFr || c.nomCompletAr || '-',
-                assureNameAr: c.nomCompletAr || '',
-                numSecuSociale: c.numPieceIdentite || '-',
-                dateDebut: c.dateEffetAffiliation 
-                  ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
-                  : (c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '-'),
-                dateFin: dossier?.dateFinDetachement 
-                  ? new Date(dossier.dateFinDetachement).toLocaleDateString('fr-FR') 
-                  : '-',
-                salaire: c.salaire || 0,
-                status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
-                statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
-                regime: c.codeRegime || '500',
-                email: c.email
-              };
-            });
-            
-            this.filteredAffiliations = [...this.affiliations];
+    // Charger les dossiers ATCT (source principale pour les affiliations)
+    this.http.get<any[]>('/api/atct').subscribe({
+      next: (dossiers) => {
+        // Aussi charger les coopérants pour compléter les données
+        this.cooperantService.getAll().subscribe({
+          next: (cooperants: Cooperant[]) => {
+            this.buildAffiliationsList(dossiers, cooperants);
             this.loading = false;
           },
           error: () => {
-            // Fallback sans données ATCT
-            this.affiliations = affiliatedCooperants.map((c: Cooperant) => ({
-              id: c.id,
-              numAffiliation: c.cleAffiliation && c.numAffiliation 
-                ? `${c.cleAffiliation}-${c.numAffiliation}` 
-                : c.numAffiliation || '-',
-              employerName: '-',
-              employerId: '-',
-              assureName: c.nomCompletFr || c.nomCompletAr || '-',
-              dateDebut: c.dateEffetAffiliation 
-                ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') 
-                : '-',
-              dateFin: '-',
-              salaire: c.salaire || 0,
-              status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
-              statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
-              regime: c.codeRegime || '500',
-              email: c.email
-            }));
-            this.filteredAffiliations = [...this.affiliations];
+            this.buildAffiliationsList(dossiers, []);
             this.loading = false;
           }
         });
       },
       error: (err: any) => {
-        console.error('Erreur chargement données:', err);
-        this.error = 'Erreur lors du chargement des données';
-        this.loading = false;
+        console.error('Erreur chargement ATCT:', err);
+        // Fallback: charger uniquement depuis les coopérants
+        this.cooperantService.getAll().subscribe({
+          next: (cooperants: Cooperant[]) => {
+            const affiliated = cooperants.filter(c => c.numAffiliation);
+            this.affiliations = affiliated.map(c => ({
+              id: c.id,
+              numAffiliation: c.cleAffiliation && c.numAffiliation 
+                ? `${c.cleAffiliation}-${c.numAffiliation}` : c.numAffiliation || '-',
+              employerName: '-',
+              employerId: '-',
+              assureName: c.nomCompletFr || c.nomCompletAr || '-',
+              assureNameAr: c.nomCompletAr || '',
+              numSecuSociale: c.numPieceIdentite || '-',
+              dateDebut: c.dateEffetAffiliation 
+                ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') : '-',
+              dateFin: '-',
+              salaire: c.salaire || 0,
+              status: 'active',
+              statusLabel: 'Active',
+              regime: c.codeRegime || '500',
+              email: c.email
+            }));
+            this.filteredAffiliations = [...this.affiliations];
+            this.loading = false;
+          },
+          error: () => {
+            this.error = 'Erreur lors du chargement des données';
+            this.loading = false;
+          }
+        });
       }
     });
+  }
+
+  private buildAffiliationsList(dossiers: any[], cooperants: Cooperant[]) {
+    const seen = new Set<string>();
+    this.affiliations = [];
+
+    // 1. Dossiers ATCT affiliés (source fiable - contient numAffiliation même si coopérant inactif)
+    const affiliatedDossiers = dossiers.filter(d => d.statut === 'AFFILIE' && d.numAffiliation);
+    for (const d of affiliatedDossiers) {
+      const key = d.email || d.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const coop = cooperants.find(c => c.email === d.email);
+      this.affiliations.push({
+        id: d.affiliationId || d.id,
+        numAffiliation: d.numAffiliation || '-',
+        employerName: d.paysEtranger || 'Employeur étranger',
+        employerId: d.matriculeEmployeurComplet || '-',
+        assureName: d.nomCompletFr || `${d.prenomFr || ''} ${d.nomFr || ''}`.trim() || '-',
+        assureNameAr: d.nomCompletAr || `${d.prenomAr || ''} ${d.nomAr || ''}`.trim() || '',
+        numSecuSociale: d.numSecuSociale || coop?.numPieceIdentite || '-',
+        dateDebut: d.dateDebutDetachement 
+          ? new Date(d.dateDebutDetachement).toLocaleDateString('fr-FR') : '-',
+        dateFin: d.dateFinDetachement 
+          ? new Date(d.dateFinDetachement).toLocaleDateString('fr-FR') : '-',
+        salaire: d.salaireTunisie || coop?.salaire || 0,
+        status: 'active',
+        statusLabel: 'Active',
+        regime: d.codeRegime || coop?.codeRegime || '500',
+        email: d.email
+      });
+    }
+
+    // 2. Coopérants avec numAffiliation qui ne sont pas déjà dans la liste
+    const affiliatedCooperants = cooperants.filter(c => c.numAffiliation);
+    for (const c of affiliatedCooperants) {
+      const key = c.email || String(c.id);
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const dossier = dossiers.find(d => d.email === c.email);
+      this.affiliations.push({
+        id: c.id,
+        numAffiliation: c.cleAffiliation && c.numAffiliation 
+          ? `${c.cleAffiliation}-${c.numAffiliation}` : c.numAffiliation || '-',
+        employerName: dossier?.paysEtranger || 'Employeur étranger',
+        employerId: dossier?.matriculeEmployeurComplet || '-',
+        assureName: c.nomCompletFr || c.nomCompletAr || '-',
+        assureNameAr: c.nomCompletAr || '',
+        numSecuSociale: c.numPieceIdentite || '-',
+        dateDebut: c.dateEffetAffiliation 
+          ? new Date(c.dateEffetAffiliation).toLocaleDateString('fr-FR') : '-',
+        dateFin: dossier?.dateFinDetachement 
+          ? new Date(dossier.dateFinDetachement).toLocaleDateString('fr-FR') : '-',
+        salaire: c.salaire || 0,
+        status: c.statutValidation === 'VALIDE' ? 'active' : 'inactive',
+        statusLabel: c.statutValidation === 'VALIDE' ? 'Active' : 'En attente',
+        regime: c.codeRegime || '500',
+        email: c.email
+      });
+    }
+
+    this.filteredAffiliations = [...this.affiliations];
   }
 
   loadAffiliations() {
     this.loadAllData();
   }
 
-  deleteAffiliation(id: number) {
+  deleteAffiliation(affiliation: any) {
     if (confirm('Êtes-vous sûr de vouloir retirer cette affiliation ?')) {
-      // Retirer l'affiliation (numAffiliation) sans supprimer le coopérant
-      this.cooperantService.updateAffiliation(id, '', '').subscribe({
-        next: () => this.loadAffiliations(),
-        error: (err: any) => {
-          console.error('Erreur retrait affiliation:', err);
+      const doReload = () => {
+        this.loadAllData();
+        this.loadPendingATCT();
+      };
+
+      // Charger dossiers ATCT et coopérants en parallèle
+      this.http.get<any[]>('/api/atct').subscribe({
+        next: (dossiers) => {
+          // 1. Reset dossier ATCT → VALIDE
+          const dossier = dossiers.find(d => d.email === affiliation.email && d.statut === 'AFFILIE');
+          const resetAtctDone = new Promise<void>((resolve) => {
+            if (dossier) {
+              const { nomCompletFr, nomCompletAr, matriculeEmployeurComplet, ...cleanDossier } = dossier;
+              cleanDossier.affiliationId = null;
+              cleanDossier.numAffiliation = null;
+              cleanDossier.statut = 'VALIDE';
+              this.http.put(`/api/atct/${dossier.id}`, cleanDossier).subscribe({
+                next: () => { console.log('Dossier ATCT remis en VALIDE'); resolve(); },
+                error: (err) => { console.error('Erreur reset ATCT:', err); resolve(); }
+              });
+            } else {
+              resolve();
+            }
+          });
+
+          // 2. Effacer numAffiliation du coopérant via son ID (affiliationId du dossier ATCT)
+          const coopId = dossier?.affiliationId || affiliation.id;
+          const resetCoopDone = new Promise<void>((resolve) => {
+            if (coopId) {
+              console.log('Effacement affiliation coopérant ID:', coopId);
+              this.cooperantService.updateAffiliation(coopId, '', '').subscribe({
+                next: () => { console.log('Coopérant affiliation effacée'); resolve(); },
+                error: (err) => { console.error('Erreur reset coopérant:', err); resolve(); }
+              });
+            } else {
+              console.log('Aucun ID coopérant trouvé');
+              resolve();
+            }
+          });
+
+          // 3. Attendre les deux puis recharger
+          Promise.all([resetAtctDone, resetCoopDone]).then(() => doReload());
+        },
+        error: () => {
           alert('Erreur lors du retrait de l\'affiliation');
         }
       });

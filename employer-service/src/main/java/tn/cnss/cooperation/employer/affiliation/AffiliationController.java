@@ -51,6 +51,9 @@ public class AffiliationController {
                 return newCoop;
             });
         
+        // S'assurer que le coopérant est actif
+        cooperant.setActif(true);
+        
         // Mettre à jour avec les vraies données du dossier ATCT
         if (dossierATCT != null) {
             cooperant.setNomFr(dossierATCT.getNomFr());

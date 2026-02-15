@@ -101,6 +101,11 @@ public class DossierATCTController {
         return ResponseEntity.ok(service.lierAffiliation(id, affiliationId, numAffiliation));
     }
 
+    @PostMapping("/{id}/delier-affiliation")
+    public ResponseEntity<DossierATCT> delierAffiliation(@PathVariable Long id) {
+        return ResponseEntity.ok(service.delierAffiliation(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
