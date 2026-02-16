@@ -64,6 +64,18 @@ public class NotificationController {
         return ResponseEntity.ok("Notification Service is running");
     }
 
+    @PostMapping("/email-multi-attachments")
+    public ResponseEntity<String> sendEmailMultiAttachments(@RequestBody java.util.Map<String, Object> request) {
+        String to = (String) request.get("to");
+        String subject = (String) request.get("subject");
+        String content = (String) request.get("content");
+        @SuppressWarnings("unchecked")
+        java.util.List<java.util.Map<String, String>> attachments = 
+            (java.util.List<java.util.Map<String, String>>) request.get("attachments");
+        emailService.sendEmailWithMultipleAttachments(to, subject, content, attachments);
+        return ResponseEntity.ok("Email avec pièces jointes envoyé");
+    }
+
     @PostMapping("/atct-rappel")
     public ResponseEntity<String> sendAtctRappel(@RequestBody AtctRappelRequest request) {
         emailService.sendAtctRappelWithPdf(request);

@@ -51,9 +51,18 @@
           
           <!-- Info pour Toutes les périodes -->
           <div *ngIf="debitForm.get('periode')?.value === 'toutes'" class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-            <p class="text-yellow-800 text-sm">
-              <span class="font-semibold">Mode "Toutes":</span> Génère les avis de débit pour tous les trimestres impayés du coopérant sélectionné.
-            </p>
+            <div class="flex items-start">
+              <span class="material-icons text-yellow-600 mr-3 mt-0.5">info</span>
+              <div>
+                <p class="text-yellow-800 text-sm font-semibold mb-1">Mode "Toutes les périodes"</p>
+                <ul class="text-yellow-700 text-sm space-y-1">
+                  <li>• Génère les avis de débit pour <strong>tous les trimestres impayés</strong> du coopérant</li>
+                  <li>• Retour <strong>1 an maximum</strong> à partir de la date de début d'affiliation</li>
+                  <li>• Les trimestres déjà générés seront ignorés automatiquement</li>
+                  <li>• Un email récapitulatif sera envoyé au coopérant</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -158,8 +167,8 @@
           <button type="submit" [disabled]="debitForm.invalid || loading || !selectedCooperant" 
                   class="px-8 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center">
             <span *ngIf="loading" class="spinner-sm mr-2"></span>
-            <span class="material-icons mr-2">{{ isEditMode ? 'save' : 'add_circle' }}</span>
-            {{ isEditMode ? 'Modifier' : 'Créer' }}
+            <span class="material-icons mr-2">{{ isEditMode ? 'save' : debitForm.get('periode')?.value === 'toutes' ? 'playlist_add' : 'add_circle' }}</span>
+            {{ isEditMode ? 'Modifier' : debitForm.get('periode')?.value === 'toutes' ? 'Générer Toutes' : 'Créer' }}
           </button>
         </div>
       </div>

@@ -118,6 +118,43 @@ public class EmailService {
         }
     }
 
+    public void sendEmailWithMultipleAttachments(String to, String subject, String content, 
+                                                  java.util.List<java.util.Map<String, String>> attachments) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setTo(to);
+            helper.setSubject(subject);
+            
+            boolean isHtml = content != null && (content.contains("<html") || content.contains("<body") || content.contains("<div") || content.contains("<table"));
+            helper.setText(content != null ? content : "", isHtml);
+            
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                helper.setFrom(fromEmail);
+            }
+            
+            if (attachments != null) {
+                for (java.util.Map<String, String> att : attachments) {
+                    String pdfBase64 = att.get("pdfBase64");
+                    String fileName = att.get("fileName");
+                    if (pdfBase64 != null && !pdfBase64.isBlank()) {
+                        byte[] pdfBytes = Base64.getDecoder().decode(pdfBase64);
+                        jakarta.mail.util.ByteArrayDataSource dataSource = 
+                            new jakarta.mail.util.ByteArrayDataSource(pdfBytes, "application/pdf");
+                        helper.addAttachment(fileName != null ? fileName : "document.pdf", dataSource);
+                    }
+                }
+            }
+            
+            mailSender.send(message);
+            log.info("Email avec {} pièces jointes envoyé à: {}", 
+                     attachments != null ? attachments.size() : 0, to);
+        } catch (Exception e) {
+            log.error("Erreur envoi email multi-attachments: {}", e.getMessage());
+        }
+    }
+
     public void sendDebitEmailWithPdf(String to, String subject, String numAffiliation, String matricule,
                                        String nomCooperant, String adresse, int trimestre, int annee,
                                        double salaire, double montantTotal) {

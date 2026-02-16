@@ -52,6 +52,20 @@
     "pathRewrite": { "^/api/affiliations": "/api/affiliations" },
     "logLevel": "debug"
   },
+  "/api/notification": {
+    "target": "http://localhost:8087",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api/notification": "/notification" },
+    "logLevel": "debug"
+  },
+  "/api/debits": {
+    "target": "http://localhost:8085",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api/debits": "/debits" },
+    "logLevel": "debug"
+  },
   "/api": {
     "target": "http://localhost:8080",
     "secure": false,

@@ -272,11 +272,9 @@ export class DebitGenerateComponent implements OnInit {
           this.loading = false;
           alert('Erreur lors de la génération du PDF');
         });
-      } else {
-        // Mode création - générer l'avis de débit avec PDF arabe
+      } else if (formData.periode === 'toutes') {
+        // Mode "Toutes" - Générer tous les trimestres impayés
         const nomCooperant = this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`;
-        
-        // Générer le PDF arabe côté frontend avec les cotisations sélectionnées
         const selectedCotisations = this.cotisations
           .filter(c => c.selected)
           .map(c => ({
@@ -286,7 +284,107 @@ export class DebitGenerateComponent implements OnInit {
             base: c.base,
             montant: c.montant
           }));
-        console.log('Cotisations sélectionnées pour PDF:', selectedCotisations);
+        
+        const requestData = {
+          cooperantId: this.selectedCooperant.id,
+          numAffiliation: formData.numAffiliation,
+          nomCooperant: nomCooperant,
+          adresse: this.selectedCooperant.adresseFr || '',
+          matricule: this.selectedCooperant.matriculeComplet || '',
+          salaire: salaire,
+          montantCotisation: montantCotisation,
+          dateDebut: formData.dateDebut || this.selectedCooperant.dateEffetAffiliation || '',
+          email: this.selectedCooperant.email || '',
+          cotisationsJson: JSON.stringify(selectedCotisations)
+        };
+        
+        this.http.post<any>('/api/debits/generate-all-unpaid', requestData).subscribe({
+          next: async (result) => {
+            if (result.generated === 0) {
+              this.loading = false;
+              alert(`Génération terminée:\n- 0 débits créés\n- ${result.skipped} ignorés (déjà existants)`);
+              return;
+            }
+
+            const trimList = (result.trimestres || []).join(', ');
+
+            // Générer 1 PDF multi-pages (1 page par trimestre, même template RTL arabe)
+            const pdfDebits = (result.trimestres || []).map((tri: string) => {
+              const triMatch = tri.match(/T(\d)-(\d+)/);
+              const triNum = triMatch ? parseInt(triMatch[1]) : 1;
+              const triYear = triMatch ? parseInt(triMatch[2]) : new Date().getFullYear();
+              return {
+                number: formData.numAffiliation,
+                employerName: nomCooperant,
+                trimestre: `T${triNum}`,
+                generatedDate: new Date().toISOString(),
+                amount: montantCotisation,
+                numAffiliation: formData.numAffiliation,
+                matricule: this.selectedCooperant!.matriculeComplet || '',
+                salaire: salaire,
+                adresse: this.selectedCooperant!.adresseFr || '',
+                annee: triYear,
+                cotisations: selectedCotisations
+              };
+            });
+
+            try {
+              const pdfBase64 = await this.pdfService.generateMultiPageDebitPdfBase64(pdfDebits);
+
+              // Envoyer 1 seul email avec 1 PDF multi-pages
+              if (this.selectedCooperant!.email) {
+                const emailData = {
+                  to: this.selectedCooperant!.email,
+                  subject: `CNSS - Avis de Débit - ${trimList}`,
+                  content: `Bonjour,\n\nVeuillez trouver ci-joint vos avis de débit pour les trimestres: ${trimList}.\n\nCordialement,\nCNSS - Caisse Nationale de Sécurité Sociale`,
+                  pdfBase64: pdfBase64,
+                  fileName: `avis_debit_${formData.numAffiliation}_${(result.trimestres || []).join('_')}.pdf`
+                };
+
+                this.http.post('/api/notification/email-with-attachment', emailData, { responseType: 'text' }).subscribe({
+                  next: () => {
+                    this.loading = false;
+                    alert(`Génération terminée:\n- ${result.generated} débits créés\n- ${result.skipped} ignorés\n\nTrimestres: ${trimList}\n\nUn email avec le PDF a été envoyé.`);
+                    this.router.navigate(['/debit']);
+                  },
+                  error: (emailErr: any) => {
+                    console.error('Erreur envoi email:', emailErr);
+                    this.loading = false;
+                    alert(`${result.generated} débits créés mais erreur lors de l'envoi de l'email.`);
+                    this.router.navigate(['/debit']);
+                  }
+                });
+              } else {
+                this.loading = false;
+                alert(`Génération terminée:\n- ${result.generated} débits créés\n- ${result.skipped} ignorés\n\nTrimestres: ${trimList}`);
+                this.router.navigate(['/debit']);
+              }
+            } catch (pdfErr) {
+              console.error('Erreur génération PDF:', pdfErr);
+              this.loading = false;
+              alert(`${result.generated} débits créés mais erreur lors de la génération du PDF.`);
+              this.router.navigate(['/debit']);
+            }
+          },
+          error: (err: any) => {
+            console.error('Erreur génération toutes:', err);
+            this.loading = false;
+            alert('Erreur lors de la génération des débits');
+          }
+        });
+      } else {
+        // Mode "En cours" - générer l'avis de débit pour 1 trimestre avec PDF arabe
+        const nomCooperant = this.selectedCooperant.nomCompletFr || `${this.selectedCooperant.prenomFr} ${this.selectedCooperant.nomFr}`;
+        
+        const selectedCotisations = this.cotisations
+          .filter(c => c.selected)
+          .map(c => ({
+            code: c.regime.code,
+            nomAr: c.regime.nomAr,
+            taux: c.regime.taux,
+            base: c.base,
+            montant: c.montant
+          }));
         
         const pdfData = {
           number: formData.numAffiliation,

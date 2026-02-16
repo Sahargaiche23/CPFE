@@ -11,9 +11,11 @@ import tn.cnss.cooperation.debit.entity.EngagementEcheance;
 import tn.cnss.cooperation.debit.repository.DebitRepository;
 import tn.cnss.cooperation.debit.repository.EngagementEcheanceRepository;
 import tn.cnss.cooperation.debit.service.DebitGenerationService;
+import tn.cnss.cooperation.debit.service.DebitSchedulerService;
 import tn.cnss.cooperation.debit.service.DebitService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/debits")
@@ -24,6 +26,7 @@ public class DebitController {
     
     private final EngagementEcheanceRepository echeanceRepository;
     private final DebitGenerationService debitGenerationService;
+    private final DebitSchedulerService debitSchedulerService;
     private final DebitService debitService;
     private final DebitRepository debitRepository;
     
@@ -142,6 +145,45 @@ public class DebitController {
         }
         echeanceRepository.deleteAll(echeances);
         return ResponseEntity.noContent().build();
+    }
+    
+    // ========== Nouveaux endpoints ==========
+    
+    @PostMapping("/auto-generate")
+    public ResponseEntity<Map<String, Object>> autoGenerate(@RequestBody Map<String, Object> request) {
+        int trimestre = request.get("trimestre") != null ? ((Number) request.get("trimestre")).intValue() : (java.time.LocalDate.now().getMonthValue() - 1) / 3 + 1;
+        int annee = request.get("annee") != null ? ((Number) request.get("annee")).intValue() : java.time.LocalDate.now().getYear();
+        log.info("Trigger manuel auto-génération T{}/{}", trimestre, annee);
+        Map<String, Object> result = debitSchedulerService.generateAllDebits(trimestre, annee);
+        return ResponseEntity.ok(result);
+    }
+    
+    @PostMapping("/generate-all-unpaid")
+    public ResponseEntity<Map<String, Object>> generateAllUnpaid(@RequestBody Map<String, Object> request) {
+        log.info("Génération tous trimestres impayés pour coopérant {}", request.get("cooperantId"));
+        Map<String, Object> result = debitSchedulerService.generateAllUnpaidForCooperant(request);
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/cooperant/{cooperantId}")
+    public ResponseEntity<List<Debit>> getByCooperant(@PathVariable Long cooperantId) {
+        return ResponseEntity.ok(debitRepository.findByCooperantId(cooperantId));
+    }
+    
+    @GetMapping("/cooperant/{cooperantId}/unpaid")
+    public ResponseEntity<List<Debit>> getUnpaidByCooperant(@PathVariable Long cooperantId) {
+        return ResponseEntity.ok(debitRepository.findUnpaidByCooperant(cooperantId));
+    }
+    
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<Debit> markAsPaid(@PathVariable Long id) {
+        return debitRepository.findById(id)
+            .map(debit -> {
+                debit.setPaye(true);
+                debit.setDatePaiement(java.time.LocalDate.now());
+                return ResponseEntity.ok(debitRepository.save(debit));
+            })
+            .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping("/health")

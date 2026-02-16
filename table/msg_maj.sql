@@ -1,5 +1,5 @@
 prompt PL/SQL Developer import file
-prompt Created on mardi 2 décembre 2025 by 66324
+prompt Created on mardi 2 dï¿½cembre 2025 by 66324
 set feedback off
 set define off
 prompt Dropping COPT.MSG_MAJ...
@@ -16,7 +16,7 @@ nologging;
 alter table COPT.MSG_MAJ
   add constraint PK_MSG_MAJ primary key (BUR_COD, CODE_APP, DATE_CRE);
 
-prompt Loading COPT.MSG_MAJ...
+prompt Loading COPT.MSG_MAJ....
 insert into COPT.MSG_MAJ (bur_cod, code_app, date_cre, msg_maj)
 values (81, 1, to_date('24-02-2017', 'dd-mm-yyyy'), '--- VOUS ETES SUR DONNEE PROD ---');
 insert into COPT.MSG_MAJ (bur_cod, code_app, date_cre, msg_maj)
