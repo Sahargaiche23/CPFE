@@ -32,6 +32,8 @@ public class AffiliationController {
         String adresse = (String) request.get("adresse");
         Object salaireObj = request.get("salaire");
         String dateEffetStr = (String) request.get("dateEffetAffiliation");
+        String reqNumAffiliation = (String) request.get("numAffiliation");
+        String reqCleAffiliation = (String) request.get("cleAffiliation");
         
         // Récupérer les vraies données du dossier ATCT
         DossierATCT dossierATCT = dossierATCTRepository.findByEmailAndActifTrue(email).orElse(null);
@@ -76,10 +78,15 @@ public class AffiliationController {
         cooperant.setStatutValidation("VALIDE");
         cooperant.setDateValidation(LocalDateTime.now());
         
-        // Générer numéro d'affiliation
-        String numAffiliation = String.format("%08d", cooperant.getMatricule());
+        // Utiliser le numéro d'affiliation envoyé par le frontend, sinon générer
+        String numAffiliation = (reqNumAffiliation != null && !reqNumAffiliation.isEmpty())
+            ? reqNumAffiliation
+            : String.format("%08d", cooperant.getMatricule());
+        String cleAffiliation = (reqCleAffiliation != null && !reqCleAffiliation.isEmpty())
+            ? reqCleAffiliation
+            : (codeRegime != null ? codeRegime.substring(0, 2) : "50");
         cooperant.setNumAffiliation(numAffiliation);
-        cooperant.setCleAffiliation(codeRegime != null ? codeRegime.substring(0, 2) : "50");
+        cooperant.setCleAffiliation(cleAffiliation);
         
         // Salaire
         if (salaireObj != null) {

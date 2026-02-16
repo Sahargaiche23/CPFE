@@ -884,7 +884,9 @@ export class AffiliationCompleteComponent implements OnInit {
           codeRegime: formData.codeRegimeCompl || '500',
           salaire: salaire,
           dateEffetAffiliation: formData.dateEffet || '',
-          adresse: formData.adresseAssure || formData.adresseEmp || ''
+          adresse: formData.adresseAssure || formData.adresseEmp || '',
+          numAffiliation: formData.numAffiliation || '',
+          cleAffiliation: formData.cleAffiliation || ''
         };
         const result: any = await lastValueFrom(this.http.post('/api/affiliations/create-from-atct', affiliationData));
         console.log('Affiliation créée:', result);
