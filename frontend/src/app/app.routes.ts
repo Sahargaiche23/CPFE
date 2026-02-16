@@ -76,6 +76,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/debit/debit.routes').then(m => m.DEBIT_ROUTES)
   },
   {
+    path: 'demande',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/demande/demande.routes').then(m => m.DEMANDE_ROUTES)
+  },
+  {
     path: 'payment',
     canActivate: [authGuard],
     loadChildren: () => import('./features/payment/payment.routes').then(m => m.PAYMENT_ROUTES)

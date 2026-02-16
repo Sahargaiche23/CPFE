@@ -7,6 +7,7 @@ import { DebitService } from '../../core/services/debit.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { AtctService } from '../../core/services/atct.service';
 import { GedService } from '../../core/services/ged.service';
+import { DemandeService } from '../../core/services/demande.service';
 import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { forkJoin } from 'rxjs';
@@ -25,6 +26,8 @@ export class DashboardComponent implements OnInit {
     pendingDebits: 0,
     totalPayments: 0
   };
+
+  demandesEnAttente = 0;
 
   // Stats pour agent ATCT
   atctStats = {
@@ -53,6 +56,7 @@ export class DashboardComponent implements OnInit {
     private paymentService: PaymentService,
     private atctService: AtctService,
     private gedService: GedService,
+    private demandeService: DemandeService,
     private authService: AuthService,
     public i18n: I18nService
   ) {}
@@ -128,6 +132,12 @@ export class DashboardComponent implements OnInit {
     this.atctService.getEnAttente().subscribe({
       next: (data) => this.dossiersAtctRecus = data || [],
       error: () => this.dossiersAtctRecus = []
+    });
+
+    // Charger les demandes en attente
+    this.demandeService.getStats().subscribe({
+      next: (data) => this.demandesEnAttente = data?.enAttente || 0,
+      error: () => {}
     });
 
     forkJoin({

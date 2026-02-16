@@ -146,6 +146,77 @@ interface DossierATCT {
           </div>
         </div>
 
+        <!-- Phase 3: Demandes Coopérant -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Mes Demandes
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">Déposer une demande ou suivre vos demandes en cours</p>
+            </div>
+            <div [routerLink]="['/cooperant/mes-demandes']" class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <span class="font-medium text-sm">Suivi ({{ nbDemandes }})</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Actualisation Salaire -->
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+                 [routerLink]="['/cooperant/demande-salaire']">
+              <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-200 transition">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800 text-sm">Actualisation Salaire</h4>
+              <p class="text-xs text-gray-500 mt-1">Mise à jour de votre salaire</p>
+            </div>
+
+            <!-- Sortie Régime Maladie -->
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+                 [routerLink]="['/cooperant/demande-sortie-regime']">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-200 transition">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800 text-sm">Sortie Régime Maladie</h4>
+              <p class="text-xs text-gray-500 mt-1">Demande de sortie du régime</p>
+            </div>
+
+            <!-- Annulation Assurance -->
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+                 [routerLink]="['/cooperant/demande-annulation']">
+              <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-red-200 transition">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800 text-sm">Annulation Assurance</h4>
+              <p class="text-xs text-gray-500 mt-1">Maladie + Capital Décès</p>
+            </div>
+
+            <!-- Rachat Loi 105 -->
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-amber-500 hover:shadow-lg transition cursor-pointer group bg-amber-50"
+                 [routerLink]="['/cooperant/demande-rachat']">
+              <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-amber-200 transition">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800 text-sm">Rachat Loi 105</h4>
+              <p class="text-xs text-gray-500 mt-1">Débits > 1 an · Taux 95%</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Détails du dossier -->
         <div class="bg-white rounded-xl shadow-lg p-6" *ngIf="cooperant">
           <h3 class="text-lg font-bold text-gray-800 mb-4">Informations du dossier</h3>
@@ -181,6 +252,7 @@ export class CooperantDashboardComponent implements OnInit {
   loading = true;
   nbReclamations = 0;
   nbDocuments = 0;
+  nbDemandes = 0;
 
   constructor(
     private cooperantService: CooperantService,
@@ -194,6 +266,7 @@ export class CooperantDashboardComponent implements OnInit {
     this.loadMyDossier();
     this.loadReclamations();
     this.loadDocuments();
+    this.loadDemandes();
   }
 
   loadMyDossier() {
@@ -227,6 +300,22 @@ export class CooperantDashboardComponent implements OnInit {
   loadDocuments() {
     this.http.get<any[]>(`/api/documents/cooperant/${this.username}`).subscribe({
       next: (docs) => this.nbDocuments = docs.length,
+      error: () => {}
+    });
+  }
+
+  loadDemandes() {
+    // Charger les demandes du coopérant connecté
+    this.cooperantService.getAll().subscribe({
+      next: (cooperants) => {
+        const coop = cooperants.find(c => c.email === this.username);
+        if (coop?.id) {
+          this.http.get<any[]>(`/api/demandes/cooperant/${coop.id}`).subscribe({
+            next: (demandes) => this.nbDemandes = demandes.length,
+            error: () => {}
+          });
+        }
+      },
       error: () => {}
     });
   }

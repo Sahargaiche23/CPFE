@@ -59,6 +59,12 @@
     "pathRewrite": { "^/api/notification": "/notification" },
     "logLevel": "debug"
   },
+  "/api/demandes": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
   "/api/debits": {
     "target": "http://localhost:8085",
     "secure": false,

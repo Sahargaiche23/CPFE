@@ -1,0 +1,211 @@
+<app-main-layout>
+  <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">
+        <span class="material-icons text-cnss-primary align-middle mr-2">add_circle</span>
+        Nouvelle Demande
+      </h1>
+      <a routerLink="/demande" class="text-gray-500 hover:text-gray-700 flex items-center gap-1">
+        <span class="material-icons text-sm">arrow_back</span> Retour
+      </a>
+    </div>
+
+    <form [formGroup]="demandeForm" (ngSubmit)="onSubmit()">
+      <!-- Type de demande -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">Type de demande</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" formControlName="typeDemande" value="ACTUALISATION_SALAIRE" (change)="onTypeChange()" class="hidden peer">
+            <div class="border-2 rounded-xl p-4 text-center transition-all peer-checked:border-cnss-primary peer-checked:bg-red-50 hover:border-gray-400">
+              <span class="material-icons text-3xl text-cnss-primary">paid</span>
+              <p class="text-xs font-semibold mt-2">Actualisation Salaire</p>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" formControlName="typeDemande" value="SORTIE_REGIME_MALADIE" (change)="onTypeChange()" class="hidden peer">
+            <div class="border-2 rounded-xl p-4 text-center transition-all peer-checked:border-cnss-primary peer-checked:bg-red-50 hover:border-gray-400">
+              <span class="material-icons text-3xl text-cnss-primary">medical_services</span>
+              <p class="text-xs font-semibold mt-2">Sortie Régime Maladie</p>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" formControlName="typeDemande" value="ANNULATION_ASSURANCE" (change)="onTypeChange()" class="hidden peer">
+            <div class="border-2 rounded-xl p-4 text-center transition-all peer-checked:border-cnss-primary peer-checked:bg-red-50 hover:border-gray-400">
+              <span class="material-icons text-3xl text-cnss-primary">cancel</span>
+              <p class="text-xs font-semibold mt-2">Annulation Assurance + Capital Décès</p>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" formControlName="typeDemande" value="RACHAT_LOI105" (change)="onTypeChange()" class="hidden peer">
+            <div class="border-2 rounded-xl p-4 text-center transition-all peer-checked:border-cnss-primary peer-checked:bg-red-50 hover:border-gray-400">
+              <span class="material-icons text-3xl text-cnss-primary">receipt_long</span>
+              <p class="text-xs font-semibold mt-2">Rachat Loi 105 (95%)</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Coopérant -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6" *ngIf="typeDemande">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">Coopérant</h2>
+        <select formControlName="cooperantId" (change)="onCooperantChange($event)" 
+                class="w-full border rounded-lg px-3 py-2">
+          <option value="">-- Sélectionner un coopérant --</option>
+          <option *ngFor="let c of cooperants" [value]="c.id">
+            {{ c.prenomFr }} {{ c.nomFr }} ({{ c.numAffiliation }})
+          </option>
+        </select>
+
+        <div *ngIf="selectedCooperant" class="mt-4 bg-blue-50 rounded-lg p-4 text-sm">
+          <div class="grid grid-cols-2 gap-2">
+            <div><strong>Matricule:</strong> {{ selectedCooperant.matriculeComplet }}</div>
+            <div><strong>Email:</strong> {{ selectedCooperant.email }}</div>
+            <div><strong>Salaire actuel:</strong> {{ selectedCooperant.salaire | number:'1.3-3' }} TND</div>
+            <div><strong>N° Affiliation:</strong> {{ selectedCooperant.numAffiliation }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE: Actualisation Salaire -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6" *ngIf="typeDemande === 'ACTUALISATION_SALAIRE' && selectedCooperant">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">
+          <span class="material-icons align-middle mr-1">paid</span>
+          Actualisation du Salaire
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ancien salaire (TND)</label>
+            <input type="text" [value]="selectedCooperant.salaire | number:'1.3-3'" disabled
+                   class="w-full border rounded-lg px-3 py-2 bg-gray-100">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau salaire (TND) *</label>
+            <input type="number" formControlName="nouveauSalaire" step="0.001" 
+                   class="w-full border rounded-lg px-3 py-2" placeholder="Ex: 3500.000">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date d'effet</label>
+            <input type="date" formControlName="dateEffet" class="w-full border rounded-lg px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Motif</label>
+            <input type="text" formControlName="motif" class="w-full border rounded-lg px-3 py-2" 
+                   placeholder="Promotion, révision annuelle...">
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE: Sortie Régime Maladie -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6" *ngIf="typeDemande === 'SORTIE_REGIME_MALADIE' && selectedCooperant">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">
+          <span class="material-icons align-middle mr-1">medical_services</span>
+          Sortie Régime Maladie
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Régime concerné</label>
+            <select formControlName="regimeConcerne" class="w-full border rounded-lg px-3 py-2">
+              <option value="">-- Sélectionner --</option>
+              <option value="134">134 - Assurance Maladie CNAM</option>
+              <option value="0">0 - Assurances Sociales</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Impact cotisation (TND)</label>
+            <input type="number" formControlName="impactCotisation" step="0.001" 
+                   class="w-full border rounded-lg px-3 py-2" placeholder="Montant de réduction">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Motif de la demande *</label>
+            <textarea formControlName="motif" rows="3" class="w-full border rounded-lg px-3 py-2" 
+                      placeholder="Expliquez le motif de sortie du régime maladie..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE: Annulation Assurance Maladie + Capital Décès -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6" *ngIf="typeDemande === 'ANNULATION_ASSURANCE' && selectedCooperant">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">
+          <span class="material-icons align-middle mr-1">cancel</span>
+          Annulation Assurance Maladie & Capital Décès
+        </h2>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 text-sm text-yellow-800">
+          <span class="material-icons text-sm align-middle mr-1">warning</span>
+          Cette action annulera la couverture assurance maladie et capital décès. Les cotisations futures seront recalculées.
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Impact cotisation estimé (TND)</label>
+            <input type="number" formControlName="impactCotisation" step="0.001" 
+                   class="w-full border rounded-lg px-3 py-2" placeholder="Réduction estimée">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Motif de la demande *</label>
+            <textarea formControlName="motif" rows="3" class="w-full border rounded-lg px-3 py-2" 
+                      placeholder="Motif d'annulation de l'assurance maladie et capital décès..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE: Rachat Loi 105 -->
+      <div class="bg-white rounded-xl shadow p-6 mb-6" *ngIf="typeDemande === 'RACHAT_LOI105' && selectedCooperant">
+        <h2 class="text-lg font-semibold text-cnss-primary mb-4">
+          <span class="material-icons align-middle mr-1">receipt_long</span>
+          Rachat Loi 105 - Taux 95%
+        </h2>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-sm text-blue-800">
+          <span class="material-icons text-sm align-middle mr-1">info</span>
+          Les débits réglés depuis plus d'1 an sont éligibles au rachat avec un taux de 95% (réduction de 5%).
+        </div>
+
+        <!-- Sélection du débit éligible -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Débit éligible *</label>
+          <select (change)="onDebitSelect($event)" class="w-full border rounded-lg px-3 py-2">
+            <option value="">-- Sélectionner un débit --</option>
+            <option *ngFor="let d of debitsEligibles" [value]="d.id">
+              {{ d.trimestre }} - {{ d.montantCotisation | number:'1.3-3' }} TND (payé le {{ d.datePaiement }})
+            </option>
+          </select>
+          <p *ngIf="debitsEligibles.length === 0" class="text-xs text-orange-600 mt-1">
+            Aucun débit éligible trouvé (les débits doivent être payés depuis plus d'1 an)
+          </p>
+        </div>
+
+        <!-- Calcul Rachat -->
+        <div *ngIf="demandeForm.value.montantOriginal" class="bg-green-50 rounded-lg p-4 mt-4">
+          <h3 class="font-semibold text-green-800 mb-3">Calcul du Rachat</h3>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div class="text-xs text-gray-500">Montant Original</div>
+              <div class="text-lg font-bold text-gray-800">{{ demandeForm.value.montantOriginal | number:'1.3-3' }} TND</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-500">Montant Rachat (95%)</div>
+              <div class="text-lg font-bold text-green-700">{{ getMontantRachat() | number:'1.3-3' }} TND</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-500">Réduction (5%)</div>
+              <div class="text-lg font-bold text-red-600">-{{ getReduction() | number:'1.3-3' }} TND</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="flex justify-between" *ngIf="typeDemande && selectedCooperant">
+        <a routerLink="/demande" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+          <span class="material-icons text-sm">close</span> Annuler
+        </a>
+        <button type="submit" [disabled]="loading || !demandeForm.valid"
+                class="bg-cnss-primary text-white px-6 py-2 rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2">
+          <span *ngIf="loading" class="animate-spin material-icons text-sm">refresh</span>
+          <span class="material-icons text-sm" *ngIf="!loading">send</span>
+          Déposer la Demande
+        </button>
+      </div>
+    </form>
+  </div>
+</app-main-layout>

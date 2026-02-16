@@ -55,6 +55,27 @@ export const COOPERANT_ROUTES: Routes = [
     path: 'suivi-dossier',
     loadComponent: () => import('./suivi-dossier/suivi-dossier.component').then(m => m.SuiviDossierComponent)
   },
+  // Phase 3: Demandes Coopérant
+  {
+    path: 'demande-salaire',
+    loadComponent: () => import('./demande-salaire/demande-salaire.component').then(m => m.DemandeSalaireComponent)
+  },
+  {
+    path: 'demande-sortie-regime',
+    loadComponent: () => import('./demande-sortie-regime/demande-sortie-regime.component').then(m => m.DemandeSortieRegimeComponent)
+  },
+  {
+    path: 'demande-annulation',
+    loadComponent: () => import('./demande-annulation/demande-annulation.component').then(m => m.DemandeAnnulationComponent)
+  },
+  {
+    path: 'demande-rachat',
+    loadComponent: () => import('./demande-rachat/demande-rachat.component').then(m => m.DemandeRachatComponent)
+  },
+  {
+    path: 'mes-demandes',
+    loadComponent: () => import('./mes-demandes/mes-demandes.component').then(m => m.MesDemandesComponent)
+  },
   {
     path: ':id',
     loadComponent: () => import('./cooperant-detail/cooperant-detail.component').then(m => m.CooperantDetailComponent)

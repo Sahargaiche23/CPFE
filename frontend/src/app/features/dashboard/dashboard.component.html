@@ -192,7 +192,7 @@
     <!-- ===== Dashboard Standard (Admin/Agent CNSS) ===== -->
     <ng-container *ngIf="!isAgentAtct">
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       <!-- Total Employers -->
       <div class="card hover:shadow-xl transition-all duration-300">
         <div class="flex items-center justify-between">
@@ -257,6 +257,23 @@
         </div>
         <a routerLink="/payment" class="text-blue-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
           {{ i18n.t('dashboard.viewDetails') }}
+          <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Demandes en attente -->
+      <div class="card hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-semibold mb-2">Demandes en attente</p>
+            <h3 class="text-3xl font-bold text-teal-600">{{ demandesEnAttente }}</h3>
+          </div>
+          <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-teal-600">assignment</span>
+          </div>
+        </div>
+        <a routerLink="/demande" class="text-teal-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          Voir détails
           <span class="material-icons text-sm ml-1">arrow_forward</span>
         </a>
       </div>
@@ -353,6 +370,11 @@
           <a routerLink="/cooperant/search" class="quick-action-btn bg-teal-50 hover:bg-teal-100 text-teal-700">
             <span class="material-icons">search</span>
             <span>Extrait Coopérant</span>
+          </a>
+
+          <a routerLink="/demande" class="quick-action-btn bg-cyan-50 hover:bg-cyan-100 text-cyan-700">
+            <span class="material-icons">assignment</span>
+            <span>Gérer Demandes</span>
           </a>
         </div>
       </div>
