@@ -699,6 +699,10 @@ export class AffiliationCompleteComponent implements OnInit {
       paysNom: dossier.paysEtranger || '',
       periodeDebut: dossier.dateDebutDetachement || '',
       periodeFin: dossier.dateFinDetachement || '',
+      salaireTunisie: dossier.salaireTunisie || '',
+      salaireEtranger: dossier.salaireEtranger || '',
+      matriculeAssure: dossier.numSecuSociale || '',
+      cleAssure: '',
       adresseEmp: dossier.adresseTunisie || '',
       localiteEmp: dossier.villeTunisie || '',
       codePostalEmp: dossier.codePostalTunisie || '',
@@ -759,6 +763,26 @@ export class AffiliationCompleteComponent implements OnInit {
       next: (data) => {
         this.cooperant = data;
         this.prefillForm(data);
+        // Charger aussi le dossier ATCT pour récupérer salaireTunisie et autres infos
+        if (data.email) {
+          this.http.get<any[]>('/api/atct').subscribe({
+            next: (dossiers) => {
+              const dossier = dossiers.find((d: any) => d.email === data.email);
+              if (dossier) {
+                this.affiliationForm.patchValue({
+                  salaireTunisie: dossier.salaireTunisie || '',
+                  salaireEtranger: dossier.salaireEtranger || '',
+                  paysNom: dossier.paysEtranger || '',
+                  periodeDebut: dossier.dateDebutDetachement || '',
+                  periodeFin: dossier.dateFinDetachement || '',
+                  empMatricule: dossier.matriculeEmployeurComplet?.split('-')[1] || '',
+                  empCle: dossier.matriculeEmployeurComplet?.split('-')[0] || '',
+                  codeRegimeCompl: dossier.codeRegime || '500'
+                });
+              }
+            }
+          });
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -873,7 +897,9 @@ export class AffiliationCompleteComponent implements OnInit {
           formData.numAffiliation || '',
           formData.cleAffiliation || '',
           salaire,
-          formData.dateEffet || ''
+          formData.dateEffet || '',
+          formData.matriculeAssure || '',
+          formData.cleAssure || ''
         ));
         console.log('Affiliation sauvegardée dans le coopérant');
       } else if (this.cooperant?.email) {
@@ -886,7 +912,9 @@ export class AffiliationCompleteComponent implements OnInit {
           dateEffetAffiliation: formData.dateEffet || '',
           adresse: formData.adresseAssure || formData.adresseEmp || '',
           numAffiliation: formData.numAffiliation || '',
-          cleAffiliation: formData.cleAffiliation || ''
+          cleAffiliation: formData.cleAffiliation || '',
+          matriculeAssure: formData.matriculeAssure || '',
+          cleAssure: formData.cleAssure || ''
         };
         const result: any = await lastValueFrom(this.http.post('/api/affiliations/create-from-atct', affiliationData));
         console.log('Affiliation créée:', result);

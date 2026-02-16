@@ -133,21 +133,24 @@ export class DashboardComponent implements OnInit {
     forkJoin({
       employers: this.cooperantService.getAll(),
       debits: this.debitService.getAll(),
-      payments: this.paymentService.getAll()
+      payments: this.paymentService.getAll(),
+      atctDossiers: this.atctService.getAll()
     }).subscribe({
       next: (data) => {
         // Compter les affiliations = coopérants avec numAffiliation
         const affiliatedCooperants = data.employers?.filter((c: any) => c.numAffiliation) || [];
+        // Total Coopérants = nombre de dossiers ATCT uniques (vrais coopérants du système)
+        const atctEmails = new Set((data.atctDossiers || []).map((d: any) => d.email));
         
         this.stats = {
-          totalEmployers: data.employers?.length || 0,
+          totalEmployers: atctEmails.size || data.employers?.length || 0,
           totalAffiliations: affiliatedCooperants.length,
           pendingDebits: data.debits?.filter((d: any) => !d.paye)?.length || 0,
           totalPayments: data.payments?.length || 0
         };
 
         // Generate recent activities from real data
-        this.recentActivities = this.generateRecentActivities({...data, affiliations: affiliatedCooperants});
+        this.recentActivities = this.generateRecentActivities({...data, affiliations: affiliatedCooperants, atctDossiers: data.atctDossiers});
         this.loading = false;
       },
       error: (err) => {
@@ -203,19 +206,28 @@ export class DashboardComponent implements OnInit {
       });
     }
     
-    // Ajouter les coopérants récents
-    if (data.employers?.length > 0) {
-      const recentCooperants = [...data.employers]
-        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
-        .slice(0, 2);
+    // Ajouter les activités ATCT récentes
+    if (data.atctDossiers?.length > 0) {
+      const recentDossiers = [...data.atctDossiers]
+        .sort((a: any, b: any) => new Date(b.dateModification || b.dateCreation || 0).getTime() - new Date(a.dateModification || a.dateCreation || 0).getTime())
+        .slice(0, 4);
       
-      recentCooperants.forEach((c: any) => {
+      recentDossiers.forEach((d: any) => {
+        const nom = d.nomCompletFr || `${d.prenomFr || ''} ${d.nomFr || ''}`.trim() || 'N/A';
+        const statut = d.statut || 'EN_ATTENTE';
+        const statutLabels: any = {
+          'EN_ATTENTE': 'En attente de validation',
+          'VALIDE': 'Dossier validé',
+          'AFFILIE': `Affilié - N° ${d.numAffiliation || ''}`,
+          'REJETE': 'Dossier rejeté',
+          'RECLAMATION': 'Réclamation en cours'
+        };
         activities.push({
-          type: 'cooperant',
-          description: `Coopérant: ${c.nomFr || c.nomAr || 'Nouveau'}`,
-          time: this.formatDate(c.createdAt),
-          icon: 'person',
-          color: 'text-purple-600'
+          type: 'atct',
+          description: `${nom} - ${statutLabels[statut] || statut}`,
+          time: this.formatDate(d.dateModification || d.dateValidation || d.dateCreation),
+          icon: statut === 'AFFILIE' ? 'how_to_reg' : statut === 'VALIDE' ? 'check_circle' : statut === 'REJETE' ? 'cancel' : 'folder_shared',
+          color: statut === 'AFFILIE' ? 'text-green-600' : statut === 'VALIDE' ? 'text-teal-600' : statut === 'REJETE' ? 'text-red-600' : 'text-yellow-600'
         });
       });
     }

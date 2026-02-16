@@ -189,10 +189,12 @@ export class CooperantService {
   }
 
   // Mettre à jour l'affiliation du coopérant
-  updateAffiliation(id: number, numAffiliation: string, cleAffiliation: string, salaire?: number, dateEffetAffiliation?: string): Observable<Cooperant> {
+  updateAffiliation(id: number, numAffiliation: string, cleAffiliation: string, salaire?: number, dateEffetAffiliation?: string, matricule?: string, cle?: string): Observable<Cooperant> {
     const updates: any = { numAffiliation, cleAffiliation };
     if (salaire !== undefined) updates.salaire = salaire.toString();
     if (dateEffetAffiliation) updates.dateEffetAffiliation = dateEffetAffiliation;
+    if (matricule) updates.matricule = matricule;
+    if (cle) updates.cle = cle;
     return this.http.patch<Cooperant>(`${this.apiUrl}/${id}`, updates);
   }
 }

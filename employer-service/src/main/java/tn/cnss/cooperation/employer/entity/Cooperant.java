@@ -166,11 +166,10 @@ public class Cooperant {
     // Méthodes helper
     @Transient
     public String getMatriculeComplet() {
-        // Format: XX-YYYYYYYY (codeRegime 2 chiffres - matricule 8 chiffres)
-        String regime = codeRegime != null ? codeRegime.substring(0, Math.min(2, codeRegime.length())) : "00";
-        if (regime.length() < 2) regime = "0" + regime;
+        // Format: CLE-MATRICULE (ex: 51-00000010)
+        String cleStr = cle != null ? String.valueOf(cle) : "00";
         String mat = String.format("%08d", matricule != null ? matricule : 0);
-        return regime + "-" + mat;
+        return cleStr + "-" + mat;
     }
     
     @Transient

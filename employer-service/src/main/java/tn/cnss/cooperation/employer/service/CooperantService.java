@@ -526,6 +526,18 @@ public class CooperantService {
                 cooperant.setDateEffetAffiliation(java.time.LocalDate.parse(dateStr));
             }
         }
+        if (updates.containsKey("matricule")) {
+            String matStr = updates.get("matricule");
+            if (matStr != null && !matStr.isEmpty()) {
+                cooperant.setMatricule(Long.parseLong(matStr));
+            }
+        }
+        if (updates.containsKey("cle")) {
+            String cleStr = updates.get("cle");
+            if (cleStr != null && !cleStr.isEmpty()) {
+                cooperant.setCle(Integer.parseInt(cleStr));
+            }
+        }
         if (updates.containsKey("actif")) {
             cooperant.setActif("true".equalsIgnoreCase(updates.get("actif")));
         }

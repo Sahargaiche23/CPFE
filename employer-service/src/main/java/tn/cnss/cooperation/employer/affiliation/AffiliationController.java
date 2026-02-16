@@ -34,6 +34,8 @@ public class AffiliationController {
         String dateEffetStr = (String) request.get("dateEffetAffiliation");
         String reqNumAffiliation = (String) request.get("numAffiliation");
         String reqCleAffiliation = (String) request.get("cleAffiliation");
+        String matriculeAssure = (String) request.get("matriculeAssure");
+        String cleAssure = (String) request.get("cleAssure");
         
         // Récupérer les vraies données du dossier ATCT
         DossierATCT dossierATCT = dossierATCTRepository.findByEmailAndActifTrue(email).orElse(null);
@@ -88,10 +90,20 @@ public class AffiliationController {
         cooperant.setNumAffiliation(numAffiliation);
         cooperant.setCleAffiliation(cleAffiliation);
         
+        // Matricule assuré (depuis le formulaire d'affiliation)
+        if (matriculeAssure != null && !matriculeAssure.isEmpty()) {
+            cooperant.setMatricule(Long.parseLong(matriculeAssure));
+        }
+        if (cleAssure != null && !cleAssure.isEmpty()) {
+            cooperant.setCle(Integer.parseInt(cleAssure));
+        }
+        
         // Salaire
         if (salaireObj != null) {
             if (salaireObj instanceof Number) {
                 cooperant.setSalaire(new BigDecimal(salaireObj.toString()));
+            } else if (salaireObj instanceof String && !((String) salaireObj).isEmpty()) {
+                cooperant.setSalaire(new BigDecimal((String) salaireObj));
             }
         }
         

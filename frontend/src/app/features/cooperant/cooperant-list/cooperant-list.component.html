@@ -6,14 +6,8 @@
         <p class="text-gray-600 mt-2">Gestion des personnes coopérantes (FR/AR) + validation agent</p>
       </div>
       <div class="flex gap-3">
-        <a routerLink="/cooperant/validation" class="px-4 py-2 bg-cnss-secondary text-white rounded-lg hover:bg-opacity-90 transition-all flex items-center">
-          <span class="material-icons mr-2">verified</span>
-          Validation
-        </a>
-        <a routerLink="/cooperant/new" class="btn-primary">
-          <span class="material-icons mr-2">add</span>
-          Nouveau coopérant
-        </a>
+        <!-- Validation et création coopérant via ATCT uniquement -->
+
       </div>
     </div>
 
@@ -73,11 +67,6 @@
                     <span class="material-icons mr-1 text-base">assignment</span>
                     Créer Affiliation
                   </a>
-                  <button (click)="voirDocsCooperant(dossier)" 
-                          class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center text-sm">
-                    <span class="material-icons mr-1 text-base">folder</span>
-                    Documents
-                  </button>
                 </div>
               </td>
             </tr>
