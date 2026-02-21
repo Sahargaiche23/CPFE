@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GedService, GedDocument } from '../../../core/services/ged.service';
+import { AiExtractionService, ExtractionResult } from '../../../core/services/ai-extraction.service';
 import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-layout.component';
 
 @Component({
@@ -82,6 +83,12 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                     </button>
                   </div>
                 </div>
+                <button (click)="extractAiData()" [disabled]="extractingAi" 
+                        class="px-4 py-2 text-white rounded-lg flex items-center gap-2 text-sm font-medium hover:shadow-md transition-all disabled:opacity-50"
+                        style="background: linear-gradient(135deg, #7C3AED, #EC4899);">
+                  <span class="material-icons text-base">{{ extractingAi ? 'hourglass_top' : 'auto_awesome' }}</span>
+                  {{ extractingAi ? 'Extraction...' : 'Extraire IA' }}
+                </button>
                 <button (click)="deleteDocument()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
                   Supprimer
                 </button>
@@ -511,6 +518,89 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
           </div>
         </div>
       </div>
+
+      <!-- AI Extraction Result Modal -->
+      @if (showAiModal && aiExtractionResult) {
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden">
+            <div class="px-6 py-4 flex items-center justify-between" style="background: linear-gradient(135deg, #7C3AED, #EC4899);">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-white text-2xl">auto_awesome</span>
+                <div>
+                  <h2 class="text-lg font-bold text-white">Résultat Extraction IA</h2>
+                  <p class="text-pink-200 text-xs">{{ document?.titre || aiExtractionResult.document_type }}</p>
+                </div>
+              </div>
+              <button (click)="closeAiModal()" class="text-white hover:text-pink-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[60vh]">
+              <div class="mb-5">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-semibold text-gray-700">Confiance</span>
+                  <span class="text-sm font-bold" [ngClass]="{
+                    'text-green-600': aiExtractionResult.confidence >= 60,
+                    'text-yellow-600': aiExtractionResult.confidence >= 30 && aiExtractionResult.confidence < 60,
+                    'text-red-600': aiExtractionResult.confidence < 30
+                  }">{{ aiExtractionResult.confidence | number:'1.0-0' }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="h-2.5 rounded-full transition-all" 
+                       [style.width.%]="aiExtractionResult.confidence"
+                       [ngClass]="{
+                         'bg-green-500': aiExtractionResult.confidence >= 60,
+                         'bg-yellow-500': aiExtractionResult.confidence >= 30 && aiExtractionResult.confidence < 60,
+                         'bg-red-500': aiExtractionResult.confidence < 30
+                       }"></div>
+                </div>
+              </div>
+              @if (aiExtractionResult.warnings && aiExtractionResult.warnings.length > 0) {
+                <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div *ngFor="let warn of aiExtractionResult.warnings" class="flex items-start gap-2 text-sm text-amber-700">
+                    <span class="material-icons text-sm mt-0.5">warning</span>
+                    <span>{{ warn }}</span>
+                  </div>
+                </div>
+              }
+              @if (aiExtractionResult.error) {
+                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-start gap-2">
+                  <span class="material-icons text-sm mt-0.5">error</span>
+                  <span>{{ aiExtractionResult.error }}</span>
+                </div>
+              }
+              @if (aiExtractionResult.success && getAiFieldKeys().length > 0) {
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="material-icons text-purple-500">data_object</span>
+                  Données extraites
+                </h3>
+                <div class="space-y-2 mb-5">
+                  <div *ngFor="let key of getAiFieldKeys()" 
+                       class="flex justify-between items-start p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <span class="text-sm text-gray-500 font-medium">{{ getAiFieldLabel(key) }}</span>
+                    <span class="text-sm font-semibold text-gray-800 text-right ml-4 max-w-[60%]">{{ aiExtractionResult.extracted_data[key] }}</span>
+                  </div>
+                </div>
+              } @else if (!aiExtractionResult.error) {
+                <div class="text-center py-6 text-gray-400">
+                  <span class="material-icons text-4xl mb-2 block">search_off</span>
+                  <p>Aucune donnée structurée extraite</p>
+                </div>
+              }
+              @if (aiExtractionResult.raw_text) {
+                <details class="mt-4">
+                  <summary class="cursor-pointer text-sm font-semibold text-gray-600 hover:text-gray-800 flex items-center gap-1">
+                    <span class="material-icons text-sm">code</span>
+                    Texte brut OCR
+                  </summary>
+                  <pre class="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto max-h-48 whitespace-pre-wrap font-mono">{{ aiExtractionResult.raw_text }}</pre>
+                </details>
+              }
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t flex justify-end">
+              <button (click)="closeAiModal()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium">Fermer</button>
+            </div>
+          </div>
+        </div>
+      }
     </app-main-layout>
 `
 })
@@ -559,7 +649,8 @@ export class GedDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private gedService: GedService
+    private gedService: GedService,
+    private aiExtractionService: AiExtractionService
   ) {}
 
   ngOnInit(): void {
@@ -863,6 +954,58 @@ export class GedDetailComponent implements OnInit {
       error: () => alert('Erreur lors du téléchargement')
     });
     this.showExportMenu = false;
+  }
+
+  // ==================== AI EXTRACTION ====================
+  extractingAi = false;
+  aiExtractionResult: ExtractionResult | null = null;
+  showAiModal = false;
+
+  extractAiData(): void {
+    if (!this.document || this.document.fichierType === 'folder') return;
+    this.extractingAi = true;
+    
+    // Auto-detect document type from categorie/tags
+    let docType = 'generic';
+    const cat = (this.document.categorie || '').toLowerCase();
+    const tags = (this.document.tags || []).join(' ').toLowerCase();
+    if (tags.includes('cin') || cat === 'identite') docType = 'cin';
+    else if (tags.includes('attestation-salaire') || cat === 'attestation') docType = 'attestation_salaire';
+    else if (tags.includes('contrat') || cat === 'contrat') docType = 'contrat';
+    else if (tags.includes('attestation-affiliation')) docType = 'attestation_affiliation';
+    
+    this.aiExtractionService.extractFromDocument(this.document.id, docType).subscribe({
+      next: (result) => {
+        this.aiExtractionResult = result;
+        this.showAiModal = true;
+        this.extractingAi = false;
+      },
+      error: (err) => {
+        console.error('Erreur extraction IA:', err);
+        this.aiExtractionResult = {
+          success: false, document_type: docType, confidence: 0,
+          extracted_data: {}, raw_text: '',
+          warnings: ['Service AI non disponible. Vérifiez que le service est démarré sur le port 8090.'],
+          error: err.message
+        };
+        this.showAiModal = true;
+        this.extractingAi = false;
+      }
+    });
+  }
+
+  getAiFieldKeys(): string[] {
+    if (!this.aiExtractionResult?.extracted_data) return [];
+    return Object.keys(this.aiExtractionResult.extracted_data);
+  }
+
+  getAiFieldLabel(field: string): string {
+    return this.aiExtractionService.getFieldLabel(field);
+  }
+
+  closeAiModal(): void {
+    this.showAiModal = false;
+    this.aiExtractionResult = null;
   }
 
   // Exporter en PDF

@@ -150,6 +150,15 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
+  # AI Extraction Service (Python/FastAPI)
+  ai-extraction-service:
+    build: ./ai-extraction-service
+    container_name: cooperation-ai-extraction
+    ports:
+      - "8090:8090"
+    networks:
+      - cooperation-network
+
   # File Service (GED)
   file-service:
     build: ./file-service
@@ -163,6 +172,7 @@ services:
       - ged-storage:/opt/cnss/ged
     depends_on:
       - eureka-server
+      - ai-extraction-service
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -171,6 +181,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=COPT
       - SPRING_DATASOURCE_PASSWORD=copt123
       - GED_UPLOAD_PATH=/opt/cnss/ged
+      - AI_EXTRACTION_URL=http://ai-extraction-service:8090
 
 networks:
   cooperation-network:

@@ -5,6 +5,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 import { AtctService, DossierATCT } from '../../../core/services/atct.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { GedService, GedDocument } from '../../../core/services/ged.service';
+import { AiExtractionService, ExtractionResult } from '../../../core/services/ai-extraction.service';
 
 @Component({
   selector: 'app-atct-detail',
@@ -423,6 +424,10 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
                       Télécharger
                     </button>
                   </div>
+                  <button (click)="extractAiData('contrat', 'contrat')" [disabled]="extractingDoc === 'contrat'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                    <span class="material-icons text-sm">{{ extractingDoc === 'contrat' ? 'hourglass_top' : 'auto_awesome' }}</span>
+                    {{ extractingDoc === 'contrat' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
+                  </button>
                 }
               </div>
 
@@ -452,6 +457,10 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
                       Télécharger
                     </button>
                   </div>
+                  <button (click)="extractAiData('attestationSalaire', 'attestation_salaire')" [disabled]="extractingDoc === 'attestationSalaire'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                    <span class="material-icons text-sm">{{ extractingDoc === 'attestationSalaire' ? 'hourglass_top' : 'auto_awesome' }}</span>
+                    {{ extractingDoc === 'attestationSalaire' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
+                  </button>
                 }
               </div>
 
@@ -482,6 +491,10 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
                       Télécharger
                     </button>
                   </div>
+                  <button (click)="extractAiData('cin', 'cin')" [disabled]="extractingDoc === 'cin'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                    <span class="material-icons text-sm">{{ extractingDoc === 'cin' ? 'hourglass_top' : 'auto_awesome' }}</span>
+                    {{ extractingDoc === 'cin' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
+                  </button>
                 }
               </div>
             </div>
@@ -537,6 +550,10 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
                     Télécharger
                   </button>
                 </div>
+                <button (click)="extractAiData('attestationAffiliation', 'attestation_affiliation')" [disabled]="extractingDoc === 'attestationAffiliation'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                  <span class="material-icons text-sm">{{ extractingDoc === 'attestationAffiliation' ? 'hourglass_top' : 'auto_awesome' }}</span>
+                  {{ extractingDoc === 'attestationAffiliation' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
+                </button>
               </div>
             }
 
@@ -719,6 +736,107 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
           </div>
         }
       </div>
+
+      <!-- AI Extraction Result Modal -->
+      @if (showExtractionModal && extractionResult) {
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden">
+            <!-- Header -->
+            <div class="px-6 py-4 flex items-center justify-between" style="background: linear-gradient(135deg, #7C3AED, #EC4899);">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-white text-2xl">auto_awesome</span>
+                <div>
+                  <h2 class="text-lg font-bold text-white">Résultat Extraction IA</h2>
+                  <p class="text-pink-200 text-xs">{{ extractionResult.document_titre || extractionResult.document_type }}</p>
+                </div>
+              </div>
+              <button (click)="closeExtractionModal()" class="text-white hover:text-pink-200 text-2xl leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[60vh]">
+              <!-- Confidence Bar -->
+              <div class="mb-5">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-semibold text-gray-700">Confiance</span>
+                  <span class="text-sm font-bold" [ngClass]="{
+                    'text-green-600': extractionResult.confidence >= 60,
+                    'text-yellow-600': extractionResult.confidence >= 30 && extractionResult.confidence < 60,
+                    'text-red-600': extractionResult.confidence < 30
+                  }">{{ extractionResult.confidence | number:'1.0-0' }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="h-2.5 rounded-full transition-all" 
+                       [style.width.%]="extractionResult.confidence"
+                       [ngClass]="{
+                         'bg-green-500': extractionResult.confidence >= 60,
+                         'bg-yellow-500': extractionResult.confidence >= 30 && extractionResult.confidence < 60,
+                         'bg-red-500': extractionResult.confidence < 30
+                       }"></div>
+                </div>
+              </div>
+
+              <!-- Warnings -->
+              @if (extractionResult.warnings && extractionResult.warnings.length > 0) {
+                <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div *ngFor="let warn of extractionResult.warnings" class="flex items-start gap-2 text-sm text-amber-700">
+                    <span class="material-icons text-sm mt-0.5">warning</span>
+                    <span>{{ warn }}</span>
+                  </div>
+                </div>
+              }
+
+              <!-- Error -->
+              @if (extractionResult.error) {
+                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-start gap-2">
+                  <span class="material-icons text-sm mt-0.5">error</span>
+                  <span>{{ extractionResult.error }}</span>
+                </div>
+              }
+
+              <!-- Extracted Data -->
+              @if (extractionResult.success && getExtractionFieldKeys().length > 0) {
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span class="material-icons text-purple-500">data_object</span>
+                  Données extraites
+                </h3>
+                <div class="space-y-2 mb-5">
+                  <div *ngFor="let key of getExtractionFieldKeys()" 
+                       class="flex justify-between items-start p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <span class="text-sm text-gray-500 font-medium">{{ getAiFieldLabel(key) }}</span>
+                    <span class="text-sm font-semibold text-gray-800 text-right ml-4 max-w-[60%]">
+                      {{ extractionResult.extracted_data[key] }}
+                    </span>
+                  </div>
+                </div>
+              } @else if (!extractionResult.error) {
+                <div class="text-center py-6 text-gray-400">
+                  <span class="material-icons text-4xl mb-2 block">search_off</span>
+                  <p>Aucune donnée structurée extraite</p>
+                </div>
+              }
+
+              <!-- Raw Text Preview -->
+              @if (extractionResult.raw_text) {
+                <details class="mt-4">
+                  <summary class="cursor-pointer text-sm font-semibold text-gray-600 hover:text-gray-800 flex items-center gap-1">
+                    <span class="material-icons text-sm">code</span>
+                    Texte brut OCR (cliquer pour afficher)
+                  </summary>
+                  <pre class="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto max-h-48 whitespace-pre-wrap font-mono">{{ extractionResult.raw_text }}</pre>
+                </details>
+              }
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t flex justify-end">
+              <button (click)="closeExtractionModal()" 
+                      class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium">
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </app-main-layout>
   `
 })
@@ -736,11 +854,17 @@ export class AtctDetailComponent implements OnInit {
   gedDocuments: {decisionAffectation?: GedDocument, contrat?: GedDocument, attestationSalaire?: GedDocument, cin?: GedDocument, autre?: GedDocument, attestationAffiliation?: GedDocument} = {};
   gedLoaded = false;
 
+  // AI Extraction
+  extractingDoc: string | null = null;
+  extractionResult: ExtractionResult | null = null;
+  showExtractionModal = false;
+
   constructor(
     private route: ActivatedRoute,
     private atctService: AtctService,
     private pdfService: PdfService,
-    private gedService: GedService
+    private gedService: GedService,
+    private aiExtractionService: AiExtractionService
   ) {}
 
   ngOnInit(): void {
@@ -922,6 +1046,49 @@ export class AtctDetailComponent implements OnInit {
       this.errorMessage = 'Erreur lors de la génération du PDF';
       setTimeout(() => this.clearMessages(), 5000);
     }
+  }
+
+  // ==================== AI EXTRACTION ====================
+  extractAiData(docKey: string, aiDocType: string): void {
+    const gedDoc = (this.gedDocuments as any)[docKey] as GedDocument | undefined;
+    if (!gedDoc) return;
+    
+    this.extractingDoc = docKey;
+    this.aiExtractionService.extractFromDocument(gedDoc.id, aiDocType).subscribe({
+      next: (result) => {
+        this.extractionResult = result;
+        this.showExtractionModal = true;
+        this.extractingDoc = null;
+      },
+      error: (err) => {
+        console.error('Erreur extraction IA:', err);
+        this.extractionResult = {
+          success: false,
+          document_type: aiDocType,
+          confidence: 0,
+          extracted_data: {},
+          raw_text: '',
+          warnings: ['Erreur de connexion au service IA. Vérifiez que le service AI extraction est démarré sur le port 8090.'],
+          error: err.message
+        };
+        this.showExtractionModal = true;
+        this.extractingDoc = null;
+      }
+    });
+  }
+
+  getExtractionFieldKeys(): string[] {
+    if (!this.extractionResult?.extracted_data) return [];
+    return Object.keys(this.extractionResult.extracted_data);
+  }
+
+  getAiFieldLabel(field: string): string {
+    return this.aiExtractionService.getFieldLabel(field);
+  }
+
+  closeExtractionModal(): void {
+    this.showExtractionModal = false;
+    this.extractionResult = null;
   }
 
   private getDecisionData() {

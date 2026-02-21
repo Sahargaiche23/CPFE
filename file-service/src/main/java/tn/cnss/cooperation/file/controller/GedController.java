@@ -18,6 +18,14 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -333,5 +341,150 @@ public class GedController {
     public ResponseEntity<List<Map<String, Object>>> getActivites(@RequestParam(defaultValue = "10") int limit) {
         // Pour l'instant, retourne une liste vide - à implémenter avec une vraie table d'activités
         return ResponseEntity.ok(List.of());
+    }
+    
+    // ==================== AI EXTRACTION ENDPOINTS ====================
+    
+    @Value("${ai.extraction.url:http://localhost:8090}")
+    private String aiExtractionUrl;
+    
+    /**
+     * Extrait les données d'un document GED existant via le service IA
+     */
+    @PostMapping("/documents/{id}/extract")
+    public ResponseEntity<Map<String, Object>> extractFromDocument(
+            @PathVariable Long id,
+            @RequestParam(value = "documentType", required = false) String documentType) {
+        try {
+            GedDocument doc = gedService.getById(id)
+                    .orElseThrow(() -> new RuntimeException("Document non trouvé"));
+            
+            // Ne pas extraire depuis les dossiers
+            if ("folder".equals(doc.getFichierType())) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", "Impossible d'extraire les données d'un dossier"
+                ));
+            }
+            
+            byte[] fileContent = gedService.downloadDocument(id);
+            
+            // Appeler le service Python AI
+            RestTemplate restTemplate = new RestTemplate();
+            
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            ByteArrayResource fileResource = new ByteArrayResource(fileContent) {
+                @Override
+                public String getFilename() {
+                    return doc.getFichierNom();
+                }
+            };
+            body.add("file", fileResource);
+            if (documentType != null && !documentType.isEmpty()) {
+                body.add("document_type", documentType);
+            }
+            body.add("lang", "fra+ara");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = restTemplate.postForObject(
+                    aiExtractionUrl + "/extract", requestEntity, Map.class);
+            
+            if (result != null) {
+                result.put("document_id", id);
+                result.put("document_titre", doc.getTitre());
+                result.put("document_fichier", doc.getFichierNom());
+            }
+            
+            return ResponseEntity.ok(result != null ? result : Map.of("success", false, "error", "Pas de réponse du service IA"));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "error", "Erreur extraction IA: " + e.getMessage(),
+                "document_id", id
+            ));
+        }
+    }
+    
+    /**
+     * Extrait les données d'un fichier uploadé directement (sans le stocker dans la GED)
+     */
+    @PostMapping("/extract-file")
+    public ResponseEntity<Map<String, Object>> extractFromUploadedFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "documentType", required = false) String documentType) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+            body.add("file", fileResource);
+            if (documentType != null && !documentType.isEmpty()) {
+                body.add("document_type", documentType);
+            }
+            body.add("lang", "fra+ara");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = restTemplate.postForObject(
+                    aiExtractionUrl + "/extract", requestEntity, Map.class);
+            
+            return ResponseEntity.ok(result != null ? result : Map.of("success", false, "error", "Pas de réponse du service IA"));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "error", "Erreur extraction IA: " + e.getMessage()
+            ));
+        }
+    }
+    
+    /**
+     * Vérifie la santé du service AI extraction
+     */
+    @GetMapping("/ai/health")
+    public ResponseEntity<Map<String, Object>> aiHealthCheck() {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = restTemplate.getForObject(aiExtractionUrl + "/health", Map.class);
+            return ResponseEntity.ok(result != null ? result : Map.of("status", "unknown"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "status", "unavailable",
+                "error", e.getMessage()
+            ));
+        }
+    }
+    
+    /**
+     * Retourne les types de documents supportés par le service AI
+     */
+    @GetMapping("/ai/document-types")
+    public ResponseEntity<Map<String, Object>> getAiDocumentTypes() {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = restTemplate.getForObject(aiExtractionUrl + "/document-types", Map.class);
+            return ResponseEntity.ok(result != null ? result : Map.of());
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "error", "Service AI non disponible: " + e.getMessage()
+            ));
+        }
     }
 }
