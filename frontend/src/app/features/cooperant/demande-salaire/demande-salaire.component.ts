@@ -11,19 +11,19 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
           <h1 class="text-lg font-bold text-gray-800">Demande d'Actualisation Salaire</h1>
-          <a routerLink="/cooperant/espace" class="ml-auto text-teal-600 hover:text-teal-800 text-sm">← Retour</a>
+          <a routerLink="/cooperant/espace" class="ml-auto text-pink-600 hover:text-pink-800 text-sm">← Retour</a>
         </div>
       </header>
 
       <main class="max-w-3xl mx-auto px-4 py-8">
         <!-- Loading -->
         <div *ngIf="loadingCoop" class="bg-white rounded-xl shadow-lg p-8 text-center">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600 mx-auto"></div>
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-600 mx-auto"></div>
           <p class="mt-4 text-gray-500">Chargement de vos informations...</p>
         </div>
 
@@ -39,7 +39,7 @@ import { AuthService } from '../../../core/services/auth.service';
             </h2>
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div><span class="text-gray-500">Nom:</span> <strong>{{ cooperant.prenomFr }} {{ cooperant.nomFr }}</strong></div>
-              <div><span class="text-gray-500">Matricule:</span> <strong class="text-teal-600">{{ cooperant.matriculeComplet }}</strong></div>
+              <div><span class="text-gray-500">Matricule:</span> <strong class="text-pink-600">{{ cooperant.matriculeComplet }}</strong></div>
               <div><span class="text-gray-500">N° Affiliation:</span> <strong>{{ cooperant.cleAffiliation }}-{{ cooperant.numAffiliation }}</strong></div>
               <div><span class="text-gray-500">Salaire actuel:</span> <strong class="text-emerald-600">{{ cooperant.salaire | number:'1.3-3' }} TND</strong></div>
             </div>
@@ -57,18 +57,18 @@ import { AuthService } from '../../../core/services/auth.service';
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau salaire mensuel (TND) *</label>
                 <input type="number" [(ngModel)]="nouveauSalaire" step="0.001" min="0"
-                       class="w-full border-2 rounded-lg px-4 py-3 text-lg focus:border-teal-500 focus:outline-none"
+                       class="w-full border-2 rounded-lg px-4 py-3 text-lg focus:border-pink-500 focus:outline-none"
                        placeholder="Ex: 3500.000">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date d'effet</label>
                 <input type="date" [(ngModel)]="dateEffet"
-                       class="w-full border-2 rounded-lg px-4 py-3 focus:border-teal-500 focus:outline-none">
+                       class="w-full border-2 rounded-lg px-4 py-3 focus:border-pink-500 focus:outline-none">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Motif de l'actualisation</label>
                 <textarea [(ngModel)]="motif" rows="3"
-                          class="w-full border-2 rounded-lg px-4 py-3 focus:border-teal-500 focus:outline-none"
+                          class="w-full border-2 rounded-lg px-4 py-3 focus:border-pink-500 focus:outline-none"
                           placeholder="Promotion, révision annuelle, changement de poste..."></textarea>
               </div>
 
@@ -116,8 +116,8 @@ import { AuthService } from '../../../core/services/auth.service';
           <h2 class="text-xl font-bold text-gray-800 mb-2">Demande déposée avec succès !</h2>
           <p class="text-gray-500 mb-6">Votre demande d'actualisation de salaire est en cours de traitement.</p>
           <div class="flex justify-center gap-4">
-            <a routerLink="/cooperant/espace" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Retour à l'espace</a>
-            <a routerLink="/cooperant/mes-demandes" class="px-4 py-2 border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50">Suivre ma demande</a>
+            <a routerLink="/cooperant/espace" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">Retour à l'espace</a>
+            <a routerLink="/cooperant/mes-demandes" class="px-4 py-2 border border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50">Suivre ma demande</a>
           </div>
         </div>
       </main>

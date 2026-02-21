@@ -41,11 +41,11 @@ body {
 
 /* Custom Material overrides */
 .mat-mdc-raised-button.mat-primary {
-  background-color: #8B1538 !important;
+  background-color: #BE185D !important;
 }
 
 .mat-mdc-raised-button.mat-accent {
-  background-color: #2E7D32 !important;
+  background-color: #9D174D !important;
 }
 
 /* Animations */
@@ -106,8 +106,8 @@ body {
 }
 
 .form-input {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
-         focus:ring-2 focus:ring-cnss-primary focus:border-transparent transition-all;
+  @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none 
+         focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all;
 }
 
 .form-label {
@@ -132,7 +132,7 @@ body {
 }
 
 .data-table tbody tr:hover {
-  @apply bg-gray-50 transition-colors duration-200;
+  @apply bg-pink-50/40 transition-colors duration-200;
 }
 
 /* Action buttons in tables */
@@ -188,7 +188,7 @@ body {
 /* Loading spinner */
 .spinner {
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #8B1538;
+  border-top: 3px solid #BE185D;
   border-radius: 50%;
   width: 40px;
   height: 40px;

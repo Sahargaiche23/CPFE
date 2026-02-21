@@ -10,12 +10,12 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div class="flex items-center gap-4">
             <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
-            <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800">
+            <a routerLink="/cooperant/espace" class="text-pink-600 hover:text-pink-800">
               ← Retour au tableau de bord
             </a>
           </div>
@@ -61,17 +61,17 @@ import { environment } from '../../../../environments/environment';
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg" *ngIf="cooperant.fichierDossier">
                 <span>📄 Dossier</span>
                 <a [href]="getDownloadUrl(cooperant.fichierDossier)" target="_blank" 
-                   class="text-teal-600 hover:underline">Télécharger</a>
+                   class="text-pink-600 hover:underline">Télécharger</a>
               </div>
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg" *ngIf="cooperant.fichierIdentite">
                 <span>🪪 Pièce d'identité</span>
                 <a [href]="getDownloadUrl(cooperant.fichierIdentite)" target="_blank"
-                   class="text-teal-600 hover:underline">Télécharger</a>
+                   class="text-pink-600 hover:underline">Télécharger</a>
               </div>
               <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg" *ngIf="cooperant.fichierAutre">
                 <span>📎 Autre document</span>
                 <a [href]="getDownloadUrl(cooperant.fichierAutre)" target="_blank"
-                   class="text-teal-600 hover:underline">Télécharger</a>
+                   class="text-pink-600 hover:underline">Télécharger</a>
               </div>
             </div>
           </div>

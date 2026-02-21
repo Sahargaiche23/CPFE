@@ -24,12 +24,12 @@ interface DebitItem {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
           <h1 class="text-lg font-bold text-gray-800">Demande de Rachat — Loi 105 (Taux 95%)</h1>
-          <a routerLink="/cooperant/espace" class="ml-auto text-teal-600 hover:text-teal-800 text-sm">← Retour</a>
+          <a routerLink="/cooperant/espace" class="ml-auto text-pink-600 hover:text-pink-800 text-sm">← Retour</a>
         </div>
       </header>
 
@@ -45,7 +45,7 @@ interface DebitItem {
           <div class="bg-white rounded-xl shadow-lg p-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div><span class="text-gray-500">Nom:</span><br><strong>{{ cooperant.prenomFr }} {{ cooperant.nomFr }}</strong></div>
-              <div><span class="text-gray-500">Matricule:</span><br><strong class="text-teal-600">{{ cooperant.matriculeComplet }}</strong></div>
+              <div><span class="text-gray-500">Matricule:</span><br><strong class="text-pink-600">{{ cooperant.matriculeComplet }}</strong></div>
               <div><span class="text-gray-500">N° Affiliation:</span><br><strong>{{ cooperant.cleAffiliation }}-{{ cooperant.numAffiliation }}</strong></div>
               <div><span class="text-gray-500">Salaire:</span><br><strong>{{ cooperant.salaire | number:'1.3-3' }} TND</strong></div>
             </div>
@@ -196,8 +196,8 @@ interface DebitItem {
           <p class="text-gray-500 mb-6">Réduction: <strong class="text-green-600">{{ getReduction() | number:'1.3-3' }} TND</strong></p>
           <p class="text-sm text-gray-400 mb-6">Votre demande sera traitée par un agent CNSS. Vous recevrez une notification par email.</p>
           <div class="flex justify-center gap-4">
-            <a routerLink="/cooperant/espace" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Retour à l'espace</a>
-            <a routerLink="/cooperant/mes-demandes" class="px-4 py-2 border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50">Suivre mes demandes</a>
+            <a routerLink="/cooperant/espace" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">Retour à l'espace</a>
+            <a routerLink="/cooperant/mes-demandes" class="px-4 py-2 border border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50">Suivre mes demandes</a>
           </div>
         </div>
       </main>

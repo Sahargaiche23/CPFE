@@ -19,11 +19,11 @@ interface Document {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
-          <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800">← Retour à l'espace</a>
+          <a routerLink="/cooperant/espace" class="text-pink-600 hover:text-pink-800">← Retour à l'espace</a>
         </div>
       </header>
 
@@ -32,13 +32,13 @@ interface Document {
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-800">📁 Mes Dépôts de Documents</h2>
             <a routerLink="/cooperant/depot-documents" 
-               class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+               class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
               + Nouveau dépôt
             </a>
           </div>
 
           <div *ngIf="loading" class="flex justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
           </div>
 
           <div *ngIf="!loading && documents.length === 0" class="text-center py-12">
@@ -46,7 +46,7 @@ interface Document {
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucun document déposé</h3>
             <p class="text-gray-500 mb-4">Vous n'avez pas encore soumis de documents.</p>
             <a routerLink="/cooperant/depot-documents" 
-               class="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+               class="inline-block px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
               Déposer mes documents
             </a>
           </div>
@@ -103,7 +103,7 @@ interface Document {
                       {{ getStatusLabel(doc.statut) }}
                     </span>
                     <a [href]="'/api/documents/' + doc.id + '/download'" target="_blank"
-                       class="p-2 text-teal-600 hover:bg-teal-50 rounded-lg">
+                       class="p-2 text-pink-600 hover:bg-pink-50 rounded-lg">
                       📥
                     </a>
                   </div>

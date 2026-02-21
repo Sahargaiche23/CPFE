@@ -1,7 +1,7 @@
 <app-main-layout>
   <div class="fade-in">
     <!-- Welcome Section -->
-    <div class="bg-gradient-to-r from-cnss-primary to-cnss-secondary rounded-2xl p-8 mb-8 text-white shadow-xl">
+    <div class="bg-gradient-to-r from-cnss-primary via-pink-600 to-cnss-accent rounded-2xl p-8 mb-8 text-white shadow-xl">
       <h1 class="text-3xl font-bold mb-2">{{ i18n.t('dashboard.title') }}</h1>
       <p class="text-lg opacity-90" *ngIf="!isAgentAtct">{{ i18n.t('dashboard.welcome') }}</p>
       <p class="text-lg opacity-90" *ngIf="isAgentAtct">Bienvenue dans l'espace de gestion ATCT - Coopération Technique</p>
@@ -12,8 +12,8 @@
       <!-- Logo ATCT -->
       <div class="flex items-center gap-4 mb-6 bg-white rounded-xl p-4 shadow">
         <img src="https://www.atct.tn/sites/default/files/logofr_0.png" alt="ATCT Logo" class="h-14 w-auto object-contain">
-        <div class="border-l-2 border-teal-600 pl-4">
-          <h2 class="text-lg font-bold text-teal-700">Agence Tunisienne de Coopération Technique</h2>
+        <div class="border-l-2 border-pink-600 pl-4">
+          <h2 class="text-lg font-bold text-pink-700">Agence Tunisienne de Coopération Technique</h2>
           <p class="text-sm text-gray-600">Tableau de bord de gestion des dossiers</p>
         </div>
       </div>
@@ -112,17 +112,17 @@
 
       <!-- Stats GED -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="card hover:shadow-xl transition-all duration-300 border-l-4 border-teal-500">
+        <div class="card hover:shadow-xl transition-all duration-300 border-l-4 border-pink-500">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm font-semibold mb-2">Documents GED</p>
-              <h3 class="text-3xl font-bold text-teal-600">{{ atctStats.totalDocuments }}</h3>
+              <h3 class="text-3xl font-bold text-pink-600">{{ atctStats.totalDocuments }}</h3>
             </div>
-            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-teal-600">folder</span>
+            <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-4xl text-pink-600">folder</span>
             </div>
           </div>
-          <a routerLink="/ged" class="text-teal-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+          <a routerLink="/ged" class="text-pink-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
             Gérer les documents
             <span class="material-icons text-sm ml-1">arrow_forward</span>
           </a>
@@ -175,7 +175,7 @@
               <span>Valider les Dossiers</span>
             </a>
             
-            <a routerLink="/ged" class="quick-action-btn bg-teal-50 hover:bg-teal-100 text-teal-700">
+            <a routerLink="/ged" class="quick-action-btn bg-pink-50 hover:bg-pink-100 text-pink-700">
               <span class="material-icons">folder</span>
               <span>Gestion Documentaire</span>
             </a>
@@ -266,13 +266,13 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-600 text-sm font-semibold mb-2">Demandes en attente</p>
-            <h3 class="text-3xl font-bold text-teal-600">{{ demandesEnAttente }}</h3>
+            <h3 class="text-3xl font-bold text-pink-600">{{ demandesEnAttente }}</h3>
           </div>
-          <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center">
-            <span class="material-icons text-4xl text-teal-600">assignment</span>
+          <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-4xl text-pink-600">assignment</span>
           </div>
         </div>
-        <a routerLink="/demande" class="text-teal-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
+        <a routerLink="/demande" class="text-pink-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
           Voir détails
           <span class="material-icons text-sm ml-1">arrow_forward</span>
         </a>
@@ -280,14 +280,14 @@
     </div>
 
     <!-- Dossiers ATCT reçus -->
-    <div *ngIf="dossiersAtctRecus.length > 0" class="card mb-8 border-l-4 border-teal-500">
+    <div *ngIf="dossiersAtctRecus.length > 0" class="card mb-8 border-l-4 border-pink-500">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold text-cnss-dark flex items-center">
-          <span class="material-icons mr-2 text-teal-600">inbox</span>
+          <span class="material-icons mr-2 text-pink-600">inbox</span>
           Dossiers ATCT reçus
-          <span class="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-sm">{{ dossiersAtctRecus.length }}</span>
+          <span class="ml-2 px-2 py-0.5 bg-pink-100 text-pink-700 rounded-full text-sm">{{ dossiersAtctRecus.length }}</span>
         </h2>
-        <a routerLink="/atct/validation" class="text-teal-600 text-sm font-semibold hover:underline flex items-center">
+        <a routerLink="/atct/validation" class="text-pink-600 text-sm font-semibold hover:underline flex items-center">
           Voir tous
           <span class="material-icons text-sm ml-1">arrow_forward</span>
         </a>
@@ -296,8 +296,8 @@
         <div *ngFor="let dossier of dossiersAtctRecus.slice(0, 5)" 
              class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-teal-600">folder_shared</span>
+            <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-pink-600">folder_shared</span>
             </div>
             <div>
               <p class="font-medium text-gray-800">{{ dossier.nomCompletFr || (dossier.prenomFr + ' ' + dossier.nomFr) }}</p>
@@ -309,7 +309,7 @@
               <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">En attente</span>
               <p class="text-xs text-gray-400 mt-1">{{ dossier.documentsDeposes ? '📄 Documents joints' : 'Sans documents' }}</p>
             </div>
-            <a [routerLink]="['/atct/detail', dossier.id]" class="p-2 text-teal-600 hover:bg-teal-50 rounded">
+            <a [routerLink]="['/atct/detail', dossier.id]" class="p-2 text-pink-600 hover:bg-pink-50 rounded">
               <span class="material-icons">visibility</span>
             </a>
           </div>
@@ -367,7 +367,7 @@
             <span>{{ i18n.t('quickActions.convertSalary') }}</span>
           </a>
           
-          <a routerLink="/cooperant/search" class="quick-action-btn bg-teal-50 hover:bg-teal-100 text-teal-700">
+          <a routerLink="/cooperant/search" class="quick-action-btn bg-pink-50 hover:bg-pink-100 text-pink-700">
             <span class="material-icons">search</span>
             <span>Extrait Coopérant</span>
           </a>

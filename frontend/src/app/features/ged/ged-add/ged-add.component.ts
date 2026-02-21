@@ -16,7 +16,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
         <!-- Sidebar gauche - Liste documents -->
         <aside class="w-72 bg-white border-r border-gray-200 flex flex-col">
           <div class="p-4">
-            <button routerLink="/ged" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
+            <button routerLink="/ged" class="w-full bg-pink-600 hover:bg-pink-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -46,7 +46,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
             <div class="flex justify-between items-center mb-8">
               <h1 class="text-2xl font-bold text-gray-800">Nouveau Document</h1>
               <button (click)="save()" [disabled]="saving" 
-                      class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 flex items-center gap-2">
+                      class="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 flex items-center gap-2">
                 <svg *ngIf="saving" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -65,7 +65,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
                   <input type="text" [(ngModel)]="document.titre" 
                          placeholder="Titre principal du document"
-                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500">
                 </div>
 
                 <!-- Description -->
@@ -117,11 +117,11 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Date de création</label>
                     <input type="date" [(ngModel)]="document.dateCreation" 
-                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500">
+                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Langue</label>
-                    <select [(ngModel)]="document.langue" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500">
+                    <select [(ngModel)]="document.langue" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-pink-500">
                       <option value="fr">Français</option>
                       <option value="ar">العربية</option>
                       <option value="en">English</option>
@@ -135,7 +135,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <div class="flex items-center gap-4">
                     <input type="file" #fileInput (change)="onFilesSelected($event)" multiple class="hidden">
                     <button (click)="fileInput.click()" 
-                            class="px-4 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 font-medium">
+                            class="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 font-medium">
                       Parcourir...
                     </button>
                     <span class="text-gray-500 text-sm">
@@ -169,14 +169,14 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
                   <div class="flex flex-wrap gap-2 mb-2">
                     <span *ngFor="let tag of document.tags; let i = index" 
-                          class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm flex items-center gap-1">
+                          class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm flex items-center gap-1">
                       {{ tag }}
-                      <button (click)="removeTag(i)" class="hover:text-teal-900">×</button>
+                      <button (click)="removeTag(i)" class="hover:text-pink-900">×</button>
                     </span>
                   </div>
                   <input type="text" [(ngModel)]="newTag" (keyup.enter)="addTag()" 
                          placeholder="Entrez un tag et appuyez sur Entrée"
-                         class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                         class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-pink-500">
                 </div>
               </div>
             </div>
@@ -185,7 +185,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-gray-800">Métadonnées secondaires</h2>
-                <button (click)="addMetadata()" class="text-teal-600 hover:text-teal-800">
+                <button (click)="addMetadata()" class="text-pink-600 hover:text-pink-800">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
@@ -213,8 +213,8 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
               <div class="grid grid-cols-5 gap-3">
                 <button *ngFor="let cat of categories" (click)="document.categorie = cat.id"
                         class="p-4 rounded-lg border-2 text-center transition"
-                        [class.border-teal-500]="document.categorie === cat.id"
-                        [class.bg-teal-50]="document.categorie === cat.id"
+                        [class.border-pink-500]="document.categorie === cat.id"
+                        [class.bg-pink-50]="document.categorie === cat.id"
                         [class.border-gray-200]="document.categorie !== cat.id">
                   <div class="text-2xl mb-1">{{ cat.icon }}</div>
                   <div class="text-sm font-medium">{{ cat.nom }}</div>
@@ -228,7 +228,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                 Annuler
               </button>
               <button (click)="save()" [disabled]="saving || !document.titre" 
-                      class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+                      class="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50">
                 {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
               </button>
             </div>

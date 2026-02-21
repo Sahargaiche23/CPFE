@@ -18,7 +18,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
           <!-- Bouton Ajouter -->
           <div class="p-4">
             <a routerLink="/ged/add" 
-                    class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
+                    class="w-full bg-pink-600 hover:bg-pink-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -31,7 +31,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div class="relative">
               <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
                      placeholder="Rechercher..."
-                     class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                     class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500">
               <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -43,8 +43,8 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div class="space-y-1">
               <button (click)="filterCategorie('')" 
                       class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition"
-                      [class.bg-teal-50]="!categorieActive"
-                      [class.text-teal-700]="!categorieActive"
+                      [class.bg-pink-50]="!categorieActive"
+                      [class.text-pink-700]="!categorieActive"
                       [class.text-gray-700]="categorieActive"
                       [class.hover:bg-gray-100]="categorieActive">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,8 +59,8 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               
               <button *ngFor="let cat of categories" (click)="filterCategorie(cat.id)"
                       class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-left transition"
-                      [class.bg-teal-50]="categorieActive === cat.id"
-                      [class.text-teal-700]="categorieActive === cat.id"
+                      [class.bg-pink-50]="categorieActive === cat.id"
+                      [class.text-pink-700]="categorieActive === cat.id"
                       [class.text-gray-700]="categorieActive !== cat.id"
                       [class.hover:bg-gray-100]="categorieActive !== cat.id">
                 <div class="flex items-center gap-3">
@@ -75,7 +75,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div class="mt-6">
               <div class="px-3 pb-2 flex items-center justify-between">
                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tags</span>
-                <button (click)="showTagModal = true" class="text-teal-600 hover:text-teal-700">
+                <button (click)="showTagModal = true" class="text-pink-600 hover:text-pink-700">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
@@ -84,8 +84,8 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               <div class="flex flex-wrap gap-2 px-3">
                 <button *ngFor="let tag of tags" (click)="toggleTag(tag.nom)"
                         class="px-2 py-1 rounded text-xs font-medium transition"
-                        [class.bg-teal-100]="selectedTags.includes(tag.nom)"
-                        [class.text-teal-700]="selectedTags.includes(tag.nom)"
+                        [class.bg-pink-100]="selectedTags.includes(tag.nom)"
+                        [class.text-pink-700]="selectedTags.includes(tag.nom)"
                         [class.bg-gray-100]="!selectedTags.includes(tag.nom)"
                         [class.text-gray-600]="!selectedTags.includes(tag.nom)">
                   {{ tag.nom }}
@@ -111,7 +111,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div class="flex items-center gap-4">
               <!-- Tri -->
               <select [(ngModel)]="sortBy" (change)="sortDocuments()" 
-                      class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500">
+                      class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-pink-500">
                 <option value="dateCreation">Date de création</option>
                 <option value="titre">Titre</option>
                 <option value="fichierTaille">Taille</option>
@@ -120,16 +120,16 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               <div class="flex border border-gray-300 rounded-lg overflow-hidden">
                 <button (click)="viewMode = 'list'" 
                         class="p-2"
-                        [class.bg-teal-50]="viewMode === 'list'"
-                        [class.text-teal-600]="viewMode === 'list'">
+                        [class.bg-pink-50]="viewMode === 'list'"
+                        [class.text-pink-600]="viewMode === 'list'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                   </svg>
                 </button>
                 <button (click)="viewMode = 'grid'" 
                         class="p-2 border-l"
-                        [class.bg-teal-50]="viewMode === 'grid'"
-                        [class.text-teal-600]="viewMode === 'grid'">
+                        [class.bg-pink-50]="viewMode === 'grid'"
+                        [class.text-pink-600]="viewMode === 'grid'">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                   </svg>
@@ -144,7 +144,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div class="flex-1 overflow-y-auto p-6">
               <!-- Loading -->
               <div *ngIf="loading" class="flex justify-center py-12">
-                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-600"></div>
               </div>
 
               <!-- Empty state -->
@@ -154,7 +154,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                 </svg>
                 <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun document</h3>
                 <p class="mt-2 text-gray-500">Commencez par ajouter votre premier document</p>
-                <button (click)="showUploadModal = true" class="mt-4 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
+                <button (click)="showUploadModal = true" class="mt-4 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
                   Ajouter un document
                 </button>
               </div>
@@ -204,7 +204,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                         {{ formatSize(doc.fichierTaille) }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button (click)="downloadDoc(doc, $event)" class="text-teal-600 hover:text-teal-900 mr-3">
+                        <button (click)="downloadDoc(doc, $event)" class="text-pink-600 hover:text-pink-900 mr-3">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                           </svg>
@@ -243,7 +243,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Envoi rapide</h3>
                 <button *ngIf="quickUploadFiles.length > 0" (click)="selectAllQuickFiles()" 
-                        class="text-xs text-teal-600 hover:underline">
+                        class="text-xs text-pink-600 hover:underline">
                   ☐ Tout sélectionner
                 </button>
               </div>
@@ -251,7 +251,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               <!-- Dropzone -->
               <div class="border-2 border-dashed rounded-lg p-6 text-center transition"
                    (dragover)="onDragOver($event)" (drop)="onQuickDrop($event)" (dragleave)="onDragLeave($event)"
-                   [class.border-teal-500]="isDragging" [class.bg-teal-50]="isDragging"
+                   [class.border-pink-500]="isDragging" [class.bg-pink-50]="isDragging"
                    [class.border-orange-400]="!isDragging && quickUploadFiles.length === 0"
                    [class.bg-orange-50]="!isDragging && quickUploadFiles.length === 0"
                    [class.border-gray-300]="quickUploadFiles.length > 0">
@@ -275,17 +275,17 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <div *ngFor="let file of quickUploadFiles; let i = index" 
-                       class="relative bg-white border rounded-lg p-2 cursor-pointer hover:border-teal-500"
-                       [class.border-teal-500]="quickUploadSelected[file.name]"
+                       class="relative bg-white border rounded-lg p-2 cursor-pointer hover:border-pink-500"
+                       [class.border-pink-500]="quickUploadSelected[file.name]"
                        [class.ring-2]="quickUploadSelected[file.name]"
-                       [class.ring-teal-200]="quickUploadSelected[file.name]"
+                       [class.ring-pink-200]="quickUploadSelected[file.name]"
                        (click)="toggleQuickFileSelection(file.name)">
                     <div class="w-full h-16 bg-gray-100 rounded flex items-center justify-center text-2xl mb-1">
                       {{ getFileIconByName(file.name) }}
                     </div>
                     <p class="text-xs text-gray-600 truncate">{{ file.name }}</p>
                     <div *ngIf="quickUploadSelected[file.name]" 
-                         class="absolute top-1 right-1 w-5 h-5 bg-teal-500 rounded flex items-center justify-center">
+                         class="absolute top-1 right-1 w-5 h-5 bg-pink-500 rounded flex items-center justify-center">
                       <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                       </svg>
@@ -298,7 +298,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                 
                 <!-- Bouton Ajouter à un document -->
                 <button (click)="showDocumentSelector()" 
-                        class="mt-4 w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm flex items-center justify-center gap-2"
+                        class="mt-4 w-full px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 text-sm flex items-center justify-center gap-2"
                         [disabled]="!hasSelectedQuickFiles()">
                   <span>+</span> Ajouter à un nouveau document
                 </button>
@@ -312,7 +312,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                     <span class="text-xs text-gray-500">{{ uf.progress }}%</span>
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-1.5">
-                    <div class="bg-teal-600 h-1.5 rounded-full transition-all" [style.width.%]="uf.progress"></div>
+                    <div class="bg-pink-600 h-1.5 rounded-full transition-all" [style.width.%]="uf.progress"></div>
                   </div>
                 </div>
               </div>
@@ -333,7 +333,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
                     </div>
                     <div class="flex-1">
                       <p class="text-gray-600">
-                        <span class="font-medium text-teal-600">{{ act.utilisateur }}</span>
+                        <span class="font-medium text-pink-600">{{ act.utilisateur }}</span>
                         {{ getActiviteLabel(act) }}
                       </p>
                       <p class="text-xs text-gray-400">{{ formatRelativeDate(act.dateActivite) }}</p>
@@ -380,17 +380,17 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
               <input type="text" [(ngModel)]="newDocument.titre" 
-                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500">
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-500">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <textarea [(ngModel)]="newDocument.description" rows="3"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500"></textarea>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-500"></textarea>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
               <select [(ngModel)]="newDocument.categorie" 
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500">
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-500">
                 <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
               </select>
             </div>
@@ -399,8 +399,8 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               <div class="flex flex-wrap gap-2">
                 <button *ngFor="let tag of tags" (click)="toggleNewDocTag(tag.nom)"
                         class="px-3 py-1 rounded-full text-sm"
-                        [class.bg-teal-100]="newDocument.tags?.includes(tag.nom)"
-                        [class.text-teal-700]="newDocument.tags?.includes(tag.nom)"
+                        [class.bg-pink-100]="newDocument.tags?.includes(tag.nom)"
+                        [class.text-pink-700]="newDocument.tags?.includes(tag.nom)"
                         [class.bg-gray-100]="!newDocument.tags?.includes(tag.nom)"
                         [class.text-gray-600]="!newDocument.tags?.includes(tag.nom)">
                   {{ tag.nom }}
@@ -413,7 +413,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
               Annuler
             </button>
             <button (click)="uploadNewDocument()" [disabled]="!selectedFile && preselectedFiles.length === 0"
-                    class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+                    class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50">
               Téléverser
             </button>
           </div>
@@ -476,7 +476,7 @@ import { MainLayoutComponent } from '../../shared/layouts/main-layout/main-layou
             </div>
           </div>
           <div class="p-6 border-t border-gray-200 flex justify-end gap-3">
-            <button (click)="downloadDoc(selectedDocument, $event)" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2">
+            <button (click)="downloadDoc(selectedDocument, $event)" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>

@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <!-- Header -->
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -39,7 +39,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <h2 class="text-2xl font-bold text-gray-800 mb-2">Mes Réclamations</h2>
               <p class="text-gray-600">Gérez vos réclamations et suivez leur traitement</p>
             </div>
-            <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800 flex items-center gap-2">
+            <a routerLink="/cooperant/espace" class="text-pink-600 hover:text-pink-800 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
@@ -51,15 +51,15 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <!-- Nouvelle Réclamation -->
-          <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-teal-500"
+          <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-pink-500"
                (click)="showForm = true">
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
               </div>
-              <span class="px-3 py-1 bg-teal-500 text-white rounded-full text-sm font-medium">Nouveau</span>
+              <span class="px-3 py-1 bg-pink-500 text-white rounded-full text-sm font-medium">Nouveau</span>
             </div>
             <h3 class="font-semibold text-gray-800">Nouvelle Réclamation</h3>
             <p class="text-sm text-gray-500">Soumettre une demande</p>
@@ -122,7 +122,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <div *ngIf="!submitted" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Objet de la réclamation *</label>
-              <select [(ngModel)]="reclamation.objet" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              <select [(ngModel)]="reclamation.objet" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-pink-500">
                 <option value="">-- Sélectionner --</option>
                 <option value="dossier">Problème avec mon dossier</option>
                 <option value="validation">Délai de validation</option>
@@ -136,7 +136,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
               <textarea [(ngModel)]="reclamation.description" rows="5" 
-                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                         placeholder="Décrivez votre réclamation en détail..."></textarea>
             </div>
 
@@ -147,7 +147,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </button>
               <button (click)="submit()" 
                       [disabled]="!reclamation.objet || !reclamation.description"
-                      class="flex-1 bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                      class="flex-1 bg-pink-600 text-white py-3 rounded-lg font-semibold hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
                 Envoyer
               </button>
             </div>
@@ -162,7 +162,7 @@ import { AuthService } from '../../../core/services/auth.service';
             </div>
             <h3 class="text-xl font-semibold text-gray-800 mb-2">Réclamation envoyée !</h3>
             <p class="text-gray-600 mb-4">Votre réclamation a été enregistrée. Nous vous répondrons dans les plus brefs délais.</p>
-            <button (click)="reset()" class="text-teal-600 hover:underline">Soumettre une autre réclamation</button>
+            <button (click)="reset()" class="text-pink-600 hover:underline">Soumettre une autre réclamation</button>
           </div>
         </div>
 

@@ -11,12 +11,12 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
           <h1 class="text-lg font-bold text-gray-800">Suivi de mes Demandes</h1>
-          <a routerLink="/cooperant/espace" class="ml-auto text-teal-600 hover:text-teal-800 text-sm">← Retour</a>
+          <a routerLink="/cooperant/espace" class="ml-auto text-pink-600 hover:text-pink-800 text-sm">← Retour</a>
         </div>
       </header>
 
@@ -43,7 +43,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <!-- Loading -->
         <div *ngIf="loading" class="bg-white rounded-xl shadow-lg p-8 text-center">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600 mx-auto"></div>
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-600 mx-auto"></div>
           <p class="mt-4 text-gray-500">Chargement de vos demandes...</p>
         </div>
 
@@ -54,7 +54,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             <p class="text-gray-500">Aucune demande déposée</p>
-            <a routerLink="/cooperant/espace" class="text-teal-600 text-sm mt-2 inline-block hover:underline">Déposer une demande →</a>
+            <a routerLink="/cooperant/espace" class="text-pink-600 text-sm mt-2 inline-block hover:underline">Déposer une demande →</a>
           </div>
 
           <div *ngFor="let d of demandes" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">

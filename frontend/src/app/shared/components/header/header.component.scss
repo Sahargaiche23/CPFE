@@ -1,13 +1,20 @@
 .nav-link {
-  @apply flex items-center text-gray-700 hover:text-cnss-primary font-medium transition-colors duration-200;
+  @apply flex items-center text-gray-600 hover:text-cnss-primary font-medium transition-all duration-200;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
   
   &:hover {
-    transform: translateY(-2px);
+    background-color: #FDF2F8;
   }
 }
 
 .dropdown-item {
-  @apply flex items-center space-x-2 px-4 py-2 hover:bg-gray-100 transition-colors duration-200;
+  @apply flex items-center space-x-2 px-4 py-2.5 transition-colors duration-200;
+  
+  &:hover {
+    background-color: #FDF2F8;
+  }
   
   .material-icons {
     font-size: 18px;

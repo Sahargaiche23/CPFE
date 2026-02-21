@@ -1,73 +1,80 @@
 <app-main-layout>
   <div class="fade-in">
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-cnss-dark">Coopérants</h1>
-        <p class="text-gray-600 mt-2">Gestion des personnes coopérantes (FR/AR) + validation agent</p>
-      </div>
-      <div class="flex gap-3">
-        <!-- Validation et création coopérant via ATCT uniquement -->
-
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md" 
+             style="background: linear-gradient(135deg, #BE185D, #EC4899);">
+          <span class="material-icons text-white text-2xl">people</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Coopérants</h1>
+          <p class="text-sm text-gray-500">Gestion des personnes coopérantes (FR/AR) + validation agent</p>
+        </div>
       </div>
     </div>
 
     <!-- Tableau ATCT Validés -->
-    <div *ngIf="dossiersATCTValides.length > 0" class="card mb-6 border-2 border-green-200 bg-green-50">
-      <h2 class="text-xl font-bold mb-4 text-green-700 flex items-center">
-        <span class="material-icons mr-2">check_circle</span>
-        Dossiers ATCT Validés - En attente d'affiliation ({{ dossiersATCTValides.length }})
-      </h2>
+    <div *ngIf="dossiersATCTValides.length > 0" class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+      <div class="p-5 border-b border-pink-100 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+          <span class="material-icons text-green-600 text-lg">check_circle</span>
+        </div>
+        <h2 class="text-lg font-bold text-gray-800">
+          Dossiers ATCT Validés - En attente d'affiliation 
+          <span class="ml-2 px-2.5 py-0.5 bg-pink-100 text-pink-700 rounded-full text-sm">{{ dossiersATCTValides.length }}</span>
+        </h2>
+      </div>
       <div class="overflow-x-auto">
-        <table class="w-full border-collapse bg-white rounded-lg overflow-hidden">
-          <thead class="bg-green-600 text-white">
-            <tr>
-              <th class="px-4 py-3 text-left">Coopérant</th>
-              <th class="px-4 py-3 text-left">Contact</th>
-              <th class="px-4 py-3 text-left">Détachement</th>
-              <th class="px-4 py-3 text-center">Régime</th>
-              <th class="px-4 py-3 text-center">Statut</th>
-              <th class="px-4 py-3 text-center">Date Validation</th>
-              <th class="px-4 py-3 text-center">Actions</th>
+        <table class="w-full">
+          <thead>
+            <tr style="background: linear-gradient(135deg, #BE185D, #9D174D);">
+              <th class="px-5 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Coopérant</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Contact</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Détachement</th>
+              <th class="px-5 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">Régime</th>
+              <th class="px-5 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">Statut</th>
+              <th class="px-5 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">Date Validation</th>
+              <th class="px-5 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr *ngFor="let dossier of dossiersATCTValides" class="border-b hover:bg-green-50">
-              <td class="px-4 py-3">
-                <div class="font-semibold">{{ dossier.prenomFr }} {{ dossier.nomFr }}</div>
+          <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let dossier of dossiersATCTValides" class="hover:bg-pink-50/40 transition">
+              <td class="px-5 py-4">
+                <div class="font-semibold text-gray-800">{{ dossier.prenomFr }} {{ dossier.nomFr }}</div>
                 <div class="text-sm text-gray-500">{{ dossier.prenomAr }} {{ dossier.nomAr }}</div>
-                <div class="text-xs text-gray-400 font-mono">{{ dossier.matriculeEmployeurComplet }}</div>
+                <div class="text-xs text-gray-400 font-mono mt-0.5">{{ dossier.matriculeEmployeurComplet }}</div>
               </td>
-              <td class="px-4 py-3">
-                <div class="text-sm">{{ dossier.email }}</div>
+              <td class="px-5 py-4">
+                <div class="text-sm text-gray-800">{{ dossier.email }}</div>
                 <div class="text-sm text-gray-500">{{ dossier.telephone }}</div>
               </td>
-              <td class="px-4 py-3">
-                <div class="font-medium">{{ dossier.paysEtranger || 'Non spécifié' }}</div>
-                <div class="text-xs text-gray-500">
+              <td class="px-5 py-4">
+                <div class="font-medium text-gray-800">{{ dossier.paysEtranger || 'Non spécifié' }}</div>
+                <div class="text-xs text-gray-500 mt-0.5">
                   {{ dossier.dateDebutDetachement | date:'dd/MM/yyyy' }} - {{ dossier.dateFinDetachement | date:'dd/MM/yyyy' }}
                 </div>
               </td>
-              <td class="px-4 py-3 text-center">
-                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
+              <td class="px-5 py-4 text-center">
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
                   {{ dossier.codeRegime || '500' }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-center">
-                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+              <td class="px-5 py-4 text-center">
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
                   VALIDÉ
                 </span>
               </td>
-              <td class="px-4 py-3 text-center text-sm">
+              <td class="px-5 py-4 text-center text-sm text-gray-600">
                 {{ dossier.dateValidation | date:'dd/MM/yyyy HH:mm' }}
               </td>
-              <td class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <a [routerLink]="['/affiliation/complete']" [queryParams]="{email: dossier.email}"
-                     class="px-3 py-2 bg-cnss-primary text-white rounded hover:bg-cnss-secondary inline-flex items-center text-sm">
-                    <span class="material-icons mr-1 text-base">assignment</span>
-                    Créer Affiliation
-                  </a>
-                </div>
+              <td class="px-5 py-4 text-center">
+                <a [routerLink]="['/affiliation/complete']" [queryParams]="{email: dossier.email}"
+                   class="inline-flex items-center px-4 py-2 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all"
+                   style="background: linear-gradient(135deg, #BE185D, #EC4899);">
+                  <span class="material-icons mr-1 text-base">assignment</span>
+                  Créer Affiliation
+                </a>
               </td>
             </tr>
           </tbody>

@@ -41,7 +41,7 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
             <div class="text-gray-600">Agents</div>
           </div>
           <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-3xl font-bold text-teal-600">{{ stats?.cooperantUsers || 0 }}</div>
+            <div class="text-3xl font-bold text-pink-600">{{ stats?.cooperantUsers || 0 }}</div>
             <div class="text-gray-600">Coopérants</div>
           </div>
         </div>
@@ -97,7 +97,7 @@ import { UserService, User, Governorate } from '../../../core/services/user.serv
                 <td class="px-6 py-4">
                   <span [ngClass]="{
                     'bg-purple-100 text-purple-800': user.profil?.toLowerCase() === 'admin',
-                    'bg-teal-100 text-teal-800': user.profil?.toLowerCase() === 'cooperant',
+                    'bg-pink-100 text-pink-800': user.profil?.toLowerCase() === 'cooperant',
                     'bg-orange-100 text-orange-800': user.profil?.toLowerCase() === 'agent_atct',
                     'bg-blue-100 text-blue-800': user.profil?.toLowerCase() === 'user'
                   }" class="px-2 py-1 rounded-full text-xs font-medium">

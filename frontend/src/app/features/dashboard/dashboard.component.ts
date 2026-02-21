@@ -237,7 +237,7 @@ export class DashboardComponent implements OnInit {
           description: `${nom} - ${statutLabels[statut] || statut}`,
           time: this.formatDate(d.dateModification || d.dateValidation || d.dateCreation),
           icon: statut === 'AFFILIE' ? 'how_to_reg' : statut === 'VALIDE' ? 'check_circle' : statut === 'REJETE' ? 'cancel' : 'folder_shared',
-          color: statut === 'AFFILIE' ? 'text-green-600' : statut === 'VALIDE' ? 'text-teal-600' : statut === 'REJETE' ? 'text-red-600' : 'text-yellow-600'
+          color: statut === 'AFFILIE' ? 'text-green-600' : statut === 'VALIDE' ? 'text-pink-600' : statut === 'REJETE' ? 'text-red-600' : 'text-yellow-600'
         });
       });
     }

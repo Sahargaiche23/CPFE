@@ -15,7 +15,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
         <!-- Sidebar gauche -->
         <aside class="w-72 bg-white border-r border-gray-200 flex flex-col">
           <div class="p-4">
-            <button routerLink="/ged/add" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
+            <button routerLink="/ged/add" class="w-full bg-pink-600 hover:bg-pink-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -24,7 +24,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
           </div>
           <div class="px-4 pb-4">
             <div class="relative">
-              <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher..." class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher..." class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500">
               <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -41,10 +41,10 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
               <tbody>
                 <tr *ngFor="let doc of filteredDocs" 
                     class="border-b hover:bg-gray-50 cursor-pointer"
-                    [class.bg-teal-50]="doc.id === document?.id"
+                    [class.bg-pink-50]="doc.id === document?.id"
                     (click)="loadDocument(doc.id)">
                   <td class="px-4 py-3">
-                    <a class="text-teal-600 hover:underline">{{ doc.titre }}</a>
+                    <a class="text-pink-600 hover:underline">{{ doc.titre }}</a>
                   </td>
                   <td class="px-4 py-3 text-right text-gray-500">{{ formatRelativeDate(doc.dateCreation) }}</td>
                 </tr>
@@ -60,7 +60,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
             <div class="flex justify-between items-start">
               <div>
                 <h1 class="text-2xl font-bold text-gray-800">{{ document.titre }}</h1>
-                <p class="text-gray-500 mt-1">{{ formatDate(document.dateCreation) }} par <span class="text-teal-600">{{ document.creePar }}</span></p>
+                <p class="text-gray-500 mt-1">{{ formatDate(document.dateCreation) }} par <span class="text-pink-600">{{ document.creePar }}</span></p>
               </div>
               <div class="flex gap-2">
                 <div class="relative">
@@ -101,7 +101,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
           <div *ngIf="editMode" class="bg-white border-b border-gray-200 px-8 py-6">
             <div class="flex justify-between items-center mb-4">
               <h3 class="font-semibold text-gray-800">Métadonnées principales</h3>
-              <button (click)="saveChanges()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2">
+              <button (click)="saveChanges()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
@@ -135,8 +135,8 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
             <div class="flex gap-1">
               <button *ngFor="let tab of tabs" (click)="activeTab = tab.id"
                       class="px-4 py-3 text-sm font-medium border-b-2 transition"
-                      [class.border-teal-500]="activeTab === tab.id"
-                      [class.text-teal-600]="activeTab === tab.id"
+                      [class.border-pink-500]="activeTab === tab.id"
+                      [class.text-pink-600]="activeTab === tab.id"
                       [class.border-transparent]="activeTab !== tab.id"
                       [class.text-gray-500]="activeTab !== tab.id">
                 {{ tab.icon }} {{ tab.label }}
@@ -159,14 +159,14 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                 <div class="flex gap-2 mb-4 border border-gray-200 rounded-lg p-1 w-fit">
                   <button (click)="setViewMode('list')" 
                           class="p-2 rounded transition-all"
-                          [ngClass]="{'bg-teal-600 text-white': fileViewMode === 'list', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'list'}">
+                          [ngClass]="{'bg-pink-600 text-white': fileViewMode === 'list', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'list'}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
                   </button>
                   <button (click)="setViewMode('grid')" 
                           class="p-2 rounded transition-all"
-                          [ngClass]="{'bg-teal-600 text-white': fileViewMode === 'grid', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'grid'}">
+                          [ngClass]="{'bg-pink-600 text-white': fileViewMode === 'grid', 'hover:bg-gray-100 text-gray-600': fileViewMode !== 'grid'}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
@@ -189,8 +189,8 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                       <p class="text-xs text-gray-500">{{ child.fichierNom }} - {{ formatFileSize(child.fichierTaille) }}</p>
                     </div>
                     <div class="flex gap-2 mt-2">
-                      <button (click)="previewChild(child); $event.stopPropagation()" class="flex-1 py-1 bg-teal-600 text-white text-xs rounded hover:bg-teal-700">Aperçu</button>
-                      <button (click)="downloadChild(child); $event.stopPropagation()" class="flex-1 py-1 border border-teal-600 text-teal-600 text-xs rounded hover:bg-teal-50">Télécharger</button>
+                      <button (click)="previewChild(child); $event.stopPropagation()" class="flex-1 py-1 bg-pink-600 text-white text-xs rounded hover:bg-pink-700">Aperçu</button>
+                      <button (click)="downloadChild(child); $event.stopPropagation()" class="flex-1 py-1 border border-pink-600 text-pink-600 text-xs rounded hover:bg-pink-50">Télécharger</button>
                     </div>
                   </div>
                 </div>
@@ -233,7 +233,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                       <p class="text-xs text-gray-500">{{ formatFileSize(document.fichierTaille) }} • {{ document.fichierType }}</p>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button class="p-2 text-teal-600 hover:bg-teal-50 rounded" (click)="$event.stopPropagation(); downloadDocument()">
+                      <button class="p-2 text-pink-600 hover:bg-pink-50 rounded" (click)="$event.stopPropagation(); downloadDocument()">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
@@ -249,7 +249,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 
                 <!-- Ajouter des fichiers -->
                 <input type="file" #fileInput (change)="onFileSelected($event)" multiple class="hidden">
-                <button (click)="fileInput.click()" class="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center gap-2">
+                <button (click)="fileInput.click()" class="w-full py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition flex items-center justify-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
@@ -272,7 +272,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                 </div>
                 <div class="space-y-3 max-h-64 overflow-y-auto">
                   <div *ngFor="let comment of comments" class="flex items-start gap-3 p-2 bg-gray-50 rounded">
-                    <div class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center text-xs">
+                    <div class="w-8 h-8 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs">
                       {{ comment.auteur.charAt(0).toUpperCase() }}
                     </div>
                     <div class="flex-1">
@@ -290,7 +290,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <input type="text" [(ngModel)]="newComment" (keyup.enter)="addComment()" 
                          placeholder="Ajouter un commentaire..." 
                          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-0">
-                  <button (click)="addComment()" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 whitespace-nowrap flex-shrink-0">
+                  <button (click)="addComment()" class="px-4 py-2 bg-pink-600 text-white rounded-lg text-sm hover:bg-pink-700 whitespace-nowrap flex-shrink-0">
                     Envoyer
                   </button>
                 </div>
@@ -308,9 +308,9 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   <select [(ngModel)]="selectedWorkflow" class="w-full border border-gray-300 rounded-lg px-3 py-2">
                     <option *ngFor="let wf of workflows" [value]="wf.id">{{ wf.nom }}</option>
                   </select>
-                  <a href="#" class="text-teal-600 text-sm hover:underline mt-1 inline-block">Ajouter plus de workflows</a>
+                  <a href="#" class="text-pink-600 text-sm hover:underline mt-1 inline-block">Ajouter plus de workflows</a>
                 </div>
-                <button (click)="startWorkflow()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+                <button (click)="startWorkflow()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
                   Démarrer le workflow
                 </button>
               </div>
@@ -373,7 +373,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                 <tbody>
                   <tr class="border-b">
                     <td class="px-4 py-3">
-                      <span class="text-teal-600">Utilisateur</span> {{ document.creePar }}
+                      <span class="text-pink-600">Utilisateur</span> {{ document.creePar }}
                     </td>
                     <td class="px-4 py-3">
                       <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs mr-1">Lecture</span>
@@ -383,7 +383,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   </tr>
                   <tr *ngFor="let perm of permissions" class="border-b">
                     <td class="px-4 py-3">
-                      <span class="text-teal-600">Utilisateur</span> {{ perm.utilisateur }}
+                      <span class="text-pink-600">Utilisateur</span> {{ perm.utilisateur }}
                     </td>
                     <td class="px-4 py-3">
                       <span class="px-2 py-1 rounded text-xs"
@@ -417,7 +417,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                   </select>
                 </div>
                 <div class="flex items-end">
-                  <button (click)="addPermission()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm">
+                  <button (click)="addPermission()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 text-sm">
                     + Ajouter
                   </button>
                 </div>
@@ -437,7 +437,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                       <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">{{ document.creePar }}</span>
                     </td>
                     <td class="px-4 py-3">
-                      Document créé : <a class="text-teal-600 hover:underline">{{ document.titre }}</a>
+                      Document créé : <a class="text-pink-600 hover:underline">{{ document.titre }}</a>
                     </td>
                   </tr>
                   <!-- Activités dynamiques -->
@@ -452,7 +452,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                       <span *ngIf="act.type === 'WORKFLOW_DEMARRE'" class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs mr-2">Workflow créé</span>
                       <span *ngIf="act.type === 'WORKFLOW_ANNULE'" class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs mr-2">Workflow supprimé</span>
                       <span *ngIf="act.type === 'COMMENTAIRE'" class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs mr-2">Commentaire créé</span>
-                      <span *ngIf="act.type === 'FICHIER_AJOUTE'" class="px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs mr-2">Fichier créé</span>
+                      <span *ngIf="act.type === 'FICHIER_AJOUTE'" class="px-2 py-1 bg-pink-100 text-pink-700 rounded text-xs mr-2">Fichier créé</span>
                       <span *ngIf="act.type === 'MODIFICATION'" class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs mr-2">Modifié</span>
                       {{ act.description }}
                     </td>
@@ -469,7 +469,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
 
         <!-- État de chargement -->
         <main *ngIf="!document && loading" class="flex-1 flex items-center justify-center bg-gray-50">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
         </main>
       </div>
 
@@ -481,15 +481,15 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
           </div>
           <div class="p-6 space-y-4">
             <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" [(ngModel)]="pdfExportOptions.metadata" class="w-4 h-4 text-teal-600 rounded">
+              <input type="checkbox" [(ngModel)]="pdfExportOptions.metadata" class="w-4 h-4 text-pink-600 rounded">
               <span class="text-sm text-gray-700">Exporter les métadonnées</span>
             </label>
             <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" [(ngModel)]="pdfExportOptions.comments" class="w-4 h-4 text-teal-600 rounded">
+              <input type="checkbox" [(ngModel)]="pdfExportOptions.comments" class="w-4 h-4 text-pink-600 rounded">
               <span class="text-sm text-gray-700">Exporter les commentaires</span>
             </label>
             <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" [(ngModel)]="pdfExportOptions.fitImages" class="w-4 h-4 text-teal-600 rounded">
+              <input type="checkbox" [(ngModel)]="pdfExportOptions.fitImages" class="w-4 h-4 text-pink-600 rounded">
               <span class="text-sm text-gray-700">Ajuster les images à la page</span>
             </label>
             <div>
@@ -505,7 +505,7 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
             <button (click)="showPdfExportModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
               Annuler
             </button>
-            <button (click)="exportPdf()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+            <button (click)="exportPdf()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
               Exporter
             </button>
           </div>

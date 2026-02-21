@@ -549,7 +549,7 @@ import { lastValueFrom } from 'rxjs';
               <button type="submit" 
                       [disabled]="form.invalid || loading || (!isReclamation && !allDocumentsUploaded())"
                       class="px-6 py-2 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      [class.bg-teal-600]="!isReclamation" [class.hover:bg-teal-700]="!isReclamation"
+                      [class.bg-pink-600]="!isReclamation" [class.hover:bg-pink-700]="!isReclamation"
                       [class.bg-orange-600]="isReclamation" [class.hover:bg-orange-700]="isReclamation">
                 @if (loading) {
                   <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">

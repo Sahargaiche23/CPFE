@@ -30,7 +30,7 @@ interface DocumentCategory {
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <!-- Header -->
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -42,7 +42,7 @@ interface DocumentCategory {
             </div>
           </div>
           <div class="flex items-center gap-4">
-            <a [routerLink]="['/cooperant/espace']" class="text-teal-600 hover:text-teal-800">
+            <a [routerLink]="['/cooperant/espace']" class="text-pink-600 hover:text-pink-800">
               ← Retour à l'espace
             </a>
           </div>
@@ -82,8 +82,8 @@ interface DocumentCategory {
             <!-- Drop Zone -->
             <div 
               class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
-              [class.border-teal-500]="dragOver === category.id"
-              [class.bg-teal-50]="dragOver === category.id"
+              [class.border-pink-500]="dragOver === category.id"
+              [class.bg-pink-50]="dragOver === category.id"
               [class.border-gray-300]="dragOver !== category.id"
               (dragover)="onDragOver($event, category.id)"
               (dragleave)="onDragLeave($event)"
@@ -128,7 +128,7 @@ interface DocumentCategory {
                   </span>
                   <div *ngIf="file.progress > 0 && file.progress < 100" class="w-20">
                     <div class="bg-gray-200 rounded-full h-2">
-                      <div class="bg-teal-500 h-2 rounded-full" [style.width.%]="file.progress"></div>
+                      <div class="bg-pink-500 h-2 rounded-full" [style.width.%]="file.progress"></div>
                     </div>
                   </div>
                   <button (click)="removeFile(category, i)" class="text-red-500 hover:text-red-700">
@@ -150,7 +150,7 @@ interface DocumentCategory {
           <button 
             (click)="submitDocuments()"
             [disabled]="!canSubmit() || submitting"
-            class="px-8 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            class="px-8 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <span *ngIf="submitting" class="animate-spin">⏳</span>
             {{ submitting ? 'Envoi en cours...' : 'Soumettre les documents' }}
           </button>

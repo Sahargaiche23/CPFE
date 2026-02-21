@@ -15,8 +15,8 @@ import { AtctService, DossierATCT, ATCTStats } from '../../../core/services/atct
         <!-- Logo ATCT -->
         <div class="flex items-center gap-4 mb-6">
           <img src="https://www.atct.tn/sites/default/files/logofr_0.png" alt="ATCT Logo" class="h-16 w-auto object-contain">
-          <div class="border-l-2 border-teal-600 pl-4">
-            <h2 class="text-lg font-bold text-teal-700">Agence Tunisienne de Coopération Technique</h2>
+          <div class="border-l-2 border-pink-600 pl-4">
+            <h2 class="text-lg font-bold text-pink-700">Agence Tunisienne de Coopération Technique</h2>
             <p class="text-sm text-gray-600">Module de gestion des dossiers ATCT</p>
           </div>
         </div>
@@ -150,7 +150,7 @@ import { AtctService, DossierATCT, ATCTStats } from '../../../core/services/atct
                               [ngClass]="{
                                 'bg-blue-100 text-blue-800': dossier.codeRegime === '500',
                                 'bg-purple-100 text-purple-800': dossier.codeRegime === '510',
-                                'bg-teal-100 text-teal-800': dossier.codeRegime === '515'
+                                'bg-pink-100 text-pink-800': dossier.codeRegime === '515'
                               }">
                           {{ dossier.codeRegime }}
                         </span>

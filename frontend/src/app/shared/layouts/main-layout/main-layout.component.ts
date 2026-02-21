@@ -12,10 +12,10 @@ import { HeaderComponent } from '../../components/header/header.component';
       <main class="flex-1 container mx-auto px-4 py-8">
         <ng-content></ng-content>
       </main>
-      <footer class="bg-cnss-dark text-white py-6 mt-auto">
+      <footer class="mt-auto py-5" style="background: linear-gradient(135deg, #1F2937 0%, #374151 100%);">
         <div class="container mx-auto px-4 text-center">
-          <p>&copy;  CNSS - Caisse Nationale de Sécurité Sociale</p>
-          <p class="text-sm mt-2 text-gray-400">Système de Gestion de la Coopération Technique</p>
+          <p class="text-white font-medium text-sm">&copy; CNSS - Caisse Nationale de Sécurité Sociale</p>
+          <p class="text-xs mt-1.5 text-pink-300">Système de Gestion de la Coopération Technique</p>
         </div>
       </footer>
     </div>

@@ -1,141 +1,148 @@
-<header class="bg-white shadow-lg sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-4">
-    <div class="flex items-center justify-between">
-      <!-- Logo & Title -->
-      <div class="flex items-center space-x-4">
-        <img 
-          src="assets/images/logo-cnss.png" 
-          alt="CNSS Logo" 
-          class="h-16 w-auto object-contain"
-        />
-        <div class="border-l-2 border-cnss-primary pl-4">
-          <h1 class="text-xl font-bold text-cnss-primary">{{ i18n.t('header.republic') }}</h1>
-          <p class="text-sm text-cnss-secondary font-semibold">{{ i18n.t('header.cnss') }}</p>
-          <p class="text-xs text-gray-600 mt-1">{{ i18n.t('header.system') }}</p>
-        </div>
-      </div>
-
-      <!-- Navigation & User -->
-      <nav class="hidden md:flex items-center space-x-6" *ngIf="user$ | async as user">
-        <!-- Menu Admin et Agent CNSS - accès complet -->
-        <ng-container *ngIf="user.profil?.toLowerCase() === 'admin' || user.profil?.toLowerCase() === 'user' || user.profil?.toLowerCase() === 'agent_cnss'">
-          <a routerLink="/dashboard" class="nav-link">
-            <span class="material-icons text-sm mr-1">dashboard</span>
-            {{ i18n.t('nav.dashboard') }}
-          </a>
-          <a routerLink="/cooperant" class="nav-link">
-            <span class="material-icons text-sm mr-1">person</span>
-            Coopérants
-          </a>
-          <a routerLink="/atct" class="nav-link">
-            <span class="material-icons text-sm mr-1">assignment</span>
-            ATCT
-          </a>
-          <a routerLink="/affiliation" class="nav-link">
-            <span class="material-icons text-sm mr-1">person_add</span>
-            {{ i18n.t('nav.affiliations') }}
-          </a>
-          <a routerLink="/debit" class="nav-link">
-            <span class="material-icons text-sm mr-1">receipt</span>
-            {{ i18n.t('nav.debits') }}
-          </a>
-          <a routerLink="/demande" class="nav-link">
-            <span class="material-icons text-sm mr-1">assignment</span>
-            Demandes
-          </a>
-          <a routerLink="/payment" class="nav-link">
-            <span class="material-icons text-sm mr-1">payment</span>
-            {{ i18n.t('nav.payments') }}
-          </a>
-          <a routerLink="/ged" class="nav-link">
-            <span class="material-icons text-sm mr-1">folder</span>
-            GED
-          </a>
-        </ng-container>
-        
-        <!-- Menu Agent ATCT - uniquement ATCT et GED -->
-        <ng-container *ngIf="user.profil?.toLowerCase() === 'agent_atct' || user.profil?.toLowerCase() === 'agent_coop_tech'">
-          <a routerLink="/dashboard" class="nav-link">
-            <span class="material-icons text-sm mr-1">dashboard</span>
-            {{ i18n.t('nav.dashboard') }}
-          </a>
-          <a routerLink="/atct" class="nav-link">
-            <span class="material-icons text-sm mr-1">assignment</span>
-            ATCT
-          </a>
-          <a routerLink="/ged" class="nav-link">
-            <span class="material-icons text-sm mr-1">folder</span>
-            GED
-          </a>
-        </ng-container>
-        
-        <!-- Menu Coopérant uniquement -->
-        <ng-container *ngIf="user.profil?.toLowerCase() === 'cooperant'">
-          <a routerLink="/cooperant/espace" class="nav-link">
-            <span class="material-icons text-sm mr-1">home</span>
-            Mon Espace
-          </a>
-          <a routerLink="/cooperant/depot-documents" class="nav-link">
-            <span class="material-icons text-sm mr-1">upload_file</span>
-            Mes Dépôts
-          </a>
-          <a routerLink="/cooperant/suivi-dossier" class="nav-link">
-            <span class="material-icons text-sm mr-1">track_changes</span>
-            Suivi Dossier
-          </a>
-          <a routerLink="/cooperant/reclamations" class="nav-link">
-            <span class="material-icons text-sm mr-1">report_problem</span>
-            Réclamations
-          </a>
-        </ng-container>
-        
-        <div class="relative">
-          <button (click)="toggleMenu()" class="flex items-center space-x-2 bg-cnss-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all">
-            <span class="material-icons">account_circle</span>
-            <span>{{ user.username }}</span>
-            <span class="material-icons text-sm">expand_more</span>
-          </button>
-          
-          <div *ngIf="isMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
-            <a routerLink="/profile" (click)="isMenuOpen = false" class="dropdown-item">
-              <span class="material-icons text-sm">person</span>
-              {{ i18n.t('nav.profile') }}
-            </a>
-            <a routerLink="/settings" (click)="isMenuOpen = false" class="dropdown-item">
-              <span class="material-icons text-sm">settings</span>
-              {{ i18n.t('nav.settings') }}
-            </a>
-            <!-- Admin Menu -->
-            <div *ngIf="user.profil?.toLowerCase() === 'admin'">
-              <hr class="my-2">
-              <p class="px-4 py-1 text-xs text-gray-500 uppercase font-semibold">Administration</p>
-              <a routerLink="/reports" (click)="isMenuOpen = false" class="dropdown-item">
-                <span class="material-icons text-sm">description</span>
-                Rapports
-              </a>
-              <a routerLink="/admin/users" (click)="isMenuOpen = false" class="dropdown-item">
-                <span class="material-icons text-sm">group</span>
-                Gestion Utilisateurs
-              </a>
-              <a routerLink="/admin/logs" (click)="isMenuOpen = false" class="dropdown-item">
-                <span class="material-icons text-sm">history</span>
-                Journal d'Audit
-              </a>
-            </div>
-            
-            <hr class="my-2">
-            <button (click)="logout()" class="dropdown-item text-red-600 w-full text-left">
-              <span class="material-icons text-sm">logout</span>
-              {{ i18n.t('nav.logout') }}
-            </button>
+<header class="sticky top-0 z-50 shadow-lg">
+  <!-- Top gradient bar -->
+  <div class="h-1" style="background: linear-gradient(90deg, #9D174D 0%, #BE185D 25%, #EC4899 50%, #F9A8D4 75%, #FBCFE8 100%);"></div>
+  
+  <!-- Main header -->
+  <div class="bg-white">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <img 
+            src="assets/images/logo-cnss.png" 
+            alt="CNSS Logo" 
+            class="h-12 w-auto object-contain"
+          />
+          <div>
+            <h1 class="text-lg font-bold text-cnss-primary leading-tight">{{ i18n.t('header.republic') }}</h1>
+            <p class="text-xs text-cnss-secondary font-semibold">{{ i18n.t('header.cnss') }}</p>
           </div>
         </div>
-      </nav>
 
-      <!-- Mobile menu button -->
-      <button class="md:hidden" (click)="toggleMenu()">
-        <span class="material-icons text-cnss-primary">menu</span>
-      </button>
+        <!-- Navigation & User -->
+        <nav class="hidden md:flex items-center gap-1" *ngIf="user$ | async as user">
+          <!-- Menu Admin et Agent CNSS - accès complet -->
+          <ng-container *ngIf="user.profil?.toLowerCase() === 'admin' || user.profil?.toLowerCase() === 'user' || user.profil?.toLowerCase() === 'agent_cnss'">
+            <a routerLink="/dashboard" class="nav-link">
+              <span class="material-icons text-sm mr-1">dashboard</span>
+              {{ i18n.t('nav.dashboard') }}
+            </a>
+            <a routerLink="/cooperant" class="nav-link">
+              <span class="material-icons text-sm mr-1">person</span>
+              Coopérants
+            </a>
+            <a routerLink="/atct" class="nav-link">
+              <span class="material-icons text-sm mr-1">assignment</span>
+              ATCT
+            </a>
+            <a routerLink="/affiliation" class="nav-link">
+              <span class="material-icons text-sm mr-1">person_add</span>
+              {{ i18n.t('nav.affiliations') }}
+            </a>
+            <a routerLink="/debit" class="nav-link">
+              <span class="material-icons text-sm mr-1">receipt</span>
+              {{ i18n.t('nav.debits') }}
+            </a>
+            <a routerLink="/demande" class="nav-link">
+              <span class="material-icons text-sm mr-1">assignment</span>
+              Demandes
+            </a>
+            <a routerLink="/payment" class="nav-link">
+              <span class="material-icons text-sm mr-1">payment</span>
+              {{ i18n.t('nav.payments') }}
+            </a>
+            <a routerLink="/ged" class="nav-link">
+              <span class="material-icons text-sm mr-1">folder</span>
+              GED
+            </a>
+          </ng-container>
+          
+          <!-- Menu Agent ATCT - uniquement ATCT et GED -->
+          <ng-container *ngIf="user.profil?.toLowerCase() === 'agent_atct' || user.profil?.toLowerCase() === 'agent_coop_tech'">
+            <a routerLink="/dashboard" class="nav-link">
+              <span class="material-icons text-sm mr-1">dashboard</span>
+              {{ i18n.t('nav.dashboard') }}
+            </a>
+            <a routerLink="/atct" class="nav-link">
+              <span class="material-icons text-sm mr-1">assignment</span>
+              ATCT
+            </a>
+            <a routerLink="/ged" class="nav-link">
+              <span class="material-icons text-sm mr-1">folder</span>
+              GED
+            </a>
+          </ng-container>
+          
+          <!-- Menu Coopérant uniquement -->
+          <ng-container *ngIf="user.profil?.toLowerCase() === 'cooperant'">
+            <a routerLink="/cooperant/espace" class="nav-link">
+              <span class="material-icons text-sm mr-1">home</span>
+              Mon Espace
+            </a>
+            <a routerLink="/cooperant/depot-documents" class="nav-link">
+              <span class="material-icons text-sm mr-1">upload_file</span>
+              Mes Dépôts
+            </a>
+            <a routerLink="/cooperant/suivi-dossier" class="nav-link">
+              <span class="material-icons text-sm mr-1">track_changes</span>
+              Suivi Dossier
+            </a>
+            <a routerLink="/cooperant/reclamations" class="nav-link">
+              <span class="material-icons text-sm mr-1">report_problem</span>
+              Réclamations
+            </a>
+          </ng-container>
+          
+          <div class="relative ml-2">
+            <button (click)="toggleMenu()" 
+                    class="flex items-center space-x-2 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all text-sm font-medium"
+                    style="background: linear-gradient(135deg, #BE185D, #EC4899);">
+              <span class="material-icons text-base">account_circle</span>
+              <span>{{ user.username }}</span>
+              <span class="material-icons text-sm">expand_more</span>
+            </button>
+            
+            <div *ngIf="isMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 border border-pink-100">
+              <a routerLink="/profile" (click)="isMenuOpen = false" class="dropdown-item">
+                <span class="material-icons text-sm text-pink-500">person</span>
+                {{ i18n.t('nav.profile') }}
+              </a>
+              <a routerLink="/settings" (click)="isMenuOpen = false" class="dropdown-item">
+                <span class="material-icons text-sm text-pink-500">settings</span>
+                {{ i18n.t('nav.settings') }}
+              </a>
+              <!-- Admin Menu -->
+              <div *ngIf="user.profil?.toLowerCase() === 'admin'">
+                <hr class="my-2 border-pink-100">
+                <p class="px-4 py-1 text-xs text-pink-400 uppercase font-semibold">Administration</p>
+                <a routerLink="/reports" (click)="isMenuOpen = false" class="dropdown-item">
+                  <span class="material-icons text-sm text-pink-500">description</span>
+                  Rapports
+                </a>
+                <a routerLink="/admin/users" (click)="isMenuOpen = false" class="dropdown-item">
+                  <span class="material-icons text-sm text-pink-500">group</span>
+                  Gestion Utilisateurs
+                </a>
+                <a routerLink="/admin/logs" (click)="isMenuOpen = false" class="dropdown-item">
+                  <span class="material-icons text-sm text-pink-500">history</span>
+                  Journal d'Audit
+                </a>
+              </div>
+              
+              <hr class="my-2 border-pink-100">
+              <button (click)="logout()" class="dropdown-item text-red-600 w-full text-left">
+                <span class="material-icons text-sm">logout</span>
+                {{ i18n.t('nav.logout') }}
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Mobile menu button -->
+        <button class="md:hidden" (click)="toggleMenu()">
+          <span class="material-icons text-cnss-primary text-2xl">menu</span>
+        </button>
+      </div>
     </div>
   </div>
 </header>

@@ -21,7 +21,7 @@ interface DossierATCT {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-800 via-pink-600 to-pink-400">
       <!-- Header -->
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -46,21 +46,21 @@ interface DossierATCT {
         <!-- Welcome Banner -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 class="text-2xl font-bold text-gray-800 mb-2">Bienvenue, {{ getNom() }}</h2>
-          <p class="text-gray-600">Matricule: <strong class="text-teal-600">{{ getMatricule() }}</strong></p>
+          <p class="text-gray-600">Matricule: <strong class="text-pink-600">{{ getMatricule() }}</strong></p>
         </div>
 
         <!-- Dashboard Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <!-- Déposer Dossier -->
-          <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-teal-500" 
+          <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-pink-500" 
                [routerLink]="['/cooperant/depot-documents']">
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
               </div>
-              <span class="px-3 py-1 bg-teal-500 text-white rounded-full text-sm font-medium">Nouveau</span>
+              <span class="px-3 py-1 bg-pink-500 text-white rounded-full text-sm font-medium">Nouveau</span>
             </div>
             <h3 class="font-semibold text-gray-800">Déposer Dossier</h3>
             <p class="text-sm text-gray-500">Nouvelle demande ATCT</p>
@@ -151,14 +151,13 @@ interface DossierATCT {
           <div class="flex items-center justify-between mb-6">
             <div>
               <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                Mes Demandes
               </h3>
               <p class="text-sm text-gray-500 mt-1">Déposer une demande ou suivre vos demandes en cours</p>
             </div>
-            <div [routerLink]="['/cooperant/mes-demandes']" class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition">
+            <div [routerLink]="['/cooperant/mes-demandes']" class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
               </svg>
@@ -168,7 +167,7 @@ interface DossierATCT {
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Actualisation Salaire -->
-            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-pink-500 hover:shadow-lg transition cursor-pointer group"
                  [routerLink]="['/cooperant/demande-salaire']">
               <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-200 transition">
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +179,7 @@ interface DossierATCT {
             </div>
 
             <!-- Sortie Régime Maladie -->
-            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-pink-500 hover:shadow-lg transition cursor-pointer group"
                  [routerLink]="['/cooperant/demande-sortie-regime']">
               <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-200 transition">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +191,7 @@ interface DossierATCT {
             </div>
 
             <!-- Annulation Assurance -->
-            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-teal-500 hover:shadow-lg transition cursor-pointer group"
+            <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-pink-500 hover:shadow-lg transition cursor-pointer group"
                  [routerLink]="['/cooperant/demande-annulation']">
               <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-red-200 transition">
                 <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

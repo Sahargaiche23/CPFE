@@ -22,7 +22,7 @@ interface Reclamation {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <!-- Header -->
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -51,7 +51,7 @@ interface Reclamation {
               <h2 class="text-2xl font-bold text-gray-800 mb-2">Mes Réclamations</h2>
               <p class="text-gray-600">Gérez vos réclamations et suivez leur traitement</p>
             </div>
-            <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800 flex items-center gap-2">
+            <a routerLink="/cooperant/espace" class="text-pink-600 hover:text-pink-800 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
@@ -63,14 +63,14 @@ interface Reclamation {
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <!-- Déposer documents -->
-          <a routerLink="/cooperant/depot-documents" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-teal-500">
+          <a routerLink="/cooperant/depot-documents" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-pink-500">
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
               </div>
-              <span class="px-3 py-1 bg-teal-500 text-white rounded-full text-sm font-medium">Nouveau</span>
+              <span class="px-3 py-1 bg-pink-500 text-white rounded-full text-sm font-medium">Nouveau</span>
             </div>
             <h3 class="font-semibold text-gray-800">Déposer Documents</h3>
             <p class="text-sm text-gray-500">Ajouter des pièces</p>
@@ -124,7 +124,7 @@ interface Reclamation {
           <h3 class="text-xl font-bold text-gray-800 mb-6">Liste des réclamations</h3>
 
           <div *ngIf="loading" class="flex justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
           </div>
 
           <div *ngIf="!loading && reclamations.length === 0" class="text-center py-12">

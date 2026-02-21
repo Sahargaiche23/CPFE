@@ -13,187 +13,277 @@ import { PdfService } from '../../../core/services/pdf.service';
   imports: [CommonModule, FormsModule, RouterLink, MainLayoutComponent],
   template: `
     <app-main-layout>
-      <div class="fade-in max-w-5xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-          <a routerLink="/dashboard" class="text-cnss-primary hover:underline inline-flex items-center mb-4">
-            <span class="material-icons mr-1">arrow_back</span>
-            Retour au tableau de bord
-          </a>
-          <h1 class="text-3xl font-bold text-cnss-dark">Recherche Historique Coopérant</h1>
-          <p class="text-gray-600 mt-2">Consultez l'extrait et l'historique d'un coopérant par numéro d'affiliation</p>
-        </div>
-
+      <div class="fade-in">
         <!-- Search Box -->
-        <div class="card mb-6">
-          <h2 class="text-xl font-bold text-cnss-dark mb-4 flex items-center">
-            <span class="material-icons mr-2 text-cnss-primary">search</span>
-            Recherche par N° Affiliation
-          </h2>
-          <div class="flex gap-4">
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div class="flex items-center gap-4">
+            <a routerLink="/dashboard" class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center hover:bg-pink-200 transition">
+              <span class="material-icons text-cnss-primary">arrow_back</span>
+            </a>
             <div class="flex-1">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">
-                Numéro d'Affiliation <span class="text-red-500">*</span>
-              </label>
+              <h1 class="text-xl font-bold text-gray-800">Recherche Historique Coopérant</h1>
+              <p class="text-sm text-gray-500">Consultez l'extrait et l'historique par numéro d'affiliation</p>
+            </div>
+          </div>
+          <div class="mt-4 flex gap-3">
+            <div class="flex-1 relative">
+              <span class="material-icons absolute left-3 top-3 text-gray-400">search</span>
               <input type="text" [(ngModel)]="searchQuery" 
                      placeholder="Ex: 54-500049 ou 500049" 
-                     class="form-field font-mono text-lg"
+                     class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl font-mono text-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition bg-gray-50"
                      (keyup.enter)="search()">
-              <p class="text-xs text-gray-500 mt-1">Format: clé-numéro (ex: 54-500049) ou juste le numéro</p>
             </div>
-            <div class="flex items-end">
-              <button (click)="search()" 
-                      [disabled]="searching || !searchQuery"
-                      class="px-6 py-3 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 flex items-center">
-                <span *ngIf="searching" class="animate-spin mr-2">⏳</span>
-                <span class="material-icons mr-2" *ngIf="!searching">search</span>
-                Rechercher
-              </button>
-            </div>
+            <button (click)="search()" 
+                    [disabled]="searching || !searchQuery"
+                    class="px-8 py-3 bg-cnss-primary text-white rounded-xl hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50 flex items-center shadow-md">
+              <span *ngIf="searching" class="animate-spin mr-2">⏳</span>
+              <span class="material-icons mr-2" *ngIf="!searching">search</span>
+              Rechercher
+            </button>
           </div>
         </div>
 
         <!-- Error Message -->
-        <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-          <div class="flex items-center">
-            <span class="material-icons mr-2">error</span>
-            {{ error }}
-          </div>
+        <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center">
+          <span class="material-icons mr-2">error</span>
+          {{ error }}
         </div>
 
-        <!-- Results -->
-        <div *ngIf="cooperant" class="space-y-6">
-          <!-- Extrait Coopérant -->
-          <div class="card border-2 border-cnss-primary">
-            <div class="bg-gradient-to-r from-cnss-primary to-cnss-secondary text-white p-4 -m-6 mb-4 rounded-t-lg">
-              <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold flex items-center">
-                  <span class="material-icons mr-2">badge</span>
-                  Extrait du Coopérant
-                </h2>
-                <button (click)="printExtrait()" 
-                        class="bg-white text-cnss-primary px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center text-sm font-semibold">
-                  <span class="material-icons mr-1">print</span>
-                  Imprimer
-                </button>
+        <!-- ===== RESULTS - Portail Social Style ===== -->
+        <div *ngIf="cooperant">
+
+          <!-- Cooperant Header Bar -->
+          <div class="bg-white rounded-xl shadow-md p-5 mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+                <span class="material-icons text-white text-2xl">person</span>
               </div>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">N° Affiliation</span>
-                <p class="font-bold text-cnss-primary text-lg">{{ cooperant.cleAffiliation }}-{{ cooperant.numAffiliation }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Matricule</span>
-                <p class="font-bold">{{ cooperant.matriculeComplet }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Régime</span>
-                <p class="font-bold">{{ cooperant.codeRegime }} - {{ cooperant.libelleRegime }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Nom & Prénom (FR)</span>
-                <p class="font-semibold">{{ cooperant.nomCompletFr }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">الإسم و اللقب (AR)</span>
-                <p class="font-semibold" dir="rtl">{{ cooperant.nomCompletAr || '-' }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Date de Naissance</span>
-                <p class="font-semibold">{{ cooperant.dateNaissance | date:'dd/MM/yyyy' }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Adresse</span>
-                <p class="font-semibold">{{ cooperant.adresseFr }}, {{ cooperant.codePostal }} {{ cooperant.localiteFr }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Téléphone</span>
-                <p class="font-semibold">{{ cooperant.telephone || '-' }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Email</span>
-                <p class="font-semibold">{{ cooperant.email || '-' }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Pièce d'identité</span>
-                <p class="font-semibold">{{ cooperant.typePieceIdentite }}: {{ cooperant.numPieceIdentite }}</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Salaire</span>
-                <p class="font-bold text-green-600">{{ cooperant.salaire | number:'1.3-3' }} TND</p>
-              </div>
-              <div class="border-b pb-2">
-                <span class="text-gray-500 text-sm">Date Effet Affiliation</span>
-                <p class="font-semibold">{{ cooperant.dateEffetAffiliation | date:'dd/MM/yyyy' }}</p>
-              </div>
-            </div>
-            
-            <div class="mt-4 pt-4 border-t flex justify-between items-center">
               <div>
-                <span class="text-gray-500 text-sm">Statut:</span>
-                <span class="ml-2 px-3 py-1 rounded-full text-sm font-semibold"
-                      [ngClass]="{
-                        'bg-green-100 text-green-800': cooperant.statutValidation === 'VALIDE',
-                        'bg-yellow-100 text-yellow-800': cooperant.statutValidation === 'EN_ATTENTE',
-                        'bg-red-100 text-red-800': cooperant.statutValidation === 'REJETE'
-                      }">
-                  {{ cooperant.statutValidation }}
-                </span>
+                <h2 class="text-xl font-bold text-gray-800">{{ cooperant.nomCompletFr }}</h2>
+                <p class="text-sm text-gray-500">{{ cooperant.codeRegime }} - {{ cooperant.libelleRegime }}</p>
               </div>
-              <div class="text-sm text-gray-500">
-                Créé le: {{ cooperant.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="px-4 py-1.5 rounded-full text-sm font-bold"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': cooperant.statutValidation === 'VALIDE',
+                      'bg-yellow-100 text-yellow-700': cooperant.statutValidation === 'EN_ATTENTE',
+                      'bg-red-100 text-red-700': cooperant.statutValidation === 'REJETE'
+                    }">
+                {{ cooperant.statutValidation }}
+              </span>
+              <button (click)="printExtrait()" 
+                      class="px-4 py-2 bg-cnss-primary text-white rounded-lg hover:bg-opacity-90 flex items-center text-sm font-semibold shadow-md transition">
+                <span class="material-icons mr-1 text-base">print</span>
+                Imprimer
+              </button>
+            </div>
+          </div>
+
+          <!-- Key Info Row (like Portail Social matricule bar) -->
+          <div class="bg-white rounded-xl shadow-md p-4 mb-4 flex flex-wrap items-center divide-x divide-gray-200">
+            <div class="px-5 py-1">
+              <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Matricule Affiliation</p>
+              <p class="font-bold text-cnss-primary text-lg mt-0.5">{{ cooperant.cleAffiliation }}-{{ cooperant.numAffiliation }}</p>
+            </div>
+            <div class="px-5 py-1">
+              <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Matricule</p>
+              <p class="font-bold text-gray-800 mt-0.5">{{ cooperant.matriculeComplet }}</p>
+            </div>
+            <div class="px-5 py-1">
+              <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Date Effet</p>
+              <p class="font-bold text-gray-800 mt-0.5">{{ cooperant.dateEffetAffiliation | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <div class="px-5 py-1">
+              <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Régime</p>
+              <p class="font-bold text-gray-800 mt-0.5">{{ cooperant.codeRegime }}</p>
+            </div>
+            <div class="px-5 py-1">
+              <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Créé le</p>
+              <p class="font-bold text-gray-800 mt-0.5">{{ cooperant.createdAt | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+
+          <!-- Colorful Stat Cards Row -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <!-- Salaire -->
+            <div class="bg-white rounded-xl shadow-md p-4 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center shadow">
+                <span class="material-icons text-white">payments</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase font-semibold">Salaire</p>
+                <p class="text-lg font-bold text-green-600">{{ cooperant.salaire | number:'1.3-3' }} DT</p>
+              </div>
+            </div>
+
+            <!-- Total Débits -->
+            <div class="bg-white rounded-xl shadow-md p-4 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center shadow">
+                <span class="material-icons text-white">receipt_long</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase font-semibold">Total Débits</p>
+                <p class="text-lg font-bold text-red-600">{{ getTotalDebits() | number:'1.3-3' }} DT</p>
+              </div>
+            </div>
+
+            <!-- Débits En Attente -->
+            <div class="bg-white rounded-xl shadow-md p-4 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow">
+                <span class="material-icons text-white">hourglass_empty</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase font-semibold">En Attente</p>
+                <p class="text-lg font-bold text-orange-600">{{ getDebitsEnAttente() }} DT</p>
+              </div>
+            </div>
+
+            <!-- Débits Payés -->
+            <div class="bg-white rounded-xl shadow-md p-4 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow">
+                <span class="material-icons text-white">check_circle</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase font-semibold">Payés</p>
+                <p class="text-lg font-bold text-purple-600">{{ getDebitsPayes() }} DT</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            
+            <!-- Détails Identité -->
+            <div class="bg-white rounded-xl shadow-md p-5">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-icons text-blue-500">badge</span>
+                <h3 class="font-bold text-gray-800">Détails Identité</h3>
+              </div>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Nom & Prénom (FR)</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.nomCompletFr }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">الإسم و اللقب</span>
+                  <span class="text-sm font-semibold text-gray-800" dir="rtl">{{ cooperant.nomCompletAr || '-' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Date Naissance</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.dateNaissance | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Pièce Identité</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.typePieceIdentite }}: {{ cooperant.numPieceIdentite }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Détails Régime -->
+            <div class="bg-white rounded-xl shadow-md p-5">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-icons text-pink-500">account_balance</span>
+                <h3 class="font-bold text-gray-800">Détails Régime</h3>
+              </div>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-500">Code Régime</span>
+                  <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">{{ cooperant.codeRegime }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Libellé Régime</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.libelleRegime }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Date Effet</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.dateEffetAffiliation | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Salaire</span>
+                  <span class="text-sm font-bold text-green-600">{{ cooperant.salaire | number:'1.3-3' }} DT</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Détails Contact -->
+            <div class="bg-white rounded-xl shadow-md p-5">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-icons text-purple-500">contact_phone</span>
+                <h3 class="font-bold text-gray-800">Détails Contact</h3>
+              </div>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Adresse</span>
+                  <span class="text-sm font-semibold text-gray-800 text-right">{{ cooperant.adresseFr }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Code Postal</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.codePostal }} {{ cooperant.localiteFr }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Téléphone</span>
+                  <span class="text-sm font-semibold text-gray-800">{{ cooperant.telephone || '-' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-500">Email</span>
+                  <span class="text-sm font-semibold text-cnss-primary">{{ cooperant.email || '-' }}</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Historique des Débits -->
-          <div class="card">
-            <h2 class="text-xl font-bold text-cnss-dark mb-4 flex items-center">
-              <span class="material-icons mr-2 text-orange-500">receipt_long</span>
-              Historique des Débits
-            </h2>
+          <div class="bg-white rounded-xl shadow-md p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="material-icons text-orange-500">receipt_long</span>
+                <h3 class="font-bold text-gray-800">Historique des Débits</h3>
+              </div>
+              <span class="text-sm text-gray-400">{{ debits.length }} enregistrement(s)</span>
+            </div>
             
             <div *ngIf="loadingDebits" class="text-center py-8">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cnss-primary mx-auto"></div>
             </div>
             
-            <div *ngIf="!loadingDebits && debits.length === 0" class="text-center py-8 text-gray-500">
-              <span class="material-icons text-4xl mb-2 block">receipt_long</span>
-              Aucun débit trouvé pour ce coopérant
+            <div *ngIf="!loadingDebits && debits.length === 0" class="text-center py-8 text-gray-400">
+              <span class="material-icons text-5xl mb-2 block">receipt_long</span>
+              Aucun débit trouvé
             </div>
             
-            <table *ngIf="!loadingDebits && debits.length > 0" class="w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Période</th>
-                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Date Génération</th>
-                  <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">Montant</th>
-                  <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let debit of debits" class="border-b hover:bg-gray-50">
-                  <td class="px-4 py-3 font-mono">{{ debit.trimestre }}</td>
-                  <td class="px-4 py-3">{{ debit.createdAt | date:'dd/MM/yyyy' }}</td>
-                  <td class="px-4 py-3 text-right font-bold text-cnss-primary">{{ debit.montantCotisation | number:'1.3-3' }} TND</td>
-                  <td class="px-4 py-3 text-center">
-                    <span class="px-2 py-1 rounded-full text-xs font-semibold"
-                          [ngClass]="debit.paye ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
-                      {{ debit.paye ? 'Payé' : 'En attente' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot class="bg-gray-100">
-                <tr>
-                  <td colspan="2" class="px-4 py-3 font-bold">Total</td>
-                  <td class="px-4 py-3 text-right font-bold text-cnss-primary">{{ getTotalDebits() | number:'1.3-3' }} TND</td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+            <div *ngIf="!loadingDebits && debits.length > 0" class="overflow-hidden rounded-xl border border-gray-100">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Période</th>
+                    <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date Génération</th>
+                    <th class="px-5 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Montant</th>
+                    <th class="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr *ngFor="let debit of debits" class="hover:bg-pink-50/50 transition">
+                    <td class="px-5 py-3.5 font-mono font-medium text-gray-800">{{ debit.trimestre }}</td>
+                    <td class="px-5 py-3.5 text-gray-600">{{ debit.createdAt | date:'dd/MM/yyyy' }}</td>
+                    <td class="px-5 py-3.5 text-right font-bold text-cnss-primary">{{ debit.montantCotisation | number:'1.3-3' }} TND</td>
+                    <td class="px-5 py-3.5 text-center">
+                      <span class="px-3 py-1 rounded-full text-xs font-bold"
+                            [ngClass]="debit.paye ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'">
+                        {{ debit.paye ? 'Payé' : 'En attente' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="bg-gray-50 border-t-2 border-gray-200">
+                    <td colspan="2" class="px-5 py-3.5 font-bold text-gray-800">Total</td>
+                    <td class="px-5 py-3.5 text-right font-bold text-cnss-primary text-lg">{{ getTotalDebits() | number:'1.3-3' }} TND</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -282,6 +372,16 @@ export class CooperantSearchComponent {
 
   getTotalDebits(): number {
     return this.debits.reduce((sum, d) => sum + (d.montantCotisation || 0), 0);
+  }
+
+  getDebitsEnAttente(): string {
+    const total = this.debits.filter(d => !d.paye).reduce((sum, d) => sum + (d.montantCotisation || 0), 0);
+    return total.toFixed(3);
+  }
+
+  getDebitsPayes(): string {
+    const total = this.debits.filter(d => d.paye).reduce((sum, d) => sum + (d.montantCotisation || 0), 0);
+    return total.toFixed(3);
   }
 
   printExtrait() {

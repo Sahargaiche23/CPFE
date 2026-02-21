@@ -353,7 +353,7 @@ import { GedService, GedDocument } from '../../../core/services/ged.service';
           <!-- Documents du dossier -->
           <div class="mt-6 bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <span class="w-8 h-8 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mr-3 text-sm">📋</span>
+              <span class="w-8 h-8 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mr-3 text-sm">📋</span>
               Documents du dossier / وثائق الملف
             </h2>
 

@@ -24,11 +24,11 @@ interface DossierATCT {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-green-500">
+    <div class="min-h-screen bg-gradient-to-br from-pink-700 via-pink-600 to-green-500">
       <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" class="h-12" />
-          <a routerLink="/cooperant/espace" class="text-teal-600 hover:text-teal-800">← Retour</a>
+          <a routerLink="/cooperant/espace" class="text-pink-600 hover:text-pink-800">← Retour</a>
         </div>
       </header>
 
@@ -38,9 +38,9 @@ interface DossierATCT {
           
           <div *ngIf="dossierAtct || cooperant" class="space-y-6">
             <!-- Info coopérant -->
-            <div class="bg-teal-50 p-4 rounded-lg mb-4">
-              <p class="font-semibold text-teal-800">{{ getNom() }}</p>
-              <p class="text-sm text-teal-600" *ngIf="dossierAtct?.matriculeEmployeurComplet">Matricule: {{ dossierAtct?.matriculeEmployeurComplet }}</p>
+            <div class="bg-pink-50 p-4 rounded-lg mb-4">
+              <p class="font-semibold text-pink-800">{{ getNom() }}</p>
+              <p class="text-sm text-pink-600" *ngIf="dossierAtct?.matriculeEmployeurComplet">Matricule: {{ dossierAtct?.matriculeEmployeurComplet }}</p>
             </div>
             
             <!-- Timeline -->
