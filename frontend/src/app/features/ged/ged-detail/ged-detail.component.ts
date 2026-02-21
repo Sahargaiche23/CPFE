@@ -83,11 +83,12 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                     </button>
                   </div>
                 </div>
-                <button (click)="extractAiData()" [disabled]="extractingAi" 
+                <button (click)="extractAiData()" [disabled]="extractingAi || document.fichierType === 'folder'" 
                         class="px-4 py-2 text-white rounded-lg flex items-center gap-2 text-sm font-medium hover:shadow-md transition-all disabled:opacity-50"
-                        style="background: linear-gradient(135deg, #7C3AED, #EC4899);">
+                        style="background: linear-gradient(135deg, #7C3AED, #EC4899);"
+                        [title]="document.fichierType === 'folder' ? 'Utilisez les boutons IA sur chaque sous-document' : 'Extraire les données avec IA'">
                   <span class="material-icons text-base">{{ extractingAi ? 'hourglass_top' : 'auto_awesome' }}</span>
-                  {{ extractingAi ? 'Extraction...' : 'Extraire IA' }}
+                  {{ extractingAi ? 'Extraction...' : (document.fichierType === 'folder' ? 'IA (sous-docs)' : 'Extraire IA') }}
                 </button>
                 <button (click)="deleteDocument()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
                   Supprimer
@@ -199,6 +200,13 @@ import { MainLayoutComponent } from '../../../shared/layouts/main-layout/main-la
                       <button (click)="previewChild(child); $event.stopPropagation()" class="flex-1 py-1 bg-pink-600 text-white text-xs rounded hover:bg-pink-700">Aperçu</button>
                       <button (click)="downloadChild(child); $event.stopPropagation()" class="flex-1 py-1 border border-pink-600 text-pink-600 text-xs rounded hover:bg-pink-50">Télécharger</button>
                     </div>
+                    <button (click)="extractChildAi(child); $event.stopPropagation()" 
+                            [disabled]="extractingChildId === child.id"
+                            class="w-full mt-2 py-1 text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50 hover:shadow-md transition-all"
+                            style="background: linear-gradient(135deg, #7C3AED, #EC4899);">
+                      <span class="material-icons text-xs">{{ extractingChildId === child.id ? 'hourglass_top' : 'auto_awesome' }}</span>
+                      {{ extractingChildId === child.id ? 'Extraction...' : 'Extraire IA' }}
+                    </button>
                   </div>
                 </div>
 
@@ -958,6 +966,7 @@ export class GedDetailComponent implements OnInit {
 
   // ==================== AI EXTRACTION ====================
   extractingAi = false;
+  extractingChildId: number | null = null;
   aiExtractionResult: ExtractionResult | null = null;
   showAiModal = false;
 
@@ -1001,6 +1010,37 @@ export class GedDetailComponent implements OnInit {
 
   getAiFieldLabel(field: string): string {
     return this.aiExtractionService.getFieldLabel(field);
+  }
+
+  extractChildAi(child: GedDocument): void {
+    if (!child || child.fichierType === 'folder') return;
+    this.extractingChildId = child.id;
+    
+    let docType = 'generic';
+    const tags = (child.tags || []).join(' ').toLowerCase();
+    const titre = (child.titre || '').toLowerCase();
+    if (tags.includes('cin') || titre.includes('cin')) docType = 'cin';
+    else if (tags.includes('attestation-salaire') || titre.includes('salaire')) docType = 'attestation_salaire';
+    else if (tags.includes('contrat') || titre.includes('contrat')) docType = 'contrat';
+    else if (tags.includes('attestation-affiliation') || titre.includes('affiliation')) docType = 'attestation_affiliation';
+    
+    this.aiExtractionService.extractFromDocument(child.id, docType).subscribe({
+      next: (result: ExtractionResult) => {
+        this.aiExtractionResult = result;
+        this.showAiModal = true;
+        this.extractingChildId = null;
+      },
+      error: (err: any) => {
+        this.aiExtractionResult = {
+          success: false, document_type: docType, confidence: 0,
+          extracted_data: {}, raw_text: '',
+          warnings: ['Service AI non disponible.'],
+          error: err.message
+        };
+        this.showAiModal = true;
+        this.extractingChildId = null;
+      }
+    });
   }
 
   closeAiModal(): void {
