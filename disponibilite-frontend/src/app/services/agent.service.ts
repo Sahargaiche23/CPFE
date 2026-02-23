@@ -45,6 +45,10 @@ export class AgentService {
     return this.http.get<AgentPublic[]>(`${this.api}/search`, { params: { q } });
   }
 
+  searchByNumInscription(numInscription: string): Observable<AgentPublic[]> {
+    return this.http.get<AgentPublic[]>(`${this.api}/search`, { params: { numInscription } });
+  }
+
   create(agent: AgentPublic): Observable<AgentPublic> {
     return this.http.post<AgentPublic>(this.api, agent);
   }

@@ -14,4 +14,6 @@ public class CotisationGenerationRequest {
     private Integer annee;
     private Long institutionId;
     private Long agentPublicId;
+    private String numInscription; // For searching agent by numInscription
+    private Boolean forceRecalcul = false; // Recalculate existing cotisations
 }

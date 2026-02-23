@@ -26,6 +26,8 @@ export interface CotisationGenerationRequest {
   annee: number;
   institutionId?: number;
   agentPublicId?: number;
+  numInscription?: string;
+  forceRecalcul?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
