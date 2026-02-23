@@ -40,4 +40,8 @@ public class SalaireService {
             return repository.save(s);
         }).orElseThrow(() -> new RuntimeException("Salaire not found: " + id));
     }
+
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
 }

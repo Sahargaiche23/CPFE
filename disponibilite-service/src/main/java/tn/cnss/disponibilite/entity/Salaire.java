@@ -1,5 +1,6 @@
 package tn.cnss.disponibilite.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,8 +23,9 @@ public class Salaire {
     @Column(name = "ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "AGENT_PUBLIC_ID", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private AgentPublic agentPublic;
 
     @Column(name = "SALAIRE_MENSUEL", precision = 15, scale = 3, nullable = false)
