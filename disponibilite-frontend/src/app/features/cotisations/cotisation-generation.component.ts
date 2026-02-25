@@ -182,9 +182,11 @@ import { AgentService, AgentPublic } from '../../services/agent.service';
             <tr class="bg-gray-100">
               <th class="border border-black p-2">رقم التسجيل</th>
               <th class="border border-black p-2">الاسم واللقب</th>
+              <th class="border border-black p-2">المؤسسة</th>
+              <th class="border border-black p-2">رقم الانخراط</th>
               <th class="border border-black p-2">الأجر الشهري</th>
-              <th class="border border-black p-2">النظام الأساسي<br>(المشغل 17.07%)</th>
-              <th class="border border-black p-2">النظام الأساسي<br>(العون 9.68%)</th>
+              <th class="border border-black p-2">النظام الأساسي<br>(المشغل)</th>
+              <th class="border border-black p-2">النظام الأساسي<br>(العون)</th>
               <th class="border border-black p-2">النظام التكميلي</th>
               <th class="border border-black p-2">المبلغ الجملي</th>
             </tr>
@@ -193,6 +195,8 @@ import { AgentService, AgentPublic } from '../../services/agent.service';
             <tr *ngFor="let c of generatedCotisations">
               <td class="border border-black p-2 text-center">{{ c.agentPublic?.numInscription }}</td>
               <td class="border border-black p-2">{{ c.agentPublic?.prenom }} {{ c.agentPublic?.nom }}</td>
+              <td class="border border-black p-2">{{ c.institution?.raisonSociale }}</td>
+              <td class="border border-black p-2 text-center">{{ c.institution?.numAffiliation }}/{{ c.institution?.brancheSociale }}</td>
               <td class="border border-black p-2 text-center">{{ c.salaireMensuelApplique | number:'1.3-3' }}</td>
               <td class="border border-black p-2 text-center">{{ c.montantCode137 | number:'1.3-3' }}</td>
               <td class="border border-black p-2 text-center">{{ c.montantCode138 | number:'1.3-3' }}</td>
@@ -202,7 +206,7 @@ import { AgentService, AgentPublic } from '../../services/agent.service';
           </tbody>
           <tfoot>
             <tr class="bg-gray-100 font-bold">
-              <td colspan="6" class="border border-black p-2 text-left">المجموع العام</td>
+              <td colspan="8" class="border border-black p-2 text-left">المجموع العام</td>
               <td class="border border-black p-2 text-center">{{ getTotalAmount() | number:'1.3-3' }}</td>
             </tr>
           </tfoot>
@@ -326,13 +330,24 @@ export class CotisationGenerationComponent {
         this.generating = false;
 
         if (this.generatedCotisations.length > 0) {
-          const first = this.generatedCotisations[0];
-          this.printData = {
-            institutionName: first.institution?.raisonSociale || '',
-            numAffiliation: first.institution?.numAffiliation || '',
-            trimestre: `T${this.trimestre}`,
-            annee: this.annee.toString()
-          };
+          // In AGENT mode, use selectedAgent's institution for print header
+          if (this.mode === 'AGENT' && this.selectedAgent?.institution) {
+            this.printData = {
+              institutionName: this.selectedAgent.institution.raisonSociale || '',
+              numAffiliation: this.selectedAgent.institution.numAffiliation || '',
+              trimestre: `T${this.trimestre}`,
+              annee: this.annee.toString()
+            };
+          } else {
+            // For other modes, use the first cotisation's institution
+            const first = this.generatedCotisations[0];
+            this.printData = {
+              institutionName: first.institution?.raisonSociale || '',
+              numAffiliation: first.institution?.numAffiliation || '',
+              trimestre: `T${this.trimestre}`,
+              annee: this.annee.toString()
+            };
+          }
         }
       },
       error: (err) => {
@@ -386,6 +401,8 @@ export class CotisationGenerationComponent {
                 <tr>
                   <th>رقم التسجيل</th>
                   <th>الاسم واللقب</th>
+                  <th>المؤسسة</th>
+                  <th>رقم الانخراط</th>
                   <th>الأجر الشهري</th>
                   <th>النظام الأساسي (المشغل)</th>
                   <th>النظام الأساسي (العون)</th>
@@ -398,6 +415,8 @@ export class CotisationGenerationComponent {
                   <tr>
                     <td>${c.agentPublic?.numInscription || ''}</td>
                     <td>${c.agentPublic?.prenom || ''} ${c.agentPublic?.nom || ''}</td>
+                    <td>${c.institution?.raisonSociale || ''}</td>
+                    <td>${c.institution?.numAffiliation || ''}/${c.institution?.brancheSociale || ''}</td>
                     <td>${(c.salaireMensuelApplique || 0).toFixed(3)}</td>
                     <td>${(c.montantCode137 || 0).toFixed(3)}</td>
                     <td>${(c.montantCode138 || 0).toFixed(3)}</td>
@@ -408,7 +427,7 @@ export class CotisationGenerationComponent {
               </tbody>
               <tfoot>
                 <tr class="total">
-                  <td colspan="6" style="text-align: right;">المجموع العام</td>
+                  <td colspan="8" style="text-align: right;">المجموع العام</td>
                   <td><strong>${this.getTotalAmount().toFixed(3)}</strong></td>
                 </tr>
               </tfoot>
