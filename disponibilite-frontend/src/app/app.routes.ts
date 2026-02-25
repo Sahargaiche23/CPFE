@@ -34,6 +34,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/paiements/carte-paiement.component').then(m => m.CartePaiementComponent)
       },
       {
+        path: 'ged',
+        loadComponent: () => import('./features/ged/ged-dossier.component').then(m => m.GedDossierComponent)
+      },
+      {
         path: 'print/avis-agents',
         loadComponent: () => import('./features/print/avis-agents.component').then(m => m.AvisAgentsComponent)
       },

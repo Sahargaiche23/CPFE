@@ -77,11 +77,18 @@ import { AuthService } from '../services/auth.service';
                     <p class="text-xs text-gray-500">Mise à jour des paiements</p>
                   </div>
                 </a>
-                <a routerLink="/app/carte-paiement" class="flex items-center gap-3 px-4 py-3 hover:bg-rose-50">
+                <a routerLink="/app/carte-paiement" class="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 border-b border-gray-100">
                   <span class="material-icons text-red-600">credit_card</span>
                   <div>
                     <p class="font-medium">بطاقة خلاص</p>
                     <p class="text-xs text-gray-500">Carte de paiement</p>
+                  </div>
+                </a>
+                <a routerLink="/app/ged" class="flex items-center gap-3 px-4 py-3 hover:bg-rose-50">
+                  <span class="material-icons text-purple-600">folder_special</span>
+                  <div>
+                    <p class="font-medium">إدارة الوثائق - GED</p>
+                    <p class="text-xs text-gray-500">Gestion Électronique des Documents</p>
                   </div>
                 </a>
               </div>

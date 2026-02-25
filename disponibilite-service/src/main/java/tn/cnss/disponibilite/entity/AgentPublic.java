@@ -1,6 +1,7 @@
 package tn.cnss.disponibilite.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -88,11 +89,13 @@ public class AgentPublic {
     }
 
     @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public String getNomCompletAr() {
         return (prenom != null ? prenom : "") + " " + (nom != null ? nom : "");
     }
 
     @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public String getNomCompletFr() {
         return (prenomFr != null ? prenomFr : "") + " " + (nomFr != null ? nomFr : "");
     }

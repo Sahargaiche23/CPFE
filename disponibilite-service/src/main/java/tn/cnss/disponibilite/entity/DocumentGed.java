@@ -1,5 +1,6 @@
 package tn.cnss.disponibilite.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class DocumentGed {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "AGENT_PUBLIC_ID", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private AgentPublic agentPublic;
 
     @Enumerated(EnumType.STRING)

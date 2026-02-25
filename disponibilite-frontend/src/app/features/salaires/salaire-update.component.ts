@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AgentService, AgentPublic } from '../../services/agent.service';
 import { InstitutionService } from '../../services/institution.service';
 import { SalaireService, Salaire } from '../../services/salaire.service';
+import { GedSharedDataService } from '../../services/ged-shared-data.service';
 
 @Component({
   selector: 'app-salaire-update',
@@ -181,7 +183,7 @@ import { SalaireService, Salaire } from '../../services/salaire.service';
     </div>
   `
 })
-export class SalaireUpdateComponent {
+export class SalaireUpdateComponent implements OnInit {
   institution: any = { numAffiliation: '', brancheSociale: '', raisonSociale: '' };
   agents: AgentPublic[] = [];
   selectedAgent: AgentPublic | null = null;
@@ -189,12 +191,39 @@ export class SalaireUpdateComponent {
   message = '';
   success = false;
   saving = false;
+  private gedSalaire: { salaire?: string; salaireDate?: string } = {};
+  private gedNumInscription = '';
 
   constructor(
     private agentService: AgentService,
     private institutionService: InstitutionService,
-    private salaireService: SalaireService
+    private salaireService: SalaireService,
+    private route: ActivatedRoute,
+    private gedSharedData: GedSharedDataService
   ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['numAffiliation']) {
+        this.institution.numAffiliation = params['numAffiliation'];
+        this.institution.brancheSociale = params['brancheSociale'] || '';
+        if (params['salaire']) this.gedSalaire.salaire = params['salaire'];
+        if (params['salaireDate']) this.gedSalaire.salaireDate = params['salaireDate'];
+        if (params['numInscription']) this.gedNumInscription = params['numInscription'];
+        this.searchInstitution();
+      }
+    });
+    // Also check GedSharedDataService as fallback
+    if (this.gedSharedData.extractedSalary?.salaire && !this.gedSalaire.salaire) {
+      const es = this.gedSharedData.extractedSalary;
+      this.gedSalaire.salaire = es.salaire;
+      if (es.dateEffet) {
+        const m = es.dateEffet.match(/(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})/);
+        this.gedSalaire.salaireDate = m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : es.dateEffet;
+      }
+      if (this.gedSharedData.agentNumInscription) this.gedNumInscription = this.gedSharedData.agentNumInscription;
+    }
+  }
 
   searchInstitution(): void {
     if (this.institution.numAffiliation) {
@@ -232,6 +261,14 @@ export class SalaireUpdateComponent {
     this.agentService.findByInstitution(institutionId).subscribe({
       next: (data) => {
         this.agents = data;
+        // Auto-select agent from GED flow
+        if (this.gedNumInscription) {
+          const match = data.find(a => a.numInscription === this.gedNumInscription);
+          if (match) {
+            this.selectAgent(match);
+            return;
+          }
+        }
         if (data.length === 1) {
           this.selectAgent(data[0]);
         }
@@ -256,11 +293,38 @@ export class SalaireUpdateComponent {
           ...s,
           dateEffet: s.dateEffet || ''
         }));
+        // Pre-fill salary from GED attestation_salaire if no existing salaires
+        this.prefillGedSalaire();
       },
       error: () => {
         this.salaires = [];
+        this.prefillGedSalaire();
       }
     });
+  }
+
+  private prefillGedSalaire(): void {
+    if (!this.gedSalaire.salaire) return;
+    // Clean salary string: "1.850.000" → 1850.000
+    let salaireNum = parseFloat(this.gedSalaire.salaire.replace(/\s/g, '').replace(/\.(?=.*\.)/g, ''));
+    if (isNaN(salaireNum)) salaireNum = 0;
+    const dateEffet = this.gedSalaire.salaireDate || new Date().toISOString().split('T')[0];
+    // Check if a salary with same date already exists
+    const existing = this.salaires.find(s => s.dateEffet === dateEffet);
+    if (existing) {
+      // Update existing salary with GED value
+      existing.salaireMensuel = salaireNum;
+      this.message = 'تم تحديث الأجر من المسح الضوئي - Salaire mis à jour depuis le scan GED (' + salaireNum + ' DT)';
+    } else {
+      // Add new salary entry
+      this.salaires.push({
+        salaireMensuel: salaireNum,
+        dateEffet: dateEffet,
+        isNew: true
+      });
+      this.message = 'تم إضافة الأجر من المسح الضوئي - Salaire ajouté depuis le scan GED (' + salaireNum + ' DT)';
+    }
+    this.success = true;
   }
 
   addSalaire(): void {

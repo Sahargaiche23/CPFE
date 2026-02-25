@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InstitutionService, Institution } from '../../services/institution.service';
 import { AgentService, AgentPublic } from '../../services/agent.service';
+import { DocumentService } from '../../services/document.service';
+import { GedSharedDataService } from '../../services/ged-shared-data.service';
 
 @Component({
   selector: 'app-dossier-registration',
@@ -138,22 +141,75 @@ import { AgentService, AgentPublic } from '../../services/agent.service';
 export class DossierRegistrationComponent implements OnInit {
   institution: any = { numAffiliation: '', brancheSociale: '', raisonSociale: '', adresse: '' };
   agents: any[] = [];
+  gedAgents: any[] = [];
   message = '';
   messageType = '';
   saving = false;
+  salaireData: { salaire?: string; salaireDate?: string; salairePeriode?: string } = {};
+  fromGed = false;
 
   constructor(
     private institutionService: InstitutionService,
-    private agentService: AgentService
+    private agentService: AgentService,
+    private documentService: DocumentService,
+    private gedSharedData: GedSharedDataService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Auto-fill from GED scan navigation
+    this.route.queryParams.subscribe(params => {
+      if (params['numAffiliation'] || params['nom'] || params['prenom']) {
+        this.fromGed = true;
+        if (params['numAffiliation']) {
+          let numAff = params['numAffiliation'];
+          let branche = params['brancheSociale'] || '';
+          // Parse '60-64759' → branche=60, numAffiliation=64759
+          if (numAff.includes('-') && !branche) {
+            const parts = numAff.split('-');
+            branche = parts[0];
+            numAff = parts.slice(1).join('-');
+          }
+          this.institution.numAffiliation = numAff;
+          this.institution.brancheSociale = branche;
+          if (params['raisonSociale']) {
+            this.institution.raisonSociale = params['raisonSociale'];
+          }
+          this.loadInstitution();
+        }
+        // Store salary data for later navigation
+        if (params['salaire']) this.salaireData.salaire = params['salaire'];
+        if (params['salaireDate']) this.salaireData.salaireDate = params['salaireDate'];
+        if (params['salairePeriode']) this.salaireData.salairePeriode = params['salairePeriode'];
+
+        // Pre-fill agent from scanned data (accept even without numInscription)
+        if (params['nom'] || params['prenom']) {
+          const nomComplet = ((params['prenom'] || '') + ' ' + (params['nom'] || '')).trim();
+          this.gedAgents = [{
+            numInscription: params['numInscription'] || '',
+            nomComplet: nomComplet,
+            adresse: params['adresse'] || '',
+            dateDebutIlhaq: params['dateDebutIlhaq'] || '',
+            dateFinIlhaq: '',
+            cin: params['cin'] || '',
+            dateNaissance: params['dateNaissance'] || '',
+            fromGed: true
+          }];
+          this.agents = [...this.gedAgents];
+          this.message = 'تم ملء البيانات تلقائيا من المسح الضوئي - Données pré-remplies depuis le scan GED. يرجى إكمال البيانات الناقصة ثم الحفظ.';
+          this.messageType = 'success';
+        }
+      }
+    });
+  }
 
   loadInstitution(): void {
     if (this.institution.numAffiliation) {
       this.message = '';
       const num = this.institution.numAffiliation;
       const br = this.institution.brancheSociale || '';
+      const savedRaisonSociale = this.institution.raisonSociale || '';
 
       this.institutionService.findByAffiliation(num, '').subscribe({
         next: (list) => {
@@ -169,11 +225,20 @@ export class DossierRegistrationComponent implements OnInit {
             this.message = 'تم تحميل المؤسسة - Institution chargée';
             this.messageType = 'success';
           } else {
+            // Institution not found - keep GED-extracted raisonSociale
+            if (savedRaisonSociale && !this.institution.raisonSociale) {
+              this.institution.raisonSociale = savedRaisonSociale;
+            }
+            this.institution.brancheSociale = br;
             this.message = 'مؤسسة غير موجودة - Institution non trouvée. Vous pouvez la créer.';
             this.messageType = 'error';
           }
         },
         error: (err) => {
+          // On error, keep GED-extracted data
+          if (savedRaisonSociale && !this.institution.raisonSociale) {
+            this.institution.raisonSociale = savedRaisonSociale;
+          }
           this.message = 'خطأ في الاتصال بالخادم - Erreur de connexion au serveur';
           this.messageType = 'error';
         }
@@ -184,15 +249,23 @@ export class DossierRegistrationComponent implements OnInit {
   loadAgents(institutionId: number): void {
     this.agentService.findByInstitution(institutionId).subscribe({
       next: (data) => {
-        this.agents = data.map(a => ({
+        const dbAgents = data.map(a => ({
           ...a,
           nomComplet: (a.prenom || '') + ' ' + (a.nom || ''),
           dateDebutIlhaq: a.dateDebutIlhaq || '',
           dateFinIlhaq: a.dateFinIlhaq || ''
         }));
+        // Merge GED pre-filled agents with DB agents (avoid duplicates by numInscription)
+        if (this.gedAgents.length > 0) {
+          const dbNums = dbAgents.map(a => a.numInscription);
+          const newFromGed = this.gedAgents.filter(g => !dbNums.includes(g.numInscription));
+          this.agents = [...dbAgents, ...newFromGed];
+        } else {
+          this.agents = dbAgents;
+        }
       },
       error: () => {
-        this.agents = [];
+        this.agents = this.gedAgents.length > 0 ? [...this.gedAgents] : [];
       }
     });
   }
@@ -278,11 +351,34 @@ export class DossierRegistrationComponent implements OnInit {
       this.message = 'تم حفظ المؤسسة بنجاح - Institution enregistrée (ID: ' + institutionId + ')';
       this.messageType = 'success';
       this.saving = false;
+      if (this.fromGed && this.salaireData.salaire) {
+        setTimeout(() => this.navigateToSalaires(), 1500);
+      }
       return;
     }
 
     let saved = 0;
     let errors = 0;
+    const total = agentsToSave.length;
+
+    const onComplete = () => {
+      if (saved + errors === total) {
+        this.saving = false;
+        // Upload pending GED documents
+        if (this.fromGed && this.gedSharedData.hasPendingFiles() && saved > 0) {
+          const agentId = agentsToSave[0].id;
+          if (agentId) {
+            this.uploadGedDocuments(agentId);
+          }
+        }
+        this.message = `تم الحفظ بنجاح - ${saved} agent(s) enregistré(s)` + (errors > 0 ? `, ${errors} erreur(s)` : '');
+        this.messageType = errors > 0 && saved === 0 ? 'error' : 'success';
+        if (this.fromGed && this.salaireData.salaire && saved > 0) {
+          setTimeout(() => this.navigateToSalaires(), 2000);
+        }
+      }
+    };
+
     agentsToSave.forEach(agent => {
       const names = (agent.nomComplet || '').split(' ');
       const agentData: any = {
@@ -291,37 +387,91 @@ export class DossierRegistrationComponent implements OnInit {
         prenom: names.length > 1 ? names[0] : '',
         nomFr: names.length > 1 ? names.slice(1).join(' ') : names[0] || '',
         prenomFr: names.length > 1 ? names[0] : '',
+        cin: agent.cin || '',
+        dateNaissance: agent.dateNaissance || null,
         adresse: agent.adresse || '',
+        telephone: agent.telephone || '',
+        email: agent.email || '',
         dateDebutIlhaq: agent.dateDebutIlhaq || null,
         dateFinIlhaq: agent.dateFinIlhaq || null,
         actif: true,
         institution: { id: institutionId }
       };
 
-      const agent$ = agent.id
-        ? this.agentService.update(agent.id, agentData)
-        : this.agentService.create(agentData);
+      if (agent.id) {
+        // Agent already has an ID - update directly
+        this.agentService.update(agent.id, agentData).subscribe({
+          next: (sa) => { agent.id = sa.id; saved++; onComplete(); },
+          error: () => { errors++; onComplete(); }
+        });
+      } else {
+        // Check if agent already exists by numInscription
+        this.agentService.searchByNumInscription(agent.numInscription).subscribe({
+          next: (existing) => {
+            if (existing.length > 0) {
+              // Agent exists - update it
+              this.agentService.update(existing[0].id!, agentData).subscribe({
+                next: (sa) => { agent.id = sa.id; saved++; onComplete(); },
+                error: () => { errors++; onComplete(); }
+              });
+            } else {
+              // New agent - create
+              this.agentService.create(agentData).subscribe({
+                next: (sa) => { agent.id = sa.id; saved++; onComplete(); },
+                error: () => { errors++; onComplete(); }
+              });
+            }
+          },
+          error: () => {
+            // Search failed, try create anyway
+            this.agentService.create(agentData).subscribe({
+              next: (sa) => { agent.id = sa.id; saved++; onComplete(); },
+              error: () => { errors++; onComplete(); }
+            });
+          }
+        });
+      }
+    });
+  }
 
-      agent$.subscribe({
-        next: (savedAgent) => {
-          agent.id = savedAgent.id;
-          saved++;
-          if (saved + errors === agentsToSave.length) {
-            this.message = `تم الحفظ بنجاح - ${saved} agent(s) enregistré(s)` + (errors > 0 ? `, ${errors} erreur(s)` : '');
-            this.messageType = errors > 0 ? 'error' : 'success';
-            this.saving = false;
+  private uploadGedDocuments(agentId: number): void {
+    const files = this.gedSharedData.pendingFiles;
+    if (files.length === 0) return;
+    let uploaded = 0;
+    let uploadErrors = 0;
+    files.forEach(pf => {
+      this.documentService.upload(agentId, pf.type, pf.file).subscribe({
+        next: () => {
+          uploaded++;
+          if (uploaded + uploadErrors === files.length) {
+            this.message += ` | ${uploaded} document(s) déposé(s)`;
+            this.gedSharedData.clear();
           }
         },
         error: () => {
-          errors++;
-          if (saved + errors === agentsToSave.length) {
-            this.message = `${saved} agent(s) enregistré(s), ${errors} erreur(s)`;
-            this.messageType = 'error';
-            this.saving = false;
+          uploadErrors++;
+          if (uploaded + uploadErrors === files.length) {
+            this.message += ` | ${uploaded} doc(s) déposé(s), ${uploadErrors} erreur(s)`;
           }
         }
       });
     });
+  }
+
+  navigateToSalaires(): void {
+    const params: any = {
+      numAffiliation: this.institution.numAffiliation || '',
+      brancheSociale: this.institution.brancheSociale || ''
+    };
+    if (this.salaireData.salaire) params.salaire = this.salaireData.salaire;
+    if (this.salaireData.salaireDate) params.salaireDate = this.salaireData.salaireDate;
+    if (this.salaireData.salairePeriode) params.salairePeriode = this.salaireData.salairePeriode;
+    // Pass agent info for auto-select
+    if (this.agents.length > 0) {
+      const agent = this.agents[0];
+      if (agent.numInscription) params.numInscription = agent.numInscription;
+    }
+    this.router.navigate(['/app/salaires'], { queryParams: params });
   }
 
   search(): void {

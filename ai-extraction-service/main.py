@@ -176,7 +176,7 @@ def extract_attestation_salaire_data(text: str) -> Dict[str, Any]:
     warnings = []
     confidence = 0.0
     fields_found = 0
-    total_fields = 5
+    total_fields = 9
     
     # Montant salaire
     salary_patterns = [
@@ -219,7 +219,31 @@ def extract_attestation_salaire_data(text: str) -> Dict[str, Any]:
     for pattern in emp_patterns:
         match = re.search(pattern, text)
         if match:
-            data["nomEmploye"] = match.group(1).strip()
+            data["nomPrenom"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    # N° Inscription
+    insc_patterns = [
+        r'[Nn]°?\s*[Ii]nscription\s*:?\s*([\d\-]+)',
+        r'رقم\s*التسجيل\s*:?\s*([\d\-]+)',
+    ]
+    for pattern in insc_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["numInscription"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    # CIN
+    cin_patterns = [
+        r'[Cc]\.?[Ii]\.?[Nn]\.?\s*:?\s*(\d{8})',
+        r'رقم\s*بطاقة\s*التعريف\s*:?\s*(\d{8})',
+    ]
+    for pattern in cin_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["numeroCIN"] = match.group(1)
             fields_found += 1
             break
     
@@ -241,22 +265,44 @@ def extract_attestation_salaire_data(text: str) -> Dict[str, Any]:
             fields_found += 1
             break
     
-    # Numéro matricule/affiliation
-    mat_patterns = [
-        r'[Mm]atricule\s*:?\s*([\d\-]+)',
+    # Numéro affiliation
+    aff_patterns = [
         r'[Nn]°?\s*(?:d\'?)?\s*[Aa]ffiliation\s*:?\s*([\d\-]+)',
+        r'[Mm]atricule\s*[Ee]mployeur\s*:?\s*([\d\-]+)',
         r'رقم\s*(?:الإنخراط|الانخراط)\s*:?\s*([\d\-]+)',
-        r'رقم\s*التسجيل\s*:?\s*([\d\-]+)',
-        r'[Nn]°?\s*[Ss][ée]cu\s*:?\s*([\d\-]+)',
     ]
-    for pattern in mat_patterns:
+    for pattern in aff_patterns:
         match = re.search(pattern, text)
         if match:
-            data["matricule"] = match.group(1).strip()
+            data["numAffiliation"] = match.group(1).strip()
             fields_found += 1
             break
     
-    confidence = (fields_found / total_fields) * 100
+    # Date d'effet
+    date_patterns = [
+        r'[Dd]ate\s*(?:d.?)?\s*[Ee]ffet\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+        r'(?:[Àà]\s*(?:compter|partir)\s*(?:du)?|[Ee]ffet)\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+    ]
+    for pattern in date_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["dateEffet"] = match.group(1)
+            fields_found += 1
+            break
+    
+    # Adresse
+    addr_patterns = [
+        r'[Aa]dresse\s*:?\s*(.+?)(?:\n|$)',
+        r'العنوان\s*:?\s*(.+?)(?:\n|$)',
+    ]
+    for pattern in addr_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["adresse"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    confidence = min((fields_found / total_fields) * 100, 100)
     if fields_found == 0:
         warnings.append("Aucun champ d'attestation de salaire reconnu")
     
@@ -441,6 +487,117 @@ def extract_attestation_affiliation_data(text: str) -> Dict[str, Any]:
     return {"data": data, "confidence": confidence, "warnings": warnings}
 
 
+def extract_decision_affectation_data(text: str) -> Dict[str, Any]:
+    """Extrait les données d'une Décision d'Affectation / Moqarer Ilhaq"""
+    data = {}
+    warnings = []
+    fields_found = 0
+    total_fields = 6
+    
+    # Nom et prénom
+    name_patterns = [
+        r'[Nn]om\s*(?:et\s*)?[Pp]r[ée]nom\s*:?\s*(.+?)(?:\n|$)',
+        r'السيد[/ة]*\s*:?\s*(.+?)(?:\n|$)',
+        r'الاسم\s*(?:و\s*اللقب)?\s*:?\s*(.+?)(?:\n|$)',
+    ]
+    for pattern in name_patterns:
+        match = re.search(pattern, text)
+        if match:
+            val = match.group(1).strip()
+            if val and len(val) > 1:
+                data["nomPrenom"] = val
+                fields_found += 1
+                break
+    
+    # N° Inscription
+    insc_patterns = [
+        r'[Nn]°?\s*[Ii]nscription\s*:?\s*([\d\-]+)',
+        r'رقم\s*التسجيل\s*:?\s*([\d\-]+)',
+    ]
+    for pattern in insc_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["numInscription"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    # CIN
+    cin_patterns = [
+        r'[Cc]\.?[Ii]\.?[Nn]\.?\s*:?\s*(\d{8})',
+        r'رقم\s*بطاقة\s*التعريف\s*:?\s*(\d{8})',
+    ]
+    for pattern in cin_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["numeroCIN"] = match.group(1)
+            fields_found += 1
+            break
+    
+    # N° Affiliation
+    aff_patterns = [
+        r'[Nn]°?\s*(?:d\'?)?\s*[Aa]ffiliation\s*:?\s*([\d\-]+)',
+        r'رقم\s*(?:الإنخراط|الانخراط)\s*:?\s*([\d\-]+)',
+    ]
+    for pattern in aff_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["numAffiliation"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    # Institution
+    inst_patterns = [
+        r'[Ii]nstitution\s*:\s*(.+?)(?:\n|$)',
+        r'[Oo]rganisme\s*:\s*(.+?)(?:\n|$)',
+        r'المؤسسة\s*:?\s*(.+?)(?:\n|$)',
+    ]
+    for pattern in inst_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["institution"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    # Date d'effet / date de début
+    date_patterns = [
+        r'(?:[Àà]\s*compter\s*du|[Ee]ffet\s*(?:a\s*compter\s*du)?)\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+        r'[Dd]ate\s*(?:d.?)?\s*[Ee]ffet\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+        r'[Pp]rend\s*effet\s*(?:a\s*compter\s*du|le)?\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+        r'(?:من|بتاريخ|تاريخ)\s*:?\s*(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})',
+    ]
+    for pattern in date_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["dateEffet"] = match.group(1)
+            fields_found += 1
+            break
+    
+    # Fallback dates
+    if "dateEffet" not in data:
+        all_dates = re.findall(r'(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{4})', text)
+        if all_dates:
+            data["dateDocument"] = all_dates[0]
+            fields_found += 1
+    
+    # Adresse
+    addr_patterns = [
+        r'[Aa]dresse\s*:?\s*(.+?)(?:\n|$)',
+        r'العنوان\s*:?\s*(.+?)(?:\n|$)',
+    ]
+    for pattern in addr_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["adresse"] = match.group(1).strip()
+            fields_found += 1
+            break
+    
+    confidence = min((fields_found / total_fields) * 100, 100)
+    if fields_found == 0:
+        warnings.append("Aucun champ de décision d'affectation reconnu")
+    
+    return {"data": data, "confidence": confidence, "warnings": warnings}
+
+
 def extract_generic_data(text: str) -> Dict[str, Any]:
     """Extraction générique - trouve tous les champs possibles"""
     data = {}
@@ -461,6 +618,32 @@ def extract_generic_data(text: str) -> Dict[str, Any]:
     if numbers:
         data["numeros_trouves"] = list(set(numbers))
     
+    # Nom et prénom
+    name_patterns = [
+        r'[Nn]om\s*(?:et\s*)?[Pp]r[ée]nom\s*:?\s*(.+?)(?:\n|$)',
+        r'السيد[/ة]*\s*:?\s*(.+?)(?:\n|$)',
+    ]
+    for pattern in name_patterns:
+        match = re.search(pattern, text)
+        if match:
+            data["nomPrenom"] = match.group(1).strip()
+            break
+    
+    # N° Inscription
+    insc_match = re.search(r'[Nn]°?\s*[Ii]nscription\s*:?\s*([\d\-]+)', text)
+    if insc_match:
+        data["numInscription"] = insc_match.group(1).strip()
+    
+    # CIN
+    cin_match = re.search(r'[Cc]\.?[Ii]\.?[Nn]\.?\s*:?\s*(\d{8})', text)
+    if cin_match:
+        data["numeroCIN"] = cin_match.group(1)
+    
+    # Adresse
+    addr_match = re.search(r'[Aa]dresse\s*:?\s*(.+?)(?:\n|$)', text)
+    if addr_match:
+        data["adresse"] = addr_match.group(1).strip()
+    
     # Emails
     emails = re.findall(r'[\w.+-]+@[\w-]+\.[\w.-]+', text)
     if emails:
@@ -471,7 +654,7 @@ def extract_generic_data(text: str) -> Dict[str, Any]:
     if phones:
         data["telephones_trouves"] = [p.strip() for p in phones]
     
-    confidence = min(len(data) * 20, 60)
+    confidence = min(len(data) * 15, 60)
     
     return {"data": data, "confidence": confidence, "warnings": warnings}
 
@@ -484,7 +667,7 @@ EXTRACTORS = {
     "contrat": extract_contrat_data,
     "contrat_cooperant": extract_contrat_data,
     "attestation_affiliation": extract_attestation_affiliation_data,
-    "decision_affectation": extract_generic_data,
+    "decision_affectation": extract_decision_affectation_data,
     "generic": extract_generic_data,
 }
 
@@ -501,19 +684,55 @@ DOCUMENT_TYPE_LABELS = {
 
 
 def detect_document_type(text: str) -> str:
-    """Détecte automatiquement le type de document à partir du texte"""
+    """Détecte automatiquement le type de document à partir du texte.
+    Order matters: check specific document types FIRST, CIN LAST
+    because 'CIN' as a field reference appears in many documents."""
     text_lower = text.lower()
     
-    if any(kw in text_lower for kw in ["carte d'identité", "carte nationale", "cin", "بطاقة التعريف", "بطاقة تعريف"]):
-        return "cin"
-    if any(kw in text_lower for kw in ["attestation de salaire", "شهادة في الأجر", "شهادة الأجر", "certificat de salaire"]):
-        return "attestation_salaire"
-    if any(kw in text_lower for kw in ["contrat de coop", "عقد التعاون", "contrat cooperant"]):
-        return "contrat"
-    if any(kw in text_lower for kw in ["attestation d'affiliation", "شهادة الإنخراط", "إعلام بالانخراط", "إعلام بالإنخراط", "الانخراط", "الإنخراط", "affiliation"]):
-        return "attestation_affiliation"
-    if any(kw in text_lower for kw in ["décision d'affectation", "مقرر الإلحاق", "decision affectation"]):
+    # 1. Decision d'affectation / Moqarer Ilhaq (most specific keywords)
+    if any(kw in text_lower for kw in [
+        "decision d'affectation", "décision d'affectation",
+        "decision affectation", "moqarer ilhaq", "مقرر الإلحاق",
+        "مقرر إلحاق", "mis en disponibilite", "mise en disponibilite"
+    ]):
         return "decision_affectation"
+    
+    # 2. Attestation de salaire / Certificat de salaire
+    if any(kw in text_lower for kw in [
+        "attestation de salaire", "certificat de salaire",
+        "شهادة في الأجر", "شهادة الأجر", "salaire brut", "salaire net",
+        "salaire mensuel", "retenue cnss"
+    ]):
+        return "attestation_salaire"
+    
+    # 3. Attestation d'affiliation
+    if any(kw in text_lower for kw in [
+        "attestation d'affiliation", "attestation d affiliation",
+        "شهادة الإنخراط", "إعلام بالانخراط", "إعلام بالإنخراط",
+        "certifie que", "est affili"
+    ]):
+        return "attestation_affiliation"
+    
+    # 4. Contrat de coopérant
+    if any(kw in text_lower for kw in [
+        "contrat de coop", "عقد التعاون", "contrat cooperant"
+    ]):
+        return "contrat"
+    
+    # 5. CIN - LAST, and require specific CIN document keywords (not just 'cin' as field)
+    if any(kw in text_lower for kw in [
+        "carte d'identité", "carte d'identite", "carte nationale",
+        "بطاقة التعريف", "بطاقة تعريف", "republique tunisienne"
+    ]):
+        # Extra check: make sure it's primarily a CIN document, not just mentioning CIN
+        if not any(kw in text_lower for kw in ["attestation", "decision", "certificat", "contrat"]):
+            return "cin"
+    
+    # 6. If text starts with CIN-like header
+    first_lines = text_lower[:200]
+    if "n° cin" in first_lines or "n°cin" in first_lines:
+        if not any(kw in text_lower for kw in ["attestation", "decision", "certificat"]):
+            return "cin"
     
     return "generic"
 

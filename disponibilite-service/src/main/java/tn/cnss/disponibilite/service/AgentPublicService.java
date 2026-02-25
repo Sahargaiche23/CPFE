@@ -1,6 +1,8 @@
 package tn.cnss.disponibilite.service;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tn.cnss.disponibilite.entity.AgentPublic;
 import tn.cnss.disponibilite.repository.AgentPublicRepository;
 
@@ -11,9 +13,11 @@ import java.util.Optional;
 public class AgentPublicService {
 
     private final AgentPublicRepository repository;
+    private final EntityManager entityManager;
 
-    public AgentPublicService(AgentPublicRepository repository) {
+    public AgentPublicService(AgentPublicRepository repository, EntityManager entityManager) {
         this.repository = repository;
+        this.entityManager = entityManager;
     }
 
     public List<AgentPublic> findAll() {
@@ -48,6 +52,7 @@ public class AgentPublicService {
         return repository.save(agent);
     }
 
+    @Transactional
     public AgentPublic update(Long id, AgentPublic updated) {
         return repository.findById(id).map(agent -> {
             agent.setNumInscription(updated.getNumInscription());
@@ -65,7 +70,10 @@ public class AgentPublicService {
             agent.setDateDebutIlhaq(updated.getDateDebutIlhaq());
             agent.setDateFinIlhaq(updated.getDateFinIlhaq());
             agent.setActif(updated.getActif());
-            return repository.save(agent);
+            repository.saveAndFlush(agent);
+            // Clear persistence context and re-fetch to load full institution
+            entityManager.clear();
+            return repository.findById(id).orElse(agent);
         }).orElseThrow(() -> new RuntimeException("Agent public not found: " + id));
     }
 

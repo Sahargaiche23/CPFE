@@ -40,14 +40,18 @@ public class DocumentController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> download(@PathVariable Long id) throws IOException {
-        DocumentGed doc = service.findById(id)
-                .orElseThrow(() -> new RuntimeException("Document non trouvé"));
-        byte[] data = service.download(id);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getNomFichier() + "\"")
-                .contentType(MediaType.parseMediaType(doc.getContentType() != null ? doc.getContentType() : "application/octet-stream"))
-                .body(data);
+    public ResponseEntity<?> download(@PathVariable Long id) {
+        try {
+            DocumentGed doc = service.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Document non trouvé: " + id));
+            byte[] data = service.download(id);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getNomFichier() + "\"")
+                    .contentType(MediaType.parseMediaType(doc.getContentType() != null ? doc.getContentType() : "application/octet-stream"))
+                    .body(data);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of("error", "Fichier introuvable: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")

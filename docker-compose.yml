@@ -162,6 +162,8 @@ services:
       - eureka-server
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - disponibilite-docs:/tmp/cnss-disponibilite-docs
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1
@@ -208,3 +210,4 @@ networks:
 volumes:
   file-storage:
   ged-storage:
+  disponibilite-docs:
