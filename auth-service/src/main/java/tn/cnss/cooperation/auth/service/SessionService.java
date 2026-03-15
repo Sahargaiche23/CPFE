@@ -52,8 +52,11 @@ public class SessionService {
     /**
      * Obtenir toutes les sessions actives d'un utilisateur
      */
+    @Transactional
     public List<UserSession> getActiveSessions(Long userId) {
         try {
+            // Nettoyer les sessions expirées avant de retourner les actives
+            sessionRepository.deactivateExpiredSessions(LocalDateTime.now());
             return sessionRepository.findByUserIdAndActiveTrue(userId);
         } catch (Exception e) {
             log.warn("Impossible de récupérer les sessions: {}", e.getMessage());

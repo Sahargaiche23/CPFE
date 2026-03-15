@@ -13,17 +13,40 @@
           Taux de Change en Direct
         </h2>
         <div class="flex items-center text-sm text-gray-500">
-          <span class="material-icons text-sm mr-1" [class.animate-spin]="isLoadingRates">refresh</span>
-          <span *ngIf="!isLoadingRates">Mis à jour: {{ lastUpdateTime | date:'HH:mm:ss' }}</span>
-          <span *ngIf="isLoadingRates">Chargement...</span>
+          <span *ngIf="isLoadingRates" class="flex items-center">
+            <span class="material-icons text-sm mr-1 animate-spin">refresh</span>
+            Chargement...
+          </span>
+          <span *ngIf="!isLoadingRates && !ratesLoadError" class="flex items-center">
+            <span class="material-icons text-sm mr-1 text-green-500">check_circle</span>
+            Mis à jour: {{ lastUpdateTime | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+          <span *ngIf="!isLoadingRates && ratesLoadError" class="flex items-center text-amber-600">
+            <span class="material-icons text-sm mr-1">warning</span>
+            Taux hors-ligne
+          </span>
+          <button *ngIf="!isLoadingRates" (click)="loadExchangeRates()" 
+                  class="ml-3 p-1 rounded-full hover:bg-blue-100 transition-all" title="Rafraîchir">
+            <span class="material-icons text-sm text-blue-600">refresh</span>
+          </button>
         </div>
       </div>
       
+      <!-- Loading skeleton -->
+      <div *ngIf="isLoadingRates && exchangeRates.length === 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div *ngFor="let i of [1,2,3,4,5,6,7]" class="bg-white rounded-lg p-3 border border-gray-200 animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+          <div class="h-6 bg-gray-200 rounded w-20 mb-1"></div>
+          <div class="h-3 bg-gray-200 rounded w-12"></div>
+        </div>
+      </div>
+
       <!-- Exchange Rate Cards (Style Google Finance) -->
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div *ngIf="exchangeRates.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <div *ngFor="let rate of exchangeRates" 
              class="bg-white rounded-lg p-3 border cursor-pointer transition-all hover:shadow-md"
              [class.border-blue-500]="selectedRate?.code === rate.code"
+             [class.shadow-md]="selectedRate?.code === rate.code"
              [class.border-gray-200]="selectedRate?.code !== rate.code"
              (click)="converterForm.patchValue({sourceCurrency: rate.code}); updateRate()">
           <div class="flex items-center justify-between mb-1">
@@ -40,6 +63,18 @@
             <span>{{ rate.changePercent >= 0 ? '+' : '' }}{{ rate.changePercent | number:'1.2-2' }}%</span>
           </div>
         </div>
+      </div>
+
+      <!-- Error state -->
+      <div *ngIf="!isLoadingRates && exchangeRates.length === 0 && ratesLoadError" 
+           class="text-center py-6">
+        <span class="material-icons text-4xl text-gray-400 mb-2">cloud_off</span>
+        <p class="text-gray-600 mb-3">Impossible de charger les taux de change</p>
+        <button (click)="loadExchangeRates()" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm">
+          <span class="material-icons text-sm mr-1">refresh</span>
+          Réessayer
+        </button>
       </div>
     </div>
 

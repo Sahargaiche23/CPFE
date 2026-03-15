@@ -26,7 +26,7 @@ export interface ExtractionResult {
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
   private api = `${environment.apiUrl}/api/disponibilite/documents`;
-  private aiApi = 'http://localhost:8090';
+  private aiApi = '/ai-api';
 
   constructor(private http: HttpClient) {}
 

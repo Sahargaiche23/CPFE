@@ -314,7 +314,7 @@ public class GedController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalDocuments", gedService.getAllDocuments().size());
+        stats.put("totalDocuments", gedService.countRootDocuments());
         stats.put("totalTaille", gedService.getTotalSize());
         
         Map<String, Long> parCategorie = new HashMap<>();
@@ -382,6 +382,11 @@ public class GedController {
             body.add("file", fileResource);
             if (documentType != null && !documentType.isEmpty()) {
                 body.add("document_type", documentType);
+            }
+            // Pass GED tags/title as hint for AI auto-detection fallback
+            String hint = deriveHintFromDocument(doc);
+            if (hint != null) {
+                body.add("hint", hint);
             }
             body.add("lang", "fra+ara");
             
@@ -474,6 +479,28 @@ public class GedController {
     /**
      * Retourne les types de documents supportés par le service AI
      */
+    /**
+     * Derive an AI document type hint from the GED document's tags and title
+     */
+    private String deriveHintFromDocument(GedDocument doc) {
+        String titre = (doc.getTitre() != null ? doc.getTitre() : "").toLowerCase();
+        String tagsStr = (doc.getTags() != null ? String.join(" ", doc.getTags()) : "").toLowerCase();
+        String combined = titre + " " + tagsStr;
+        
+        if (combined.contains("decision") || combined.contains("décision") || combined.contains("decision-affectation")) {
+            return "decision_affectation";
+        } else if (combined.contains("contrat")) {
+            return "contrat";
+        } else if (combined.contains("attestation-affiliation") || (combined.contains("attestation") && combined.contains("affiliation"))) {
+            return "attestation_affiliation";
+        } else if (combined.contains("attestation") || combined.contains("salaire") || combined.contains("attestation-salaire")) {
+            return "attestation_salaire";
+        } else if (combined.contains("cin") || combined.contains("identite") || combined.contains("identité")) {
+            return "cin";
+        }
+        return null;
+    }
+    
     @GetMapping("/ai/document-types")
     public ResponseEntity<Map<String, Object>> getAiDocumentTypes() {
         try {

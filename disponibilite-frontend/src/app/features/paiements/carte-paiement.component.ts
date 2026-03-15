@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AgentService } from '../../services/agent.service';
 import { CotisationService, Cotisation } from '../../services/cotisation.service';
 
@@ -132,7 +133,7 @@ interface PaiementRow {
     </div>
   `
 })
-export class CartePaiementComponent {
+export class CartePaiementComponent implements OnInit {
   numInscription = '';
   agent: any = null;
   paiements: PaiementRow[] = [];
@@ -145,9 +146,20 @@ export class CartePaiementComponent {
   error = false;
 
   constructor(
+    private route: ActivatedRoute,
     private agentService: AgentService,
     private cotisationService: CotisationService
   ) {}
+
+  ngOnInit(): void {
+    // Auto-search if numInscription is provided via query params
+    this.route.queryParams.subscribe(params => {
+      if (params['numInscription']) {
+        this.numInscription = params['numInscription'];
+        this.search();
+      }
+    });
+  }
 
   formatNumInscription(num: string): string {
     if (!num || num.length < 3) return num;

@@ -112,8 +112,12 @@ import { GedSharedDataService } from '../../services/ged-shared-data.service';
                 <td class="px-3 py-2">
                   <input [(ngModel)]="agent.dateFinIlhaq" type="date" class="w-full border border-gray-300 rounded px-2 py-1 text-sm">
                 </td>
-                <td class="px-3 py-2 text-center">
-                  <button (click)="removeAgent(i)" class="text-red-500 hover:text-red-700">
+                <td class="px-3 py-2 text-center flex items-center justify-center gap-2">
+                  <button *ngIf="agent.numInscription && agent.id" (click)="openCartePaiement(agent)" 
+                          class="text-rose-600 hover:text-rose-800 p-1 rounded hover:bg-rose-50" title="بطاقة خلاص">
+                    <span class="material-icons text-sm">credit_card</span>
+                  </button>
+                  <button (click)="removeAgent(i)" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="حذف">
                     <span class="material-icons text-sm">delete</span>
                   </button>
                 </td>
@@ -476,5 +480,13 @@ export class DossierRegistrationComponent implements OnInit {
 
   search(): void {
     this.loadInstitution();
+  }
+
+  openCartePaiement(agent: any): void {
+    if (agent.numInscription) {
+      this.router.navigate(['/app/carte-paiement'], { 
+        queryParams: { numInscription: agent.numInscription } 
+      });
+    }
   }
 }

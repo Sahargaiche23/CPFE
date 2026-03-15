@@ -143,4 +143,8 @@ public class GedService {
     public List<Object[]> getCountByCategorie() {
         return documentRepository.countByCategorie();
     }
+
+    public long countRootDocuments() {
+        return documentRepository.countRootDocuments();
+    }
 }

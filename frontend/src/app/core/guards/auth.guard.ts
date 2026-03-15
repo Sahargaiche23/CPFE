@@ -1,15 +1,25 @@
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard = () => {
+export const authGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isAuthenticated()) {
-    return true;
+  if (!authService.isAuthenticated()) {
+    router.navigate(['/auth/login']);
+    return false;
   }
 
-  router.navigate(['/auth/login']);
-  return false;
+  // Cooperant users can only access /cooperant/* routes
+  const user = authService.getCurrentUser();
+  if (user?.profil?.toLowerCase() === 'cooperant') {
+    const url = state.url;
+    if (!url.startsWith('/cooperant')) {
+      router.navigate(['/cooperant/espace']);
+      return false;
+    }
+  }
+
+  return true;
 };

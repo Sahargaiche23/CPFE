@@ -1,4 +1,18 @@
 {
+  "/exchange-api": {
+    "target": "https://open.er-api.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": { "^/exchange-api": "" },
+    "logLevel": "debug"
+  },
+  "/frankfurter-api": {
+    "target": "https://api.frankfurter.app",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": { "^/frankfurter-api": "" },
+    "logLevel": "debug"
+  },
   "/api/ged": {
     "target": "http://localhost:8088",
     "secure": false,

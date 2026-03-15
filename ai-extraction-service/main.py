@@ -683,49 +683,78 @@ DOCUMENT_TYPE_LABELS = {
 }
 
 
-def detect_document_type(text: str) -> str:
+def detect_document_type(text: str, hint: str = None) -> str:
     """Détecte automatiquement le type de document à partir du texte.
     Order matters: check specific document types FIRST, CIN LAST
-    because 'CIN' as a field reference appears in many documents."""
+    because 'CIN' as a field reference appears in many documents.
+    
+    Args:
+        text: OCR extracted text
+        hint: optional hint from GED tags/title (e.g. 'contrat', 'cin', 'attestation_salaire')
+    """
     text_lower = text.lower()
     
+    # If text is too short/poor quality, use the hint if available
+    meaningful_text = ''.join(c for c in text_lower if c.isalpha() or c in 'éèêëàâäùûüôöîïç')
+    if len(meaningful_text) < 30:
+        if hint and hint in EXTRACTORS:
+            return hint
+        return "generic"
+    
+    # Helper: count how many keywords match (for stricter detection)
+    def count_matches(keywords):
+        return sum(1 for kw in keywords if kw in text_lower)
+    
     # 1. Decision d'affectation / Moqarer Ilhaq (most specific keywords)
-    if any(kw in text_lower for kw in [
-        "decision d'affectation", "décision d'affectation",
-        "decision affectation", "moqarer ilhaq", "مقرر الإلحاق",
-        "مقرر إلحاق", "mis en disponibilite", "mise en disponibilite"
-    ]):
-        return "decision_affectation"
+    decision_kw_fr = ["decision d'affectation", "décision d'affectation",
+        "decision affectation", "moqarer ilhaq", "mis en disponibilite", "mise en disponibilite"]
+    decision_kw_ar = ["مقرر الإلحاق", "مقرر إلحاق"]
+    if any(kw in text_lower for kw in decision_kw_fr) or count_matches(decision_kw_ar) >= 1:
+        # Verify with a second signal if Arabic-only match
+        if any(kw in text_lower for kw in decision_kw_fr):
+            return "decision_affectation"
+        # Arabic match: require additional context (date, name, etc.)
+        if len(meaningful_text) > 80:
+            return "decision_affectation"
     
     # 2. Attestation de salaire / Certificat de salaire
-    if any(kw in text_lower for kw in [
-        "attestation de salaire", "certificat de salaire",
-        "شهادة في الأجر", "شهادة الأجر", "salaire brut", "salaire net",
-        "salaire mensuel", "retenue cnss"
-    ]):
+    salaire_kw_fr = ["attestation de salaire", "certificat de salaire",
+        "salaire brut", "salaire net", "salaire mensuel", "retenue cnss"]
+    salaire_kw_ar = ["شهادة في الأجر", "شهادة الأجر"]
+    if any(kw in text_lower for kw in salaire_kw_fr):
+        return "attestation_salaire"
+    if count_matches(salaire_kw_ar) >= 1 and len(meaningful_text) > 80:
         return "attestation_salaire"
     
-    # 3. Attestation d'affiliation
-    if any(kw in text_lower for kw in [
-        "attestation d'affiliation", "attestation d affiliation",
-        "شهادة الإنخراط", "إعلام بالانخراط", "إعلام بالإنخراط",
-        "certifie que", "est affili"
-    ]):
+    # 3. Attestation d'affiliation - STRICT: require French keywords or multiple Arabic matches
+    affiliation_kw_fr = ["attestation d'affiliation", "attestation d affiliation",
+        "est affilié à la cnss", "est affilie a la cnss"]
+    affiliation_kw_ar = ["شهادة الإنخراط", "إعلام بالانخراط", "إعلام بالإنخراط"]
+    if any(kw in text_lower for kw in affiliation_kw_fr):
         return "attestation_affiliation"
+    # Arabic: require at least the keyword AND substantial text (avoid matching UI labels from screenshots)
+    if count_matches(affiliation_kw_ar) >= 1 and len(meaningful_text) > 100:
+        # Extra check: should also contain affiliation-related content (numbers, names)
+        if any(kw in text_lower for kw in ["numéro", "numero", "matricule", "affilié", "affilie", "certifi"]):
+            return "attestation_affiliation"
     
     # 4. Contrat de coopérant
-    if any(kw in text_lower for kw in [
-        "contrat de coop", "عقد التعاون", "contrat cooperant"
-    ]):
+    contrat_kw_fr = ["contrat de coop", "contrat cooperant", "contrat de travail"]
+    contrat_kw_ar = ["عقد التعاون"]
+    if any(kw in text_lower for kw in contrat_kw_fr):
+        return "contrat"
+    if count_matches(contrat_kw_ar) >= 1 and len(meaningful_text) > 80:
         return "contrat"
     
     # 5. CIN - LAST, and require specific CIN document keywords (not just 'cin' as field)
     if any(kw in text_lower for kw in [
         "carte d'identité", "carte d'identite", "carte nationale",
-        "بطاقة التعريف", "بطاقة تعريف", "republique tunisienne"
+        "republique tunisienne"
     ]):
-        # Extra check: make sure it's primarily a CIN document, not just mentioning CIN
         if not any(kw in text_lower for kw in ["attestation", "decision", "certificat", "contrat"]):
+            return "cin"
+    if any(kw in text for kw in ["بطاقة التعريف", "بطاقة تعريف"]):
+        if len(meaningful_text) > 60 and not any(kw in text_lower for kw in ["attestation", "decision"]):
             return "cin"
     
     # 6. If text starts with CIN-like header
@@ -733,6 +762,10 @@ def detect_document_type(text: str) -> str:
     if "n° cin" in first_lines or "n°cin" in first_lines:
         if not any(kw in text_lower for kw in ["attestation", "decision", "certificat"]):
             return "cin"
+    
+    # 7. If hint is available and no keyword matched, use the hint
+    if hint and hint in EXTRACTORS:
+        return hint
     
     return "generic"
 
@@ -760,6 +793,7 @@ def health_check():
 async def extract_document(
     file: UploadFile = File(...),
     document_type: Optional[str] = Form(None),
+    hint: Optional[str] = Form(None),
     lang: Optional[str] = Form("fra+ara")
 ):
     """
@@ -768,6 +802,7 @@ async def extract_document(
     - **file**: Fichier à analyser (image PNG/JPG ou PDF)
     - **document_type**: Type de document (cin, attestation_salaire, contrat, attestation_affiliation, generic). 
       Si non spécifié, le type est détecté automatiquement.
+    - **hint**: Indice optionnel du type (depuis les tags/titre GED), utilisé comme fallback si la détection OCR échoue.
     - **lang**: Langues OCR (défaut: fra+ara pour français+arabe)
     """
     file_bytes = await file.read()
@@ -792,7 +827,7 @@ async def extract_document(
     if not raw_text.strip():
         return ExtractionResult(
             success=False,
-            document_type=document_type or "unknown",
+            document_type=hint or document_type or "unknown",
             confidence=0,
             extracted_data={},
             raw_text="",
@@ -801,7 +836,7 @@ async def extract_document(
     
     # 2. Détecter le type si non spécifié
     if not document_type or document_type not in EXTRACTORS:
-        document_type = detect_document_type(raw_text)
+        document_type = detect_document_type(raw_text, hint=hint)
     
     # 3. Extraire les données selon le type
     extractor = EXTRACTORS.get(document_type, extract_generic_data)

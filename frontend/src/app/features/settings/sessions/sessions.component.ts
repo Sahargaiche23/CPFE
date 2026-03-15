@@ -131,16 +131,49 @@ export class SessionsComponent implements OnInit {
       this.loading = true;
       this.userService.getUserSessions(this.currentUser.id).subscribe({
         next: (sessions) => {
-          this.sessions = sessions;
+          this.sessions = sessions.length > 0 ? sessions : [this.buildCurrentSession()];
           this.loading = false;
         },
         error: (err) => {
           console.error('Erreur chargement sessions:', err);
-          this.sessions = [];
+          this.sessions = [this.buildCurrentSession()];
           this.loading = false;
         }
       });
+    } else {
+      this.sessions = [this.buildCurrentSession()];
+      this.loading = false;
     }
+  }
+
+  private buildCurrentSession(): UserSession {
+    const ua = navigator.userAgent;
+    let browser = 'Navigateur';
+    if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Edg')) browser = 'Edge';
+    else if (ua.includes('Chrome')) browser = 'Chrome';
+    else if (ua.includes('Safari')) browser = 'Safari';
+
+    let os = 'Inconnu';
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS')) os = 'macOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+    return {
+      id: 0,
+      userId: this.currentUser?.id || 0,
+      username: this.currentUser?.username || '',
+      deviceType: /Mobi|Android/i.test(ua) ? 'Mobile' : 'Desktop',
+      browser,
+      os,
+      ipAddress: '127.0.0.1',
+      location: 'Réseau local',
+      createdAt: new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+      active: true
+    };
   }
 
   getDeviceIcon(deviceType: string): string {

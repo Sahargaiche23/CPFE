@@ -33,7 +33,7 @@ public interface UserSessionRepository extends JpaRepository<UserSession, Long> 
     void updateLastActivity(@Param("tokenHash") String tokenHash, @Param("time") LocalDateTime time);
     
     @Modifying
-    @Query("UPDATE UserSession s SET s.active = false WHERE s.expiresAt < :now")
+    @Query("UPDATE UserSession s SET s.active = false WHERE s.active = true AND (s.expiresAt < :now OR s.expiresAt IS NULL)")
     void deactivateExpiredSessions(@Param("now") LocalDateTime now);
     
     long countByUserIdAndActiveTrue(Long userId);

@@ -424,7 +424,7 @@ import { AiExtractionService, ExtractionResult } from '../../../core/services/ai
                       Télécharger
                     </button>
                   </div>
-                  <button (click)="extractAiData('contrat', 'contrat')" [disabled]="extractingDoc === 'contrat'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                  <button (click)="extractAiData('contrat')" [disabled]="extractingDoc === 'contrat'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
                     <span class="material-icons text-sm">{{ extractingDoc === 'contrat' ? 'hourglass_top' : 'auto_awesome' }}</span>
                     {{ extractingDoc === 'contrat' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
                   </button>
@@ -457,7 +457,7 @@ import { AiExtractionService, ExtractionResult } from '../../../core/services/ai
                       Télécharger
                     </button>
                   </div>
-                  <button (click)="extractAiData('attestationSalaire', 'attestation_salaire')" [disabled]="extractingDoc === 'attestationSalaire'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                  <button (click)="extractAiData('attestationSalaire')" [disabled]="extractingDoc === 'attestationSalaire'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
                     <span class="material-icons text-sm">{{ extractingDoc === 'attestationSalaire' ? 'hourglass_top' : 'auto_awesome' }}</span>
                     {{ extractingDoc === 'attestationSalaire' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
                   </button>
@@ -491,7 +491,7 @@ import { AiExtractionService, ExtractionResult } from '../../../core/services/ai
                       Télécharger
                     </button>
                   </div>
-                  <button (click)="extractAiData('cin', 'cin')" [disabled]="extractingDoc === 'cin'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                  <button (click)="extractAiData('cin')" [disabled]="extractingDoc === 'cin'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
                     <span class="material-icons text-sm">{{ extractingDoc === 'cin' ? 'hourglass_top' : 'auto_awesome' }}</span>
                     {{ extractingDoc === 'cin' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
                   </button>
@@ -550,7 +550,7 @@ import { AiExtractionService, ExtractionResult } from '../../../core/services/ai
                     Télécharger
                   </button>
                 </div>
-                <button (click)="extractAiData('attestationAffiliation', 'attestation_affiliation')" [disabled]="extractingDoc === 'attestationAffiliation'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
+                <button (click)="extractAiData('attestationAffiliation')" [disabled]="extractingDoc === 'attestationAffiliation'" class="w-full mt-2 py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs rounded hover:from-purple-700 hover:to-pink-600 flex items-center justify-center gap-1 disabled:opacity-50">
                   <span class="material-icons text-sm">{{ extractingDoc === 'attestationAffiliation' ? 'hourglass_top' : 'auto_awesome' }}</span>
                   {{ extractingDoc === 'attestationAffiliation' ? 'Extraction IA en cours...' : 'Extraire données IA' }}
                 </button>
@@ -751,6 +751,13 @@ import { AiExtractionService, ExtractionResult } from '../../../core/services/ai
                 </div>
               </div>
               <button (click)="closeExtractionModal()" class="text-white hover:text-pink-200 text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- AI-detected document type badge -->
+            <div class="px-6 py-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
+              <span class="material-icons text-purple-600 text-sm">auto_awesome</span>
+              <span class="text-sm text-purple-700 font-medium">Type détecté automatiquement :</span>
+              <span class="px-3 py-1 bg-purple-200 text-purple-800 rounded-full text-sm font-bold">{{ getDocumentTypeLabel(extractionResult.document_type) }}</span>
             </div>
 
             <div class="p-6 overflow-y-auto max-h-[60vh]">
@@ -1049,12 +1056,13 @@ export class AtctDetailComponent implements OnInit {
   }
 
   // ==================== AI EXTRACTION ====================
-  extractAiData(docKey: string, aiDocType: string): void {
+  extractAiData(docKey: string): void {
     const gedDoc = (this.gedDocuments as any)[docKey] as GedDocument | undefined;
     if (!gedDoc) return;
     
     this.extractingDoc = docKey;
-    this.aiExtractionService.extractFromDocument(gedDoc.id, aiDocType).subscribe({
+    // No document type passed - AI auto-detects from content
+    this.aiExtractionService.extractFromDocument(gedDoc.id).subscribe({
       next: (result) => {
         this.extractionResult = result;
         this.showExtractionModal = true;
@@ -1064,7 +1072,7 @@ export class AtctDetailComponent implements OnInit {
         console.error('Erreur extraction IA:', err);
         this.extractionResult = {
           success: false,
-          document_type: aiDocType,
+          document_type: 'unknown',
           confidence: 0,
           extracted_data: {},
           raw_text: '',
@@ -1089,6 +1097,21 @@ export class AtctDetailComponent implements OnInit {
   closeExtractionModal(): void {
     this.showExtractionModal = false;
     this.extractionResult = null;
+  }
+
+  getDocumentTypeLabel(type: string): string {
+    const labels: {[key: string]: string} = {
+      'cin': 'Carte d\'Identit\u00e9 Nationale / \u0628\u0637\u0627\u0642\u0629 \u0627\u0644\u062a\u0639\u0631\u064a\u0641 \u0627\u0644\u0648\u0637\u0646\u064a\u0629',
+      'carte_identite': 'Carte d\'Identit\u00e9 Nationale / \u0628\u0637\u0627\u0642\u0629 \u0627\u0644\u062a\u0639\u0631\u064a\u0641 \u0627\u0644\u0648\u0637\u0646\u064a\u0629',
+      'attestation_salaire': 'Attestation de Salaire / \u0634\u0647\u0627\u062f\u0629 \u0641\u064a \u0627\u0644\u0623\u062c\u0631',
+      'contrat': 'Contrat de Coop\u00e9rant / \u0639\u0642\u062f \u0627\u0644\u062a\u0639\u0627\u0648\u0646 \u0627\u0644\u0641\u0646\u064a',
+      'contrat_cooperant': 'Contrat de Coop\u00e9rant / \u0639\u0642\u062f \u0627\u0644\u062a\u0639\u0627\u0648\u0646 \u0627\u0644\u0641\u0646\u064a',
+      'attestation_affiliation': 'Attestation d\'Affiliation / \u0634\u0647\u0627\u062f\u0629 \u0627\u0644\u0625\u0646\u062e\u0631\u0627\u0637',
+      'decision_affectation': 'D\u00e9cision d\'Affectation / \u0645\u0642\u0631\u0631 \u0627\u0644\u0625\u0644\u062d\u0627\u0642',
+      'generic': 'Document G\u00e9n\u00e9rique / \u0648\u062b\u064a\u0642\u0629 \u0639\u0627\u0645\u0629',
+      'unknown': 'Type inconnu / \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641',
+    };
+    return labels[type] || type;
   }
 
   private getDecisionData() {

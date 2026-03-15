@@ -28,6 +28,9 @@ public interface GedDocumentRepository extends JpaRepository<GedDocument, Long> 
     @Query("SELECT SUM(d.fichierTaille) FROM GedDocument d")
     Long getTotalSize();
     
-    @Query("SELECT d.categorie, COUNT(d) FROM GedDocument d GROUP BY d.categorie")
+    @Query("SELECT d.categorie, COUNT(d) FROM GedDocument d WHERE d.parentId IS NULL GROUP BY d.categorie")
     List<Object[]> countByCategorie();
+
+    @Query("SELECT COUNT(d) FROM GedDocument d WHERE d.parentId IS NULL")
+    long countRootDocuments();
 }

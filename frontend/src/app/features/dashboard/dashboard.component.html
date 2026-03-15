@@ -19,15 +19,15 @@
       </div>
 
       <!-- Stats ATCT -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
         <div class="card hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-gray-600 text-sm font-semibold mb-2">Total Dossiers ATCT</p>
+              <p class="text-gray-600 text-sm font-semibold mb-2">Total Dossiers</p>
               <h3 class="text-3xl font-bold text-blue-600">{{ atctStats.totalDossiers }}</h3>
             </div>
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-blue-600">folder_shared</span>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-3xl text-blue-600">folder_shared</span>
             </div>
           </div>
           <a routerLink="/atct" class="text-blue-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
@@ -42,12 +42,12 @@
               <p class="text-gray-600 text-sm font-semibold mb-2">En Attente</p>
               <h3 class="text-3xl font-bold text-yellow-600">{{ atctStats.enAttente }}</h3>
             </div>
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-yellow-600">hourglass_empty</span>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-3xl text-yellow-600">hourglass_empty</span>
             </div>
           </div>
           <a routerLink="/atct/validation" class="text-yellow-600 text-sm font-semibold mt-4 inline-flex items-center hover:underline">
-            Valider les dossiers
+            Valider
             <span class="material-icons text-sm ml-1">arrow_forward</span>
           </a>
         </div>
@@ -58,8 +58,20 @@
               <p class="text-gray-600 text-sm font-semibold mb-2">Validés</p>
               <h3 class="text-3xl font-bold text-green-600">{{ atctStats.valides }}</h3>
             </div>
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-green-600">check_circle</span>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-3xl text-green-600">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card hover:shadow-xl transition-all duration-300 border-l-4 border-teal-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-semibold mb-2">Affiliés</p>
+              <h3 class="text-3xl font-bold text-teal-600">{{ atctStats.affilies }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-3xl text-teal-600">verified</span>
             </div>
           </div>
         </div>
@@ -70,11 +82,10 @@
               <p class="text-gray-600 text-sm font-semibold mb-2">Retours CNSS</p>
               <h3 class="text-3xl font-bold text-red-600">{{ atctStats.retoursCnss }}</h3>
             </div>
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-red-600">assignment_return</span>
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <span class="material-icons text-3xl text-red-600">assignment_return</span>
             </div>
           </div>
-          <span class="text-red-600 text-sm font-semibold mt-2 inline-block">Documents manquants</span>
         </div>
       </div>
 

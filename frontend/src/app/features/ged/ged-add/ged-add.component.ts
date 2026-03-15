@@ -283,7 +283,7 @@ export class GedAddComponent implements OnInit {
 
   loadRecentDocs(): void {
     this.gedService.getDocuments().subscribe({
-      next: (docs) => this.recentDocs = docs.slice(0, 5),
+      next: (docs) => this.recentDocs = docs.filter((d: any) => !d.parentId).slice(0, 5),
       error: () => {}
     });
   }

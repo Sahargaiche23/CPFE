@@ -65,6 +65,7 @@ public class DossierATCTService {
         stats.put("valides", repository.countValides());
         stats.put("rejetes", repository.countRejetes());
         stats.put("reclamations", repository.countReclamations());
+        stats.put("affilies", repository.countAffilies());
         return stats;
     }
 

@@ -32,6 +32,7 @@ export class SalaryConverterComponent implements OnInit, OnDestroy {
   exchangeRates: ExchangeRate[] = [];
   selectedRate: ExchangeRate | null = null;
   isLoadingRates: boolean = true;
+  ratesLoadError: boolean = false;
   lastUpdateTime: Date = new Date();
   
   // Pour le mini-graphique
@@ -65,13 +66,19 @@ export class SalaryConverterComponent implements OnInit, OnDestroy {
 
   loadExchangeRates() {
     this.isLoadingRates = true;
+    this.ratesLoadError = false;
     this.exchangeRateService.getLatestRates()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (rates) => {
           this.exchangeRates = rates;
-          this.lastUpdateTime = new Date();
           this.isLoadingRates = false;
+          if (rates.length > 0) {
+            this.lastUpdateTime = rates[0].lastUpdate;
+            this.ratesLoadError = false;
+          } else {
+            this.ratesLoadError = true;
+          }
           
           // Mettre à jour le taux si une devise est déjà sélectionnée
           const currency = this.converterForm.get('sourceCurrency')?.value;
@@ -81,6 +88,7 @@ export class SalaryConverterComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.isLoadingRates = false;
+          this.ratesLoadError = true;
         }
       });
   }
@@ -109,10 +117,11 @@ export class SalaryConverterComponent implements OnInit, OnDestroy {
   }
 
   calculate() {
+    const sourceCurrency = this.converterForm.get('sourceCurrency')?.value;
     const sourceAmount = this.converterForm.get('sourceAmount')?.value;
     const exchangeRate = this.converterForm.get('exchangeRate')?.value;
 
-    if (sourceAmount && exchangeRate) {
+    if (sourceCurrency && sourceAmount && exchangeRate) {
       // Convert to TND
       this.convertedAmount = sourceAmount * exchangeRate;
       
