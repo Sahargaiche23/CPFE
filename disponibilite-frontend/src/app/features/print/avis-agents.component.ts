@@ -83,60 +83,102 @@ interface CotisationRow {
           <div *ngIf="loading" class="mt-4 text-center text-gray-500">جاري التحميل...</div>
         </div>
 
-        <!-- Preview -->
-        <div *ngIf="cotisations.length > 0" class="mt-8 border border-gray-300 rounded-xl p-8 bg-white max-w-4xl mx-auto" dir="rtl">
-          <!-- Institution Info -->
-          <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <!-- Preview: Assuré (138 + 198) -->
+        <div *ngIf="getAssureCotisations().length > 0" class="mt-8 border-2 border-blue-300 rounded-xl p-8 bg-white max-w-4xl mx-auto" dir="rtl">
+          <div class="mb-4 px-3 py-2 bg-blue-50 rounded-lg text-blue-800 font-bold text-center">
+            <span class="material-icons align-middle text-sm">person</span>
+            إعلام المضمون / Avis Assuré
+          </div>
+          <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div class="grid grid-cols-2 gap-2 text-sm">
               <p><strong>المؤسسة :</strong> {{ selectedInstitution?.raisonSociale }}</p>
               <p><strong>رقم الإنخراط :</strong> {{ branche }}-{{ institutionNum }}</p>
-              <p><strong>رقم التسجيل :</strong> {{ getUniqueNumInscriptions() }}</p>
+              <p><strong>رقم المضمون الاجتماعي :</strong> {{ getUniqueNumInscriptions() }}</p>
               <p><strong>العنوان :</strong> {{ selectedInstitution?.adresse }}</p>
             </div>
           </div>
-
           <div class="text-sm text-gray-500 mb-2">الثلاثي {{ trimestre }} / {{ annee }}</div>
+          <table class="w-full text-sm border border-gray-400 mb-4">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border border-gray-400 px-3 py-2">الرمز</th>
+                <th class="border border-gray-400 px-3 py-2">النسبة(%)</th>
+                <th class="border border-gray-400 px-3 py-2">جملة الاحتياطي الاجتماعي</th>
+                <th class="border border-gray-400 px-3 py-2">المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="border border-gray-400 px-3 py-2">138</td>
+                <td class="border border-gray-400 px-3 py-2">9.68</td>
+                <td class="border border-gray-400 px-3 py-2 font-mono">{{ getTotalSalaires().toFixed(3) }}</td>
+                <td class="border border-gray-400 px-3 py-2 font-mono">{{ getTotal138().toFixed(3) }}</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-400 px-3 py-2">198</td>
+                <td class="border border-gray-400 px-3 py-2">{{ getTotal198() > 0 ? getComplementaryRate198() : '0' }}</td>
+                <td class="border border-gray-400 px-3 py-2 font-mono">{{ getTotal198() > 0 ? getTotalSalaires().toFixed(3) : '0.000' }}</td>
+                <td class="border border-gray-400 px-3 py-2 font-mono">{{ getTotal198().toFixed(3) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="w-full text-sm border border-gray-400 mb-4">
+            <tr class="bg-blue-50">
+              <td class="border border-gray-400 px-3 py-2 text-right w-3/4"><strong>المجموع</strong></td>
+              <td class="border border-gray-400 px-3 py-2 font-mono text-right font-bold text-blue-700">{{ getAssureTotal().toFixed(3) }}</td>
+            </tr>
+          </table>
+        </div>
 
+        <!-- Preview: Employeur (137 + 197) -->
+        <div *ngIf="getEmployerCotisations().length > 0" class="mt-8 border-2 border-orange-300 rounded-xl p-8 bg-white max-w-4xl mx-auto" dir="rtl">
+          <div class="mb-4 px-3 py-2 bg-orange-50 rounded-lg text-orange-800 font-bold text-center">
+            <span class="material-icons align-middle text-sm">business</span>
+            إعلام المشغّل / Avis Employeur
+          </div>
+          <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <p><strong>المؤسسة :</strong> {{ selectedInstitution?.raisonSociale }}</p>
+              <p><strong>رقم الإنخراط :</strong> {{ branche }}-{{ institutionNum }}</p>
+              <p><strong>رقم المضمون الاجتماعي :</strong> {{ getUniqueNumInscriptions() }}</p>
+              <p><strong>العنوان :</strong> {{ selectedInstitution?.adresse }}</p>
+            </div>
+          </div>
+          <div class="text-sm text-gray-500 mb-2">الثلاثي {{ trimestre }} / {{ annee }}</div>
           <table class="w-full text-sm border border-gray-400 mb-4">
             <thead class="bg-gray-100">
               <tr>
                 <th class="border border-gray-400 px-3 py-2">اسم ولقب العون المعني</th>
                 <th class="border border-gray-400 px-3 py-2">الرمز</th>
                 <th class="border border-gray-400 px-3 py-2">رقم المضمون الاجتماعي</th>
-                <th class="border border-gray-400 px-3 py-2">مبلغ الأجر</th>
+                <th class="border border-gray-400 px-3 py-2">مبلغ الأجور</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let c of cotisations">
-                <td class="border border-gray-400 px-3 py-2">{{ c.code === '137' || c.code === '197' ? (selectedInstitution?.raisonSociale || '') : c.nomAgent }}</td>
+              <tr *ngFor="let c of getEmployerCotisations()">
+                <td class="border border-gray-400 px-3 py-2">{{ c.nomAgent }}</td>
                 <td class="border border-gray-400 px-3 py-2">{{ c.code }}</td>
                 <td class="border border-gray-400 px-3 py-2 font-mono">{{ c.numInscription }}</td>
                 <td class="border border-gray-400 px-3 py-2 font-mono">{{ c.montantDu.toFixed(3) }}</td>
               </tr>
             </tbody>
           </table>
-
-          <!-- Summary -->
           <table class="w-full text-sm border border-gray-400 mb-4">
             <tr>
               <td class="border border-gray-400 px-3 py-2 text-right w-3/4"><strong>جملة الأجور</strong></td>
               <td class="border border-gray-400 px-3 py-2 font-mono text-right">{{ getTotalSalaires().toFixed(3) }}</td>
             </tr>
             <tr>
-              <td class="border border-gray-400 px-3 py-2 text-right"><strong>النظام الأساسي (المشغل) %17.07</strong></td>
+              <td class="border border-gray-400 px-3 py-2 text-right"><strong>مساهمات النظام القانوني المعنى (137) %17.07</strong></td>
               <td class="border border-gray-400 px-3 py-2 font-mono text-right">{{ getTotal137().toFixed(3) }}</td>
             </tr>
             <tr>
-              <td class="border border-gray-400 px-3 py-2 text-right"><strong>النظام الأساسي (العون) %9.68</strong></td>
-              <td class="border border-gray-400 px-3 py-2 font-mono text-right">{{ getTotal138().toFixed(3) }}</td>
+              <td class="border border-gray-400 px-3 py-2 text-right"><strong>مساهمات النظام التكميلي للجرايات (197)</strong></td>
+              <td class="border border-gray-400 px-3 py-2 font-mono text-right">{{ getTotal197().toFixed(3) }}</td>
             </tr>
-            <tr>
-              <td class="border border-gray-400 px-3 py-2 text-right"><strong>مساهمات النظام التكميلي للجرايات</strong></td>
-              <td class="border border-gray-400 px-3 py-2 font-mono text-right">{{ getTotalComplementary().toFixed(3) }}</td>
-            </tr>
-            <tr class="bg-gray-100">
+            <tr class="bg-orange-50">
               <td class="border border-gray-400 px-3 py-2 text-right"><strong>المجموع</strong></td>
-              <td class="border border-gray-400 px-3 py-2 font-mono text-right font-bold text-rose-700">{{ totalAmount.toFixed(3) }}</td>
+              <td class="border border-gray-400 px-3 py-2 font-mono text-right font-bold text-orange-700">{{ getEmployerTotal().toFixed(3) }}</td>
             </tr>
           </table>
         </div>
@@ -297,8 +339,44 @@ export class AvisAgentsComponent implements OnInit {
     return this.cotisations.filter(c => c.code === '138').reduce((s, c) => s + c.montantDu, 0);
   }
 
+  getTotal197(): number {
+    return this.cotisations.filter(c => c.code === '197').reduce((s, c) => s + c.montantDu, 0);
+  }
+
+  getTotal198(): number {
+    return this.cotisations.filter(c => c.code === '198').reduce((s, c) => s + c.montantDu, 0);
+  }
+
   getTotalComplementary(): number {
     return this.cotisations.filter(c => c.code === '197' || c.code === '198').reduce((s, c) => s + c.montantDu, 0);
+  }
+
+  getAssureCotisations(): CotisationRow[] {
+    return this.cotisations.filter(c => c.code === '138' || c.code === '198');
+  }
+
+  getEmployerCotisations(): CotisationRow[] {
+    return this.cotisations.filter(c => c.code === '137' || c.code === '197');
+  }
+
+  getComplementaryRate198(): string {
+    const sal = this.getTotalSalaires();
+    if (sal <= 0) return '0';
+    return ((this.getTotal198() / sal) * 100).toFixed(2);
+  }
+
+  getComplementaryRate197(): string {
+    const sal = this.getTotalSalaires();
+    if (sal <= 0) return '0';
+    return ((this.getTotal197() / sal) * 100).toFixed(2);
+  }
+
+  getAssureTotal(): number {
+    return this.getTotal138() + this.getTotal198();
+  }
+
+  getEmployerTotal(): number {
+    return this.getTotal137() + this.getTotal197();
   }
 
   getTotalSalaires(): number {
@@ -315,141 +393,121 @@ export class AvisAgentsComponent implements OnInit {
 
   print(): void {
     const triNames: {[key: number]: string} = {1: 'الأولى', 2: 'الثانية', 3: 'الثالثة', 4: 'الرابعة'};
-    const totalInWords = this.convertToArabicWords(this.totalAmount);
     const today = new Date().toLocaleDateString('fr-TN');
+    const assureCots = this.getAssureCotisations();
+    const employerCots = this.getEmployerCotisations();
+    const assureTotal = this.getAssureTotal();
+    const employerTotal = this.getEmployerTotal();
+    const totalSalaires = this.getTotalSalaires();
+    const numInscriptions = [...new Set(this.cotisations.map(c => c.numInscription))].join(' - ');
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8">
-        <title>إعلام لدفع المساهمات</title>
-        <style>
-          body { font-family: 'Traditional Arabic', 'Arial', sans-serif; padding: 20px 40px; direction: rtl; font-size: 14px; line-height: 1.6; }
-          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 10px; }
-          .header-right { text-align: right; font-size: 12px; }
-          .header-center { text-align: center; flex: 1; }
-          .header-left { text-align: left; font-size: 11px; }
-          .cnss-title { font-weight: bold; font-size: 16px; text-decoration: underline; }
-          .office-box { background: #000; color: white; padding: 5px 20px; display: inline-block; margin-top: 8px; font-size: 13px; }
-          .date { text-align: left; margin: 15px 0; font-size: 13px; }
-          .institution-box { display: flex; align-items: center; margin: 25px 0; padding: 0 50px; }
-          .bracket { font-size: 90px; font-weight: 100; line-height: 0.8; font-family: Arial; color: #000; }
-          .box-content { flex: 1; padding: 10px 15px; }
-          .box-content p { margin: 6px 0; font-size: 14px; }
-          .subject { font-weight: bold; font-size: 15px; margin: 20px 0; text-decoration: underline; }
-          .body-text { text-align: justify; margin-bottom: 15px; font-size: 13px; }
-          .amount-text { font-weight: bold; margin: 10px 0; font-size: 14px; }
-          table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-          th, td { border: 1px solid #000; padding: 6px; text-align: center; }
-          th { background: #f5f5f5; font-weight: bold; }
-          .summary { margin-top: 15px; }
-          .summary td { text-align: right; padding: 5px 10px; }
-          .summary td:first-child { width: 70%; }
-          .footer { margin-top: 20px; font-size: 11px; color: #666; }
-          @media print { body { padding: 15px; } }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="header-right">
-            <div>الجمهورية التونسية</div>
-            <div>وزارة الشؤون الاجتماعية و التضامن</div>
-            <div>و التونسيين بالخارج</div>
-          </div>
-          <div class="header-center">
-            <img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" style="height:70px;">
-            <div class="cnss-title">الصندوق الوطني للضمان الاجتماعي</div>
-            <div class="office-box">المكتب الجهوي: تونس المدينة</div>
-          </div>
-          <div class="header-left">
-            <div>République Tunisienne</div>
-            <div>Ministère des Affaires Sociales et de solidarité</div>
-            <div>et des Tunisiens à l'Étranger</div>
-            <div style="margin-top: 8px; font-weight: bold;">Caisse Nationale</div>
-            <div style="font-weight: bold;">de Sécurité Sociale</div>
-          </div>
-        </div>
+    const styles = `
+      body { font-family: 'Traditional Arabic', 'Arial', sans-serif; padding: 20px 40px; direction: rtl; font-size: 14px; line-height: 1.6; }
+      .page { page-break-after: always; }
+      .page:last-child { page-break-after: auto; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 10px; }
+      .header-right { text-align: right; font-size: 12px; }
+      .header-center { text-align: center; flex: 1; }
+      .header-left { text-align: left; font-size: 11px; }
+      .cnss-title { font-weight: bold; font-size: 16px; text-decoration: underline; }
+      .office-box { background: #000; color: white; padding: 5px 20px; display: inline-block; margin-top: 8px; font-size: 13px; }
+      .date { text-align: left; margin: 15px 0; font-size: 13px; }
+      .institution-box { display: flex; align-items: center; margin: 25px 0; padding: 0 50px; }
+      .bracket { font-size: 90px; font-weight: 100; line-height: 0.8; font-family: Arial; color: #000; }
+      .box-content { flex: 1; padding: 10px 15px; }
+      .box-content p { margin: 6px 0; font-size: 14px; }
+      .subject { font-weight: bold; font-size: 15px; margin: 20px 0; text-decoration: underline; }
+      .body-text { text-align: justify; margin-bottom: 15px; font-size: 13px; }
+      .amount-text { font-weight: bold; margin: 10px 0; font-size: 14px; }
+      table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+      th, td { border: 1px solid #000; padding: 6px; text-align: center; }
+      th { background: #f5f5f5; font-weight: bold; }
+      .summary { margin-top: 15px; }
+      .summary td { text-align: right; padding: 5px 10px; }
+      .summary td:first-child { width: 70%; }
+      .footer { margin-top: 20px; font-size: 11px; color: #666; }
+      .type-badge { text-align: center; font-weight: bold; font-size: 14px; margin: 10px 0; padding: 6px; border: 1px solid #000; }
+      @media print { body { padding: 15px; } .page { page-break-after: always; } .page:last-child { page-break-after: auto; } }
+    `;
 
-        <div class="date">${today}</div>
+    const inst = this.selectedInstitution?.raisonSociale || '';
+    const affil = (this.branche || '') + '-' + (this.institutionNum || '');
+    const addr = this.selectedInstitution?.adresse || '';
 
-        <div class="institution-box">
-          <span class="bracket">[</span>
-          <div class="box-content">
-            <p><strong>المؤسسة :</strong> ${this.selectedInstitution?.raisonSociale || ''}</p>
-            <p><strong>رقم الإنخراط:</strong> ${this.branche || ''}-${this.institutionNum || ''}</p>
-            <p><strong>رقم التسجيل :</strong> ${[...new Set(this.cotisations.map(c => c.numInscription))].join(' - ')}</p>
-            <p><strong>العنوان :</strong> ${this.selectedInstitution?.adresse || ''}</p>
-          </div>
-          <span class="bracket">]</span>
-        </div>
+    const total138 = this.getTotal138();
+    const total198 = this.getTotal198();
+    const total137 = this.getTotal137();
+    const total197 = this.getTotal197();
+    const rate198 = totalSalaires > 0 && total198 > 0 ? ((total198 / totalSalaires) * 100).toFixed(2) : '0';
+    const rate197 = totalSalaires > 0 && total197 > 0 ? ((total197 / totalSalaires) * 100).toFixed(2) : '0';
 
-        <div class="subject">الموضوع: إعلام لدفع المساهمات</div>
+    const pageHeader = '<div class="header"><div class="header-right"><div>الجمهورية التونسية</div><div>وزارة الشؤون الاجتماعية و التضامن</div><div>و التونسيين بالخارج</div></div>' +
+      '<div class="header-center"><img src="https://www.cnss.tn/html/themes/images/logo.png" alt="CNSS" style="height:70px;"><div class="cnss-title">الصندوق الوطني للضمان الاجتماعي</div><div class="office-box">المكتب الجهوي: تونس المدينة</div></div>' +
+      '<div class="header-left"><div>République Tunisienne</div><div>Ministère des Affaires Sociales et de solidarité</div><div>et des Tunisiens à l\'Étranger</div><div style="margin-top:8px;font-weight:bold;">Caisse Nationale</div><div style="font-weight:bold;">de Sécurité Sociale</div></div></div>' +
+      '<div class="date">' + today + '</div>' +
+      '<div class="institution-box"><span class="bracket">[</span><div class="box-content">' +
+      '<p><strong>المؤسسة :</strong> ' + inst + '</p>' +
+      '<p><strong>رقم الإنخراط:</strong> ' + affil + '</p>' +
+      '<p><strong>رقم المضمون الاجتماعي :</strong> ' + numInscriptions + '</p>' +
+      '<p><strong>العنوان :</strong> ' + addr + '</p>' +
+      '</div><span class="bracket">]</span></div>';
 
-        <div class="body-text">
-          أما بعد،<br>
-          أتشرف بإعلامكم بأن مبلغ المساهمات الواجب عليكم دفعها للصندوق الوطني للضمان الاجتماعي في إطار التغطية
-          الاجتماعية للأعوان العموميين المحالين على عدم المباشرة الخاصة، طبقا للقانون عدد 16 لسنة 2003 المؤرخ في 24
-          فيفري 2003، بعنوان الثلاثي ${triNames[+this.trimestre]} لسنة ${this.annee}
-        </div>
+    const bodyText = '<div class="subject">الموضوع: إعلام لدفع المساهمات</div>' +
+      '<div class="body-text">أما بعد،<br>أتشرف بإعلامكم بأن مبلغ المساهمات الواجب عليكم دفعها للصندوق الوطني للضمان الاجتماعي في إطار التغطية الاجتماعية للأعوان العموميين المحالين على عدم المباشرة الخاصة، طبقا للقانون عدد 16 لسنة 2003 المؤرخ في 24 فيفري 2003، بعنوان الثلاثي ' + triNames[+this.trimestre] + ' لسنة ' + this.annee + '</div>';
 
-        <div class="amount-text">
-          حدد بـ ${totalInWords}
-        </div>
+    // --- Page Assuré: per-code rows (138 + 198) ---
+    const buildAssurePage = (): string => {
+      if (assureCots.length === 0) return '';
+      const totalWords = this.convertToArabicWords(assureTotal);
 
-        <table>
-          <thead>
-            <tr>
-              <th>اسم ولقب العون المعني</th>
-              <th>الرمز</th>
-              <th>رقم المضمون الاجتماعي</th>
-              <th>مبلغ الأجر</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.cotisations.map(c => `
-              <tr>
-                <td>${c.code === '137' || c.code === '197' ? (this.selectedInstitution?.raisonSociale || '') : c.nomAgent}</td>
-                <td>${c.code}</td>
-                <td>${c.numInscription}</td>
-                <td>${c.montantDu.toFixed(3)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      const table = '<table><thead><tr>' +
+        '<th>الرمز</th><th>النسبة(%)</th><th>جملة الاحتياطي الاجتماعي</th><th>المبلغ</th>' +
+        '</tr></thead><tbody>' +
+        '<tr><td>138</td><td>9.68</td><td>' + totalSalaires.toFixed(3) + '</td><td>' + total138.toFixed(3) + '</td></tr>' +
+        '<tr><td>198</td><td>' + rate198 + '</td><td>' + (total198 > 0 ? totalSalaires.toFixed(3) : '0.000') + '</td><td>' + total198.toFixed(3) + '</td></tr>' +
+        '</tbody></table>';
 
-        <table class="summary">
-          <tr>
-            <td><strong>جملة الأجور</strong></td>
-            <td>${this.getTotalSalaires().toFixed(3)}</td>
-          </tr>
-          <tr>
-            <td><strong>النظام الأساسي (المشغل) %17.07</strong></td>
-            <td>${this.cotisations.filter(c => c.code === '137').reduce((s, c) => s + c.montantDu, 0).toFixed(3)}</td>
-          </tr>
-          <tr>
-            <td><strong>النظام الأساسي (العون) %9.68</strong></td>
-            <td>${this.cotisations.filter(c => c.code === '138').reduce((s, c) => s + c.montantDu, 0).toFixed(3)}</td>
-          </tr>
-          <tr>
-            <td><strong>مساهمات النظام التكميلي للجرايات</strong></td>
-            <td>${this.cotisations.filter(c => c.code === '197' || c.code === '198').reduce((s, c) => s + c.montantDu, 0).toFixed(3)}</td>
-          </tr>
-          <tr>
-            <td><strong>المجموع</strong></td>
-            <td><strong>${this.totalAmount.toFixed(3)}</strong></td>
-          </tr>
-        </table>
+      const summary = '<table class="summary"><tr><td><strong>المجموع</strong></td><td><strong>' + assureTotal.toFixed(3) + '</strong></td></tr></table>';
 
-        <div class="footer">
-          <p>تاريخ الطباعة: ${today}</p>
-        </div>
-      </body>
-      </html>
-    `);
+      return '<div class="page">' + pageHeader + bodyText +
+        '<div class="amount-text">حدد بـ ' + totalWords + '</div>' +
+        table + summary +
+        '<div class="footer"><p>تاريخ الطباعة: ' + today + '</p></div></div>';
+    };
+
+    // --- Page Employeur: per-agent rows (137 + 197) ---
+    const buildEmployerPage = (): string => {
+      if (employerCots.length === 0) return '';
+      const totalWords = this.convertToArabicWords(employerTotal);
+
+      let rows = '';
+      for (const c of employerCots) {
+        rows += '<tr><td>' + c.nomAgent + '</td><td>' + c.code + '</td><td>' + c.numInscription + '</td><td>' + c.montantDu.toFixed(3) + '</td></tr>';
+      }
+
+      const table = '<table><thead><tr>' +
+        '<th>اسم ولقب العون المعني</th><th>الرمز</th><th>رقم المضمون الاجتماعي</th><th>مبلغ الأجور</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+
+      const summary = '<table class="summary">' +
+        '<tr><td><strong>جملة الأجور</strong></td><td>' + totalSalaires.toFixed(3) + '</td></tr>' +
+        '<tr><td><strong>مساهمات النظام القانوني المعنى (137) %17.07</strong></td><td>' + total137.toFixed(3) + '</td></tr>' +
+        '<tr><td><strong>مساهمات النظام التكميلي للجرايات (197)</strong></td><td>' + total197.toFixed(3) + '</td></tr>' +
+        '<tr><td><strong>المجموع</strong></td><td><strong>' + employerTotal.toFixed(3) + '</strong></td></tr>' +
+        '</table>';
+
+      return '<div class="page">' + pageHeader + bodyText +
+        '<div class="amount-text">حدد بـ ' + totalWords + '</div>' +
+        table + summary +
+        '<div class="footer"><p>تاريخ الطباعة: ' + today + '</p></div></div>';
+    };
+
+    printWindow.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>إعلام لدفع المساهمات</title><style>' + styles + '</style></head><body>' +
+      buildAssurePage() + buildEmployerPage() +
+      '</body></html>');
     printWindow.document.close();
     printWindow.print();
   }

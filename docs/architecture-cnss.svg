@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="Arial, sans-serif">
+  <defs>
+    <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e11d48"/>
+      <stop offset="100%" style="stop-color:#be123c"/>
+    </linearGradient>
+    <linearGradient id="grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#334155"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#grad-dark)" rx="12"/>
+  
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="white" font-size="18" font-weight="bold">Architecture Microservices CNSS</text>
+  
+  <!-- Layer Labels -->
+  <rect x="10" y="55" width="120" height="24" rx="12" fill="rgba(255,255,255,0.1)"/>
+  <text x="70" y="72" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">FRONTEND</text>
+  
+  <!-- Frontend Layer -->
+  <rect x="220" y="55" width="160" height="50" rx="8" fill="url(#grad-blue)"/>
+  <text x="300" y="78" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Frontend Coopération</text>
+  <text x="300" y="95" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Angular 17 · :4200</text>
+  
+  <rect x="420" y="55" width="160" height="50" rx="8" fill="url(#grad-blue)"/>
+  <text x="500" y="78" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Frontend Disponibilité</text>
+  <text x="500" y="95" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Angular 17 · :4300</text>
+  
+  <!-- Arrow 1 -->
+  <path d="M400 110 L400 125" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#arrow)"/>
+  <polygon points="400,130 395,120 405,120" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- Gateway Label -->
+  <rect x="10" y="140" width="120" height="24" rx="12" fill="rgba(255,255,255,0.1)"/>
+  <text x="70" y="157" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">GATEWAY</text>
+  
+  <!-- Gateway Layer -->
+  <rect x="150" y="140" width="140" height="50" rx="8" fill="url(#grad-purple)"/>
+  <text x="220" y="163" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NGINX Ingress</text>
+  <text x="220" y="180" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Load Balancer + SSL</text>
+  
+  <rect x="330" y="140" width="140" height="50" rx="8" fill="url(#grad-purple)"/>
+  <text x="400" y="163" text-anchor="middle" fill="white" font-size="11" font-weight="bold">API Gateway</text>
+  <text x="400" y="180" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Spring Cloud · :8080</text>
+  
+  <rect x="510" y="140" width="140" height="50" rx="8" fill="url(#grad-purple)"/>
+  <text x="580" y="163" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Eureka Server</text>
+  <text x="580" y="180" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Discovery · :8761</text>
+  
+  <!-- Arrow 2 -->
+  <polygon points="400,215 395,205 405,205" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- Services Label -->
+  <rect x="10" y="225" width="120" height="24" rx="12" fill="rgba(255,255,255,0.1)"/>
+  <text x="70" y="242" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">MICROSERVICES</text>
+  
+  <!-- Microservices Row 1 -->
+  <rect x="150" y="225" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="207" y="245" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Auth</text>
+  <text x="207" y="260" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8089</text>
+  
+  <rect x="275" y="225" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="332" y="245" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Employer</text>
+  <text x="332" y="260" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8081</text>
+  
+  <rect x="400" y="225" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="457" y="245" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Salary</text>
+  <text x="457" y="260" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8082</text>
+  
+  <rect x="525" y="225" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="582" y="245" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Regime</text>
+  <text x="582" y="260" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8083</text>
+  
+  <rect x="650" y="225" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="707" y="245" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Affiliation</text>
+  <text x="707" y="260" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8084</text>
+  
+  <!-- Microservices Row 2 -->
+  <rect x="150" y="280" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="207" y="300" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Debit</text>
+  <text x="207" y="315" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8085</text>
+  
+  <rect x="275" y="280" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="332" y="300" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Payment</text>
+  <text x="332" y="315" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8086</text>
+  
+  <rect x="400" y="280" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="457" y="300" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Notification</text>
+  <text x="457" y="315" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8087</text>
+  
+  <rect x="525" y="280" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="582" y="300" text-anchor="middle" fill="white" font-size="10" font-weight="bold">File</text>
+  <text x="582" y="315" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8088</text>
+  
+  <rect x="650" y="280" width="115" height="45" rx="6" fill="url(#grad-green)"/>
+  <text x="707" y="300" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Disponibilité</text>
+  <text x="707" y="315" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:8091</text>
+  
+  <!-- Arrow 3 -->
+  <polygon points="400,345 395,335 405,335" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- AI Service Label -->
+  <rect x="10" y="355" width="120" height="24" rx="12" fill="rgba(255,255,255,0.1)"/>
+  <text x="70" y="372" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">SERVICE IA</text>
+  
+  <!-- AI Service -->
+  <rect x="250" y="355" width="300" height="50" rx="8" fill="url(#grad-red)"/>
+  <text x="400" y="378" text-anchor="middle" fill="white" font-size="12" font-weight="bold">AI Extraction Service</text>
+  <text x="400" y="395" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10">Python FastAPI + Tesseract OCR · :8090</text>
+  
+  <!-- Arrow 4 -->
+  <polygon points="400,425 395,415 405,415" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- Infrastructure Label -->
+  <rect x="10" y="440" width="120" height="24" rx="12" fill="rgba(255,255,255,0.1)"/>
+  <text x="70" y="457" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">INFRASTRUCTURE</text>
+  
+  <!-- Infrastructure -->
+  <rect x="150" y="440" width="140" height="50" rx="8" fill="url(#grad-orange)"/>
+  <text x="220" y="463" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Oracle DB</text>
+  <text x="220" y="480" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:1521</text>
+  
+  <rect x="310" y="440" width="140" height="50" rx="8" fill="url(#grad-orange)"/>
+  <text x="380" y="463" text-anchor="middle" fill="white" font-size="11" font-weight="bold">RabbitMQ</text>
+  <text x="380" y="480" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:5672</text>
+  
+  <rect x="470" y="440" width="140" height="50" rx="8" fill="url(#grad-orange)"/>
+  <text x="540" y="463" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Redis</text>
+  <text x="540" y="480" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">:6379</text>
+  
+  <rect x="630" y="440" width="140" height="50" rx="8" fill="url(#grad-orange)"/>
+  <text x="700" y="463" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Volumes</text>
+  <text x="700" y="480" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">/data/cnss/*</text>
+  
+  <!-- Legend -->
+  <rect x="150" y="520" width="500" height="60" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="400" y="540" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10">LÉGENDE</text>
+  
+  <rect x="180" y="550" width="40" height="16" rx="4" fill="url(#grad-blue)"/>
+  <text x="230" y="562" fill="rgba(255,255,255,0.8)" font-size="9">Frontend</text>
+  
+  <rect x="290" y="550" width="40" height="16" rx="4" fill="url(#grad-purple)"/>
+  <text x="340" y="562" fill="rgba(255,255,255,0.8)" font-size="9">Gateway</text>
+  
+  <rect x="400" y="550" width="40" height="16" rx="4" fill="url(#grad-green)"/>
+  <text x="450" y="562" fill="rgba(255,255,255,0.8)" font-size="9">Services</text>
+  
+  <rect x="510" y="550" width="40" height="16" rx="4" fill="url(#grad-orange)"/>
+  <text x="560" y="562" fill="rgba(255,255,255,0.8)" font-size="9">Infra</text>
+</svg>

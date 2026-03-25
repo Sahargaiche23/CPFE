@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide DevOps - Mise en Production CNSS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --primary: #e11d48;
+            --primary-dark: #be123c;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: white;
+            font-size: 11pt;
+        }
+        
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 28pt;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 14pt;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        .header .meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 10pt;
+            color: var(--gray);
+        }
+        
+        .header .meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Sections */
+        h2 {
+            font-size: 18pt;
+            color: var(--primary);
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            font-size: 14pt;
+            color: var(--dark);
+            margin: 25px 0 15px;
+            page-break-after: avoid;
+        }
+        
+        h4 {
+            font-size: 12pt;
+            color: var(--gray);
+            margin: 20px 0 10px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9pt;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        tbody tr:hover {
+            background: #fef2f2;
+        }
+        
+        /* Architecture Diagrams */
+        .architecture {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            page-break-inside: avoid;
+        }
+        
+        .architecture-title {
+            color: white;
+            font-size: 14pt;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .arch-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .arch-box {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 15px 20px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .arch-box.frontend {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+        }
+        
+        .arch-box.gateway {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            border: none;
+        }
+        
+        .arch-box.service {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+        }
+        
+        .arch-box.infra {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: none;
+        }
+        
+        .arch-box.ai {
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            border: none;
+        }
+        
+        .arch-box .name {
+            color: white;
+            font-weight: 600;
+            font-size: 10pt;
+            margin-bottom: 5px;
+        }
+        
+        .arch-box .port {
+            color: rgba(255,255,255,0.7);
+            font-size: 9pt;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .arch-arrow {
+            color: rgba(255,255,255,0.5);
+            font-size: 20pt;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .arch-label {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 9pt;
+            text-align: center;
+            margin: 15px auto;
+            width: fit-content;
+        }
+        
+        /* Pipeline Diagram */
+        .pipeline {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .pipeline-title {
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .pipeline-step {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 12px 18px;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .pipeline-step .step-num {
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10pt;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .pipeline-step .step-name {
+            font-weight: 600;
+            font-size: 9pt;
+            color: var(--dark);
+        }
+        
+        .pipeline-arrow {
+            color: var(--primary);
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        
+        /* Code blocks */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9pt;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9pt;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        /* Info boxes */
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--secondary);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid var(--success);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        
+        /* TOC */
+        .toc {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin: 30px 0;
+        }
+        
+        .toc-title {
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            columns: 2;
+            column-gap: 30px;
+        }
+        
+        .toc-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .toc-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+        
+        .toc-list a {
+            color: var(--dark);
+            text-decoration: none;
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 8pt;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-primary { background: var(--primary); color: white; }
+        .badge-success { background: var(--success); color: white; }
+        .badge-warning { background: var(--warning); color: white; }
+        .badge-info { background: var(--secondary); color: white; }
+        
+        /* Page breaks */
+        .page-break {
+            page-break-before: always;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: var(--gray);
+            font-size: 9pt;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                font-size: 10pt;
+            }
+            .container {
+                padding: 15mm;
+            }
+            .architecture, .pipeline {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Guide DevOps</h1>
+            <div class="subtitle">Mise en Production — Architecture Microservices</div>
+            <div class="meta">
+                <span><strong>Application:</strong> CNSS Coopération & Disponibilité</span>
+                <span><strong>Version:</strong> 1.0</span>
+                <span><strong>Date:</strong> Mars 2026</span>
+            </div>
+        </div>
+
+        <!-- TOC -->
+        <div class="toc">
+            <div class="toc-title">📋 Table des matières</div>
+            <ul class="toc-list">
+                <li><a href="#arch">1. Architecture de l'application</a></li>
+                <li><a href="#services">2. Liste des microservices</a></li>
+                <li><a href="#cicd">3. Outils CI/CD</a></li>
+                <li><a href="#github">4. GitHub Actions Pipeline</a></li>
+                <li><a href="#k8s">5. Orchestration Kubernetes</a></li>
+                <li><a href="#monitoring">6. Monitoring & Logging</a></li>
+                <li><a href="#security">7. Sécurité</a></li>
+                <li><a href="#cloud">8. Solutions Cloud</a></li>
+                <li><a href="#summary">9. Résumé des outils</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Architecture -->
+        <h2 id="arch">1. Architecture de l'application CNSS</h2>
+        
+        <div class="architecture">
+            <div class="architecture-title">🏗️ Infrastructure Microservices CNSS</div>
+            
+            <div class="arch-label">COUCHE FRONTEND</div>
+            <div class="arch-row">
+                <div class="arch-box frontend">
+                    <div class="name">Frontend Coopération</div>
+                    <div class="port">Angular 17 · :4200</div>
+                </div>
+                <div class="arch-box frontend">
+                    <div class="name">Frontend Disponibilité</div>
+                    <div class="port">Angular 17 · :4300</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">COUCHE GATEWAY</div>
+            <div class="arch-row">
+                <div class="arch-box gateway">
+                    <div class="name">NGINX Ingress</div>
+                    <div class="port">Load Balancer + SSL</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">API Gateway</div>
+                    <div class="port">Spring Cloud · :8080</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">Eureka Server</div>
+                    <div class="port">Discovery · :8761</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">COUCHE MICROSERVICES</div>
+            <div class="arch-row">
+                <div class="arch-box service">
+                    <div class="name">Auth</div>
+                    <div class="port">:8089</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Employer</div>
+                    <div class="port">:8081</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Salary</div>
+                    <div class="port">:8082</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Regime</div>
+                    <div class="port">:8083</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Affiliation</div>
+                    <div class="port">:8084</div>
+                </div>
+            </div>
+            <div class="arch-row">
+                <div class="arch-box service">
+                    <div class="name">Debit</div>
+                    <div class="port">:8085</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Payment</div>
+                    <div class="port">:8086</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Notification</div>
+                    <div class="port">:8087</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">File</div>
+                    <div class="port">:8088</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Disponibilité</div>
+                    <div class="port">:8091</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">SERVICE IA</div>
+            <div class="arch-row">
+                <div class="arch-box ai">
+                    <div class="name">AI Extraction Service</div>
+                    <div class="port">Python FastAPI + Tesseract OCR · :8090</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">COUCHE INFRASTRUCTURE</div>
+            <div class="arch-row">
+                <div class="arch-box infra">
+                    <div class="name">Oracle DB</div>
+                    <div class="port">:1521</div>
+                </div>
+                <div class="arch-box infra">
+                    <div class="name">RabbitMQ</div>
+                    <div class="port">:5672</div>
+                </div>
+                <div class="arch-box infra">
+                    <div class="name">Redis</div>
+                    <div class="port">:6379</div>
+                </div>
+                <div class="arch-box infra">
+                    <div class="name">Volumes</div>
+                    <div class="port">/data/cnss/*</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Services List -->
+        <h2 id="services">2. Liste des Microservices</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Service</th>
+                    <th>Technologie</th>
+                    <th>Port</th>
+                    <th>Image Docker</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>eureka-server</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8761</code></td>
+                    <td><code>ghcr.io/cnss/eureka:latest</code></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>gateway-service</strong></td>
+                    <td>Spring Cloud Gateway</td>
+                    <td><code>8080</code></td>
+                    <td><code>ghcr.io/cnss/gateway:latest</code></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>auth-service</strong></td>
+                    <td>Spring Boot + JWT</td>
+                    <td><code>8089</code></td>
+                    <td><code>ghcr.io/cnss/auth:latest</code></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>employer-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8081</code></td>
+                    <td><code>ghcr.io/cnss/employer:latest</code></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>salary-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8082</code></td>
+                    <td><code>ghcr.io/cnss/salary:latest</code></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>regime-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8083</code></td>
+                    <td><code>ghcr.io/cnss/regime:latest</code></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>affiliation-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8084</code></td>
+                    <td><code>ghcr.io/cnss/affiliation:latest</code></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><strong>debit-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8085</code></td>
+                    <td><code>ghcr.io/cnss/debit:latest</code></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><strong>payment-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8086</code></td>
+                    <td><code>ghcr.io/cnss/payment:latest</code></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><strong>notification-service</strong></td>
+                    <td>Spring Boot + Mail</td>
+                    <td><code>8087</code></td>
+                    <td><code>ghcr.io/cnss/notification:latest</code></td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td><strong>file-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8088</code></td>
+                    <td><code>ghcr.io/cnss/file:latest</code></td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td><strong>disponibilite-service</strong></td>
+                    <td>Spring Boot</td>
+                    <td><code>8091</code></td>
+                    <td><code>ghcr.io/cnss/disponibilite:latest</code></td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td><strong>ai-extraction-service</strong></td>
+                    <td>Python FastAPI + OCR</td>
+                    <td><code>8090</code></td>
+                    <td><code>ghcr.io/cnss/ai-extraction:latest</code></td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td><strong>frontend-cooperation</strong></td>
+                    <td>Angular 17 (NGINX)</td>
+                    <td><code>80</code></td>
+                    <td><code>ghcr.io/cnss/frontend-coop:latest</code></td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td><strong>frontend-disponibilite</strong></td>
+                    <td>Angular 17 (NGINX)</td>
+                    <td><code>80</code></td>
+                    <td><code>ghcr.io/cnss/frontend-dispo:latest</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 3: CI/CD Tools -->
+        <div class="page-break"></div>
+        <h2 id="cicd">3. Outils d'Intégration Continue (CI/CD)</h2>
+        
+        <h3>3.1 Comparatif des outils</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Outil</th>
+                    <th>Points forts</th>
+                    <th>Points faibles</th>
+                    <th>Idéal pour</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>GitHub Actions</strong> <span class="badge badge-primary">Recommandé</span></td>
+                    <td>Intégré à GitHub, YAML simple, marketplace riche, runners gratuits</td>
+                    <td>Minutes limitées (plan gratuit)</td>
+                    <td>Projets GitHub, équipes modernes</td>
+                </tr>
+                <tr>
+                    <td><strong>Jenkins</strong></td>
+                    <td>Très extensible, plugins nombreux, gratuit</td>
+                    <td>Configuration complexe, UI vieillissante</td>
+                    <td>Entreprises avec besoins spécifiques</td>
+                </tr>
+                <tr>
+                    <td><strong>Azure DevOps</strong></td>
+                    <td>Intégration Azure/MS parfaite</td>
+                    <td>Vendor lock-in</td>
+                    <td>Environnements Microsoft</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>3.2 Pourquoi GitHub Actions ?</h3>
+        <ul>
+            <li><strong>Intégré à GitHub</strong> — pas de serveur séparé à gérer</li>
+            <li><strong>YAML simple</strong> — fichiers <code>.github/workflows/*.yml</code></li>
+            <li><strong>Marketplace riche</strong> — actions prêtes à l'emploi</li>
+            <li><strong>Runners gratuits</strong> — 2000 minutes/mois (plan gratuit)</li>
+            <li><strong>Self-hosted runners</strong> — possibilité d'utiliser ses propres serveurs</li>
+        </ul>
+
+        <!-- Section 4: GitHub Actions Pipeline -->
+        <h2 id="github">4. Pipeline GitHub Actions</h2>
+        
+        <div class="pipeline">
+            <div class="pipeline-title">🔄 Flux CI/CD GitHub Actions</div>
+            <div class="pipeline-flow">
+                <div class="pipeline-step">
+                    <div class="step-num">1</div>
+                    <div class="step-name">Git Push</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">2</div>
+                    <div class="step-name">Build & Test</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">3</div>
+                    <div class="step-name">SonarQube</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">4</div>
+                    <div class="step-name">Docker Build</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">5</div>
+                    <div class="step-name">Push ghcr.io</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">6</div>
+                    <div class="step-name">Deploy K8s</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>4.1 Secrets GitHub à configurer</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Secret</th>
+                    <th>Description</th>
+                    <th>Exemple</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>SONAR_TOKEN</code></td>
+                    <td>Token d'authentification SonarQube</td>
+                    <td><code>sqp_xxxxx</code></td>
+                </tr>
+                <tr>
+                    <td><code>SONAR_HOST_URL</code></td>
+                    <td>URL du serveur SonarQube</td>
+                    <td><code>https://sonar.cnss.tn</code></td>
+                </tr>
+                <tr>
+                    <td><code>KUBECONFIG_STAGING</code></td>
+                    <td>Kubeconfig encodé base64 (staging)</td>
+                    <td><code>base64 ~/.kube/config</code></td>
+                </tr>
+                <tr>
+                    <td><code>KUBECONFIG_PROD</code></td>
+                    <td>Kubeconfig encodé base64 (production)</td>
+                    <td><code>base64 ~/.kube/config</code></td>
+                </tr>
+                <tr>
+                    <td><code>SLACK_WEBHOOK_URL</code></td>
+                    <td>Webhook Slack pour notifications</td>
+                    <td><code>https://hooks.slack.com/...</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 5: Kubernetes -->
+        <div class="page-break"></div>
+        <h2 id="k8s">5. Orchestration Kubernetes</h2>
+        
+        <h3>5.1 Comparatif des solutions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Solution</th>
+                    <th>Avantages</th>
+                    <th>Inconvénients</th>
+                    <th>Coût</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Kubernetes (k3s)</strong> <span class="badge badge-primary">Recommandé</span></td>
+                    <td>Léger, rapide à installer, prod-ready</td>
+                    <td>Moins de features que K8s complet</td>
+                    <td>Gratuit</td>
+                </tr>
+                <tr>
+                    <td><strong>Docker Swarm</strong></td>
+                    <td>Simple, intégré à Docker</td>
+                    <td>Moins de fonctionnalités</td>
+                    <td>Gratuit</td>
+                </tr>
+                <tr>
+                    <td><strong>Portainer</strong></td>
+                    <td>UI intuitive, gère Docker/K8s</td>
+                    <td>Limité pour gros clusters</td>
+                    <td>Freemium</td>
+                </tr>
+                <tr>
+                    <td><strong>OpenShift</strong></td>
+                    <td>K8s + sécurité + CI/CD intégrés</td>
+                    <td>Coûteux, lourd</td>
+                    <td>Licence Red Hat</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>5.2 Architecture Kubernetes CNSS</h3>
+        <div class="architecture">
+            <div class="architecture-title">☸️ Cluster Kubernetes</div>
+            
+            <div class="arch-label">CONTROL PLANE</div>
+            <div class="arch-row">
+                <div class="arch-box gateway">
+                    <div class="name">kube-apiserver</div>
+                    <div class="port">API Server</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">etcd</div>
+                    <div class="port">Key-Value Store</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">scheduler</div>
+                    <div class="port">Pod Scheduling</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">controller</div>
+                    <div class="port">Controller Manager</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">WORKER NODES</div>
+            <div class="arch-row">
+                <div class="arch-box service">
+                    <div class="name">Node #1</div>
+                    <div class="port">eureka, auth, salary, file, ai</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Node #2</div>
+                    <div class="port">gateway, employer, payment, dispo</div>
+                </div>
+                <div class="arch-box service">
+                    <div class="name">Node #3</div>
+                    <div class="port">frontends, notification, debit</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">▼</div>
+            
+            <div class="arch-label">NAMESPACES</div>
+            <div class="arch-row">
+                <div class="arch-box frontend">
+                    <div class="name">cnss-prod</div>
+                    <div class="port">Production</div>
+                </div>
+                <div class="arch-box infra">
+                    <div class="name">cnss-staging</div>
+                    <div class="port">Staging / Test</div>
+                </div>
+                <div class="arch-box ai">
+                    <div class="name">monitoring</div>
+                    <div class="port">Prometheus / Grafana</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Monitoring -->
+        <h2 id="monitoring">6. Monitoring & Logging</h2>
+        
+        <div class="architecture">
+            <div class="architecture-title">📊 Stack de Monitoring</div>
+            
+            <div class="arch-label">MÉTRIQUES</div>
+            <div class="arch-row">
+                <div class="arch-box service">
+                    <div class="name">Prometheus</div>
+                    <div class="port">Scraping métriques</div>
+                </div>
+                <div class="arch-box infra">
+                    <div class="name">Alertmanager</div>
+                    <div class="port">Gestion alertes</div>
+                </div>
+                <div class="arch-box frontend">
+                    <div class="name">Grafana</div>
+                    <div class="port">Dashboards</div>
+                </div>
+            </div>
+            
+            <div class="arch-arrow">+</div>
+            
+            <div class="arch-label">LOGS</div>
+            <div class="arch-row">
+                <div class="arch-box ai">
+                    <div class="name">Promtail</div>
+                    <div class="port">Collecte logs</div>
+                </div>
+                <div class="arch-box gateway">
+                    <div class="name">Loki</div>
+                    <div class="port">Stockage logs</div>
+                </div>
+                <div class="arch-box frontend">
+                    <div class="name">Grafana</div>
+                    <div class="port">Visualisation</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>6.1 Installation via Helm</h3>
+        <pre>
+# Installer Prometheus + Grafana
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace
+
+# Installer Loki pour les logs
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install loki grafana/loki-stack --namespace monitoring</pre>
+
+        <!-- Section 7: Security -->
+        <div class="page-break"></div>
+        <h2 id="security">7. Sécurité en Production</h2>
+        
+        <h3>7.1 Checklist sécurité</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Élément</th>
+                    <th>Action</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Secrets</strong></td>
+                    <td>Utiliser Kubernetes Secrets ou HashiCorp Vault</td>
+                    <td><span class="badge badge-warning">Requis</span></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Images Docker</strong></td>
+                    <td>Scanner avec Trivy ou Snyk</td>
+                    <td><span class="badge badge-warning">Requis</span></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Registre Docker</strong></td>
+                    <td>Utiliser ghcr.io avec authentification</td>
+                    <td><span class="badge badge-success">OK</span></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>HTTPS/TLS</strong></td>
+                    <td>Certificats Let's Encrypt via cert-manager</td>
+                    <td><span class="badge badge-warning">Requis</span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>RBAC</strong></td>
+                    <td>Limiter les permissions par namespace</td>
+                    <td><span class="badge badge-warning">Requis</span></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Network Policies</strong></td>
+                    <td>Restreindre le trafic entre pods</td>
+                    <td><span class="badge badge-info">Recommandé</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 8: Cloud -->
+        <h2 id="cloud">8. Solutions Cloud</h2>
+        
+        <h3>8.1 Comparatif des options</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Solution</th>
+                    <th>Coût mensuel</th>
+                    <th>Complexité</th>
+                    <th>Idéal pour</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>On-Premise (k3s)</strong> <span class="badge badge-primary">Recommandé</span></td>
+                    <td>Coût serveurs uniquement</td>
+                    <td>Moyen</td>
+                    <td>Budget limité, contrôle total</td>
+                </tr>
+                <tr>
+                    <td><strong>AWS EKS</strong></td>
+                    <td>~150-500$/mois</td>
+                    <td>Faible</td>
+                    <td>Scalabilité, intégrations AWS</td>
+                </tr>
+                <tr>
+                    <td><strong>Azure AKS</strong></td>
+                    <td>~100-400$/mois</td>
+                    <td>Faible</td>
+                    <td>Environnement Microsoft</td>
+                </tr>
+                <tr>
+                    <td><strong>Google GKE</strong></td>
+                    <td>~100-400$/mois</td>
+                    <td>Faible</td>
+                    <td>Performance, ML/IA</td>
+                </tr>
+                <tr>
+                    <td><strong>OVHcloud Managed K8s</strong></td>
+                    <td>~80-300$/mois</td>
+                    <td>Faible</td>
+                    <td>Souveraineté données (EU)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info-box">
+            <strong>💡 Recommandation pour CNSS (Tunisie)</strong><br>
+            <strong>Option 1 :</strong> Infrastructure locale avec 3 serveurs (16 Go RAM, 4 vCPU) + k3s + Portainer<br>
+            <strong>Option 2 :</strong> Cloud hybride avec OVHcloud/Scaleway + Oracle DB on-premise + VPN
+        </div>
+
+        <!-- Section 9: Summary -->
+        <div class="page-break"></div>
+        <h2 id="summary">9. Résumé des outils recommandés</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th>Outil principal</th>
+                    <th>Alternative</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CI/CD</strong></td>
+                    <td><span class="badge badge-primary">GitHub Actions</span></td>
+                    <td>Jenkins</td>
+                </tr>
+                <tr>
+                    <td><strong>Qualité code</strong></td>
+                    <td><span class="badge badge-info">SonarQube</span></td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>Registre Docker</strong></td>
+                    <td><span class="badge badge-success">ghcr.io</span></td>
+                    <td>Docker Hub / Harbor</td>
+                </tr>
+                <tr>
+                    <td><strong>Orchestration</strong></td>
+                    <td><span class="badge badge-primary">Kubernetes (k3s)</span></td>
+                    <td>Docker Swarm</td>
+                </tr>
+                <tr>
+                    <td><strong>Gestion K8s</strong></td>
+                    <td><span class="badge badge-info">Portainer</span></td>
+                    <td>Rancher</td>
+                </tr>
+                <tr>
+                    <td><strong>Déploiement</strong></td>
+                    <td><span class="badge badge-success">Helm + ArgoCD</span></td>
+                    <td>kubectl apply</td>
+                </tr>
+                <tr>
+                    <td><strong>Monitoring</strong></td>
+                    <td><span class="badge badge-warning">Prometheus + Grafana</span></td>
+                    <td>Datadog (payant)</td>
+                </tr>
+                <tr>
+                    <td><strong>Logs</strong></td>
+                    <td><span class="badge badge-info">Loki + Grafana</span></td>
+                    <td>ELK Stack</td>
+                </tr>
+                <tr>
+                    <td><strong>Sécurité images</strong></td>
+                    <td><span class="badge badge-primary">Trivy</span></td>
+                    <td>Snyk</td>
+                </tr>
+                <tr>
+                    <td><strong>Certificats SSL</strong></td>
+                    <td><span class="badge badge-success">cert-manager + Let's Encrypt</span></td>
+                    <td>—</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="success-box">
+            <strong>✅ Stack recommandée pour CNSS</strong><br>
+            <code>GitHub Actions + k3s + Portainer + Helm + Prometheus/Grafana + Loki</code><br>
+            Cette stack est <strong>gratuite</strong>, <strong>robuste</strong>, et adaptée à une administration publique.
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Guide DevOps — Mise en Production CNSS</strong></p>
+            <p>Coopération Technique ATCT + Mise en Disponibilité Spéciale</p>
+            <p>Version 1.0 — Mars 2026</p>
+        </div>
+    </div>
+</body>
+</html>

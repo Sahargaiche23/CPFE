@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="Arial, sans-serif">
+  <defs>
+    <linearGradient id="k8s-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#326ce5"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="k8s-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="k8s-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="k8s-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <linearGradient id="k8s-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e11d48"/>
+      <stop offset="100%" style="stop-color:#be123c"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="#1e293b" rx="12"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Cluster Kubernetes CNSS</text>
+  
+  <!-- Control Plane Section -->
+  <rect x="20" y="50" width="760" height="90" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="400" y="70" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="11">CONTROL PLANE</text>
+  
+  <rect x="50" y="85" width="160" height="45" rx="6" fill="url(#k8s-blue)"/>
+  <text x="130" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold">kube-apiserver</text>
+  <text x="130" y="122" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">API Server</text>
+  
+  <rect x="230" y="85" width="160" height="45" rx="6" fill="url(#k8s-blue)"/>
+  <text x="310" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold">etcd</text>
+  <text x="310" y="122" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Key-Value Store</text>
+  
+  <rect x="410" y="85" width="160" height="45" rx="6" fill="url(#k8s-blue)"/>
+  <text x="490" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold">scheduler</text>
+  <text x="490" y="122" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Pod Scheduling</text>
+  
+  <rect x="590" y="85" width="160" height="45" rx="6" fill="url(#k8s-blue)"/>
+  <text x="670" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold">controller-manager</text>
+  <text x="670" y="122" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Controllers</text>
+  
+  <!-- Arrow -->
+  <polygon points="400,155 395,145 405,145" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- Worker Nodes Section -->
+  <rect x="20" y="165" width="760" height="120" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="400" y="185" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="11">WORKER NODES</text>
+  
+  <rect x="50" y="200" width="220" height="75" rx="6" fill="url(#k8s-green)"/>
+  <text x="160" y="222" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Node #1</text>
+  <text x="160" y="242" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">eureka · auth · salary</text>
+  <text x="160" y="258" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">file · ai-extraction</text>
+  
+  <rect x="290" y="200" width="220" height="75" rx="6" fill="url(#k8s-green)"/>
+  <text x="400" y="222" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Node #2</text>
+  <text x="400" y="242" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">gateway · employer · payment</text>
+  <text x="400" y="258" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">disponibilité · regime</text>
+  
+  <rect x="530" y="200" width="220" height="75" rx="6" fill="url(#k8s-green)"/>
+  <text x="640" y="222" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Node #3</text>
+  <text x="640" y="242" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">frontend-coop · frontend-dispo</text>
+  <text x="640" y="258" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">notification · debit · affiliation</text>
+  
+  <!-- Arrow -->
+  <polygon points="400,300 395,290 405,290" fill="rgba(255,255,255,0.5)"/>
+  
+  <!-- Namespaces Section -->
+  <rect x="20" y="310" width="760" height="75" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="400" y="330" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="11">NAMESPACES</text>
+  
+  <rect x="100" y="345" width="180" height="30" rx="6" fill="url(#k8s-purple)"/>
+  <text x="190" y="365" text-anchor="middle" fill="white" font-size="11" font-weight="bold">cnss-prod</text>
+  
+  <rect x="310" y="345" width="180" height="30" rx="6" fill="url(#k8s-orange)"/>
+  <text x="400" y="365" text-anchor="middle" fill="white" font-size="11" font-weight="bold">cnss-staging</text>
+  
+  <rect x="520" y="345" width="180" height="30" rx="6" fill="url(#k8s-red)"/>
+  <text x="610" y="365" text-anchor="middle" fill="white" font-size="11" font-weight="bold">monitoring</text>
+</svg>

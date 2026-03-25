@@ -1,0 +1,213 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============================================
+% PACKAGES
+% ============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french,english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+
+% ============================================
+% PAGE GEOMETRY
+% ============================================
+\geometry{
+    a4paper,
+    left=2cm,
+    right=2cm,
+    top=1.5cm,
+    bottom=1.5cm
+}
+
+% ============================================
+% COLORS
+% ============================================
+\definecolor{espritred}{HTML}{C41E3A}
+\definecolor{espritgray}{HTML}{808080}
+\definecolor{lightgray}{HTML}{D3D3D3}
+
+% ============================================
+% HYPERREF
+% ============================================
+\hypersetup{
+    colorlinks=false,
+    pdfauthor={Esprit},
+    pdftitle={Rapport de Stage PFE}
+}
+
+\pagestyle{empty}
+
+\begin{document}
+
+% ============================================
+% PAGE 1 : FORMULAIRE DE VALIDATION
+% ============================================
+\begin{center}
+    \includegraphics[width=4cm]{images/img-000.png}
+\end{center}
+
+\vspace{1cm}
+
+\noindent\textbf{Je valide le dépôt du rapport PFE relatif à l'étudiant nommé ci-dessous / I validate the submission of the student's report:}
+
+\vspace{0.8cm}
+
+\begin{itemize}
+    \item[\textbullet] \textbf{Nom \& Prénom / Name \& Surname :} \dotfill
+\end{itemize}
+
+\vspace{1.5cm}
+
+\begin{center}
+    \textbf{Encadrant Entreprise / Business site Supervisor}
+\end{center}
+
+\begin{itemize}
+    \item[\textbullet] \textbf{Nom \& Prénom / Name \& Surname :} \dotfill
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{center}
+    \textbf{Cachet \& Signature / Stamp \& Signature}
+\end{center}
+
+\vspace{2cm}
+
+\begin{center}
+    \textbf{Encadrant Académique / Academic Supervisor}
+\end{center}
+
+\begin{itemize}
+    \item[\textbullet] \textbf{Nom \& Prénom / Name \& Surname :} \dotfill
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{center}
+    \textbf{Signature / Signature}
+\end{center}
+
+\vspace{3cm}
+
+\noindent\textit{Ce formulaire doit être rempli, signé et scanné / This form must be completed, signed and scanned.}
+
+\vspace{0.5cm}
+
+\noindent\textit{Ce formulaire doit être introduit après la page de garde / This form must be inserted after the cover page.}
+
+\newpage
+
+% ============================================
+% PAGE 2 : PAGE DE GARDE PRINCIPALE
+% ============================================
+\begin{tikzpicture}[remember picture, overlay]
+    % Triangles gris (côté gauche)
+    \fill[gray!50] (current page.north west) -- ++(0,-5) -- ++(4,0) -- cycle;
+    \fill[gray!35] (current page.north west) ++ (0,-3) -- ++(0,-6) -- ++(5,0) -- cycle;
+    \fill[gray!45] (current page.north west) ++ (0,-7) -- ++(0,-4) -- ++(3,0) -- cycle;
+    \fill[gray!30] (current page.north west) ++ (0,-10) -- ++(0,-7) -- ++(6,0) -- cycle;
+    \fill[gray!40] (current page.north west) ++ (0,-15) -- ++(0,-5) -- ++(4,0) -- cycle;
+    \fill[gray!25] (current page.north west) ++ (0,-18) -- ++(0,-6) -- ++(5,0) -- cycle;
+    \fill[gray!35] (current page.north west) ++ (0,-22) -- ++(0,-4) -- ++(3.5,0) -- cycle;
+    
+    % Triangles rouges/orange
+    \fill[espritred!90] (current page.north west) ++ (2.5,-2) -- ++(0,-3.5) -- ++(2.5,0) -- cycle;
+    \fill[espritred!70] (current page.north west) ++ (1,-6) -- ++(0,-3) -- ++(2.5,0) -- cycle;
+    \fill[espritred!80] (current page.north west) ++ (3,-9) -- ++(0,-4) -- ++(3,0) -- cycle;
+    \fill[espritred!60] (current page.north west) ++ (0.5,-12) -- ++(0,-2.5) -- ++(2,0) -- cycle;
+    \fill[espritred!75] (current page.north west) ++ (2,-14) -- ++(0,-3.5) -- ++(2.5,0) -- cycle;
+    \fill[espritred!85] (current page.north west) ++ (1.5,-17) -- ++(0,-3) -- ++(2,0) -- cycle;
+    \fill[espritred!65] (current page.north west) ++ (3.5,-20) -- ++(0,-2.5) -- ++(2,0) -- cycle;
+    
+    % Petits triangles décoratifs
+    \fill[gray!55] (current page.north west) ++ (4.5,-4) -- ++(0,-2) -- ++(1.5,0) -- cycle;
+    \fill[espritred!50] (current page.north west) ++ (4,-11) -- ++(0,-1.5) -- ++(1.2,0) -- cycle;
+    \fill[gray!40] (current page.north west) ++ (2,-21) -- ++(0,-2) -- ++(1.5,0) -- cycle;
+\end{tikzpicture}
+
+\begin{center}
+    % Logo ESPRIT
+    \includegraphics[width=5cm]{images/img-000.png}
+    
+    \vspace{1cm}
+    
+    {\Large\bfseries\textcolor{espritred}{2025 - 2026}}
+    
+    \vspace{0.5cm}
+    
+    {\large PROJET DE FIN D'ÉTUDES}
+    
+    \vspace{1cm}
+    
+    % Cadre rouge pour le diplôme
+    \begin{tikzpicture}
+        \node[draw=espritred, line width=2pt, inner sep=12pt, text width=12cm, align=center] {
+            {\Large\bfseries DIPLÔME NATIONAL D'INGÉNIEUR}
+        };
+    \end{tikzpicture}
+    
+    \vspace{0.5cm}
+    
+    {\large SPÉCIALITÉ : \textbf{INFORMATIQUE}}
+    
+    \vspace{1.5cm}
+    
+    % Titre du projet
+    \begin{minipage}{0.85\textwidth}
+        \centering
+        {\LARGE\bfseries Système de Gestion de la\\[0.3cm]
+        Coopération Technique - CNSS \&\\[0.3cm]
+        Mise en Disponibilité}
+    \end{minipage}
+    
+    \vspace{2cm}
+    
+    % Informations
+    \begin{minipage}{0.8\textwidth}
+        \begin{flushleft}
+            {\large\textbf{Réalisé par:} Sahar Gaiche}
+            
+            \vspace{0.8cm}
+            
+            {\large\textbf{Encadré par:} Oussema Cherif}
+            
+            \vspace{0.8cm}
+            
+            {\large\textbf{Encadrant ESPRIT:} Hanene ENNINE}
+            
+            \vspace{0.8cm}
+            
+            {\large\textbf{Encadrant Entreprise:} \dotfill}
+        \end{flushleft}
+    \end{minipage}
+    
+    \vfill
+    
+    % Logos en bas
+    \begin{tabular}{ccccc}
+        \includegraphics[height=1.2cm]{images/img-004.png} &
+        \hspace{0.8cm} &
+        \includegraphics[height=1.2cm]{images/img-005.png} &
+        \hspace{0.8cm} &
+        % Ajouter d'autres logos si disponibles
+    \end{tabular}
+    
+\end{center}
+
+\newpage
+
+% ============================================
+% PAGE 3 : PAGE VIDE OU CONTENU ADDITIONNEL
+% ============================================
+% (Cette page peut être supprimée si non nécessaire)
+
+\end{document}

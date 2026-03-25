@@ -1,0 +1,514 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{colortbl}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{tikz}
+
+% Page geometry
+\geometry{margin=2cm}
+
+% Colors
+\definecolor{primary}{HTML}{E11D48}
+\definecolor{primarydark}{HTML}{BE123C}
+\definecolor{secondary}{HTML}{0EA5E9}
+\definecolor{success}{HTML}{10B981}
+\definecolor{warning}{HTML}{F59E0B}
+\definecolor{dark}{HTML}{1E293B}
+\definecolor{light}{HTML}{F8FAFC}
+\definecolor{gray}{HTML}{64748B}
+\definecolor{codebg}{HTML}{1E293B}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    urlcolor=secondary,
+    pdftitle={Guide DevOps - CNSS},
+    pdfauthor={CNSS}
+}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{gray}{\small Guide DevOps - CNSS}}
+\fancyhead[R]{\textcolor{gray}{\small Mars 2026}}
+\fancyfoot[C]{\textcolor{gray}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Section formatting
+\titleformat{\section}
+    {\Large\bfseries\color{primary}}
+    {\thesection.}{0.5em}{}[\color{primary}\titlerule]
+    
+\titleformat{\subsection}
+    {\large\bfseries\color{dark}}
+    {\thesubsection}{0.5em}{}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    commentstyle=\color{success},
+    keywordstyle=\color{secondary},
+    stringstyle=\color{warning},
+    frame=single,
+    rulecolor=\color{gray},
+    breaklines=true,
+    showstringspaces=false,
+    columns=flexible,
+    literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+}
+
+% Custom boxes
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{infobox}{
+    colback=secondary!10,
+    colframe=secondary,
+    leftrule=4pt,
+    rightrule=0pt,
+    toprule=0pt,
+    bottomrule=0pt,
+    arc=0pt,
+    breakable
+}
+
+\newtcolorbox{successbox}{
+    colback=success!10,
+    colframe=success,
+    leftrule=4pt,
+    rightrule=0pt,
+    toprule=0pt,
+    bottomrule=0pt,
+    arc=0pt,
+    breakable
+}
+
+\newtcolorbox{warningbox}{
+    colback=warning!10,
+    colframe=warning,
+    leftrule=4pt,
+    rightrule=0pt,
+    toprule=0pt,
+    bottomrule=0pt,
+    arc=0pt,
+    breakable
+}
+
+% Badge command
+\newcommand{\badge}[2]{%
+    \tikz[baseline=(char.base)]{
+        \node[fill=#1,text=white,rounded corners=3pt,inner sep=3pt,font=\tiny\bfseries] (char) {#2};
+    }%
+}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries\textcolor{primary}{Guide DevOps}\par}
+    \vspace{0.5cm}
+    {\LARGE Mise en Production\par}
+    \vspace{1cm}
+    {\Large\textcolor{gray}{Architecture Microservices CNSS}\par}
+    
+    \vspace{2cm}
+    
+    \begin{tikzpicture}
+        \draw[primary,line width=3pt] (0,0) -- (10,0);
+    \end{tikzpicture}
+    
+    \vspace{2cm}
+    
+    {\large
+    \begin{tabular}{rl}
+        \textbf{Application:} & Coopération Technique + Mise en Disponibilité \\[5pt]
+        \textbf{Stack:} & Spring Boot · Angular · Python · Docker · Kubernetes \\[5pt]
+        \textbf{Version:} & 1.0 \\[5pt]
+        \textbf{Date:} & Mars 2026 \\
+    \end{tabular}
+    }
+    
+    \vfill
+    
+    {\Large\bfseries CNSS - Caisse Nationale de Sécurité Sociale\par}
+    {\large Tunisie\par}
+    
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% ============================================
+\section{Architecture de l'application CNSS}
+% ============================================
+
+L'application CNSS est composée de 15 microservices interconnectés, répartis en plusieurs couches :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Frontend} : 2 applications Angular 17
+    \item \textbf{Gateway} : NGINX Ingress, API Gateway, Eureka Server
+    \item \textbf{Microservices} : 10 services Spring Boot
+    \item \textbf{Service IA} : Python FastAPI + Tesseract OCR
+    \item \textbf{Infrastructure} : Oracle DB, RabbitMQ, Redis
+\end{itemize}
+
+\subsection{Diagramme d'architecture}
+
+\begin{center}
+    \fbox{\includesvg[width=0.95\textwidth]{images/architecture-cnss.svg}}
+\end{center}
+
+\subsection{Liste des microservices}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{longtable}{|c|l|l|c|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} & \textcolor{white}{\textbf{Service}} & \textcolor{white}{\textbf{Technologie}} & \textcolor{white}{\textbf{Port}} & \textcolor{white}{\textbf{Image Docker}} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} & \textcolor{white}{\textbf{Service}} & \textcolor{white}{\textbf{Technologie}} & \textcolor{white}{\textbf{Port}} & \textcolor{white}{\textbf{Image Docker}} \\
+\hline
+\endhead
+1 & eureka-server & Spring Boot & 8761 & ghcr.io/cnss/eureka \\
+2 & gateway-service & Spring Cloud Gateway & 8080 & ghcr.io/cnss/gateway \\
+3 & auth-service & Spring Boot + JWT & 8089 & ghcr.io/cnss/auth \\
+4 & employer-service & Spring Boot & 8081 & ghcr.io/cnss/employer \\
+5 & salary-service & Spring Boot & 8082 & ghcr.io/cnss/salary \\
+6 & regime-service & Spring Boot & 8083 & ghcr.io/cnss/regime \\
+7 & affiliation-service & Spring Boot & 8084 & ghcr.io/cnss/affiliation \\
+8 & debit-service & Spring Boot & 8085 & ghcr.io/cnss/debit \\
+9 & payment-service & Spring Boot & 8086 & ghcr.io/cnss/payment \\
+10 & notification-service & Spring Boot + Mail & 8087 & ghcr.io/cnss/notification \\
+11 & file-service & Spring Boot & 8088 & ghcr.io/cnss/file \\
+12 & disponibilite-service & Spring Boot & 8091 & ghcr.io/cnss/disponibilite \\
+13 & ai-extraction-service & Python FastAPI & 8090 & ghcr.io/cnss/ai-extraction \\
+14 & frontend-cooperation & Angular 17 (NGINX) & 80 & ghcr.io/cnss/frontend-coop \\
+15 & frontend-disponibilite & Angular 17 (NGINX) & 80 & ghcr.io/cnss/frontend-dispo \\
+\hline
+\end{longtable}
+\end{center}
+
+\newpage
+
+% ============================================
+\section{Outils d'Intégration Continue (CI/CD)}
+% ============================================
+
+\subsection{Comparatif des outils}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|p{4cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Outil}} & \textcolor{white}{\textbf{Points forts}} & \textcolor{white}{\textbf{Points faibles}} & \textcolor{white}{\textbf{Idéal pour}} \\
+\hline
+\textbf{GitHub Actions} \badge{primary}{Recommandé} & Intégré à GitHub, YAML simple, marketplace riche & Minutes limitées (plan gratuit) & Projets GitHub \\
+\textbf{Jenkins} & Très extensible, plugins nombreux, gratuit & Configuration complexe, UI vieillissante & Entreprises \\
+\textbf{Azure DevOps} & Intégration Azure/MS parfaite & Vendor lock-in & Environnements MS \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Pourquoi GitHub Actions ?}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Intégré à GitHub} --- pas de serveur séparé à gérer
+    \item \textbf{YAML simple} --- fichiers \texttt{.github/workflows/*.yml}
+    \item \textbf{Marketplace riche} --- actions prêtes à l'emploi
+    \item \textbf{Runners gratuits} --- 2000 minutes/mois (plan gratuit)
+    \item \textbf{Self-hosted runners} --- possibilité d'utiliser ses propres serveurs
+\end{itemize}
+
+\newpage
+
+% ============================================
+\section{Pipeline GitHub Actions}
+% ============================================
+
+\subsection{Diagramme du pipeline}
+
+\begin{center}
+    \fbox{\includesvg[width=0.95\textwidth]{images/pipeline-cicd.svg}}
+\end{center}
+
+\subsection{Secrets GitHub à configurer}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|l|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Secret}} & \textcolor{white}{\textbf{Description}} & \textcolor{white}{\textbf{Exemple}} \\
+\hline
+\texttt{SONAR\_TOKEN} & Token SonarQube & \texttt{sqp\_xxxxx} \\
+\texttt{SONAR\_HOST\_URL} & URL serveur SonarQube & \texttt{https://sonar.cnss.tn} \\
+\texttt{KUBECONFIG\_STAGING} & Kubeconfig base64 (staging) & \texttt{base64 ~/.kube/config} \\
+\texttt{KUBECONFIG\_PROD} & Kubeconfig base64 (production) & \texttt{base64 ~/.kube/config} \\
+\texttt{SLACK\_WEBHOOK\_URL} & Webhook Slack & \texttt{https://hooks.slack.com/...} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Extrait du workflow}
+
+\begin{lstlisting}[language=bash,caption={.github/workflows/ci-cd.yml}]
+name: CNSS CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/cnss
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, employer-service, salary-service]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+      - run: ./gradlew clean build test
+\end{lstlisting}
+
+\newpage
+
+% ============================================
+\section{Orchestration Kubernetes}
+% ============================================
+
+\subsection{Comparatif des solutions}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|p{4cm}|p{3.5cm}|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Solution}} & \textcolor{white}{\textbf{Avantages}} & \textcolor{white}{\textbf{Inconvénients}} & \textcolor{white}{\textbf{Coût}} \\
+\hline
+\textbf{Kubernetes (k3s)} \badge{primary}{Recommandé} & Léger, rapide, prod-ready & Moins de features que K8s complet & Gratuit \\
+\textbf{Docker Swarm} & Simple, intégré à Docker & Moins de fonctionnalités & Gratuit \\
+\textbf{Portainer} & UI intuitive, gère Docker/K8s & Limité pour gros clusters & Freemium \\
+\textbf{OpenShift} & K8s + sécurité + CI/CD intégrés & Coûteux, lourd & Licence Red Hat \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Architecture du cluster}
+
+\begin{center}
+    \fbox{\includesvg[width=0.95\textwidth]{images/kubernetes-cluster.svg}}
+\end{center}
+
+\subsection{Installation k3s}
+
+\begin{lstlisting}[language=bash,caption={Installation k3s sur les nodes}]
+# Sur le master
+curl -sfL https://get.k3s.io | sh -
+
+# Recuperer le token
+cat /var/lib/rancher/k3s/server/node-token
+
+# Sur les workers
+curl -sfL https://get.k3s.io | K3S_URL=https://master:6443 \
+  K3S_TOKEN=<token> sh -
+\end{lstlisting}
+
+\newpage
+
+% ============================================
+\section{Monitoring et Logging}
+% ============================================
+
+\subsection{Stack de monitoring}
+
+\begin{center}
+    \fbox{\includesvg[width=0.95\textwidth]{images/monitoring-stack.svg}}
+\end{center}
+
+\subsection{Installation via Helm}
+
+\begin{lstlisting}[language=bash,caption={Installation Prometheus + Grafana + Loki}]
+# Ajouter les repos Helm
+helm repo add prometheus-community \
+  https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# Installer Prometheus + Grafana
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace
+
+# Installer Loki pour les logs
+helm install loki grafana/loki-stack --namespace monitoring
+\end{lstlisting}
+
+\subsection{Composants}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|l|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Composant}} & \textcolor{white}{\textbf{Fonction}} & \textcolor{white}{\textbf{Port}} \\
+\hline
+Prometheus & Collecte des métriques & 9090 \\
+Alertmanager & Gestion des alertes & 9093 \\
+Grafana & Dashboards & 3000 \\
+Promtail & Collecte des logs & - \\
+Loki & Stockage des logs & 3100 \\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ============================================
+\section{Sécurité en Production}
+% ============================================
+
+\subsection{Checklist sécurité}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|c|l|p{6cm}|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} & \textcolor{white}{\textbf{Élément}} & \textcolor{white}{\textbf{Action}} & \textcolor{white}{\textbf{Statut}} \\
+\hline
+1 & Secrets & Kubernetes Secrets ou HashiCorp Vault & \badge{warning}{Requis} \\
+2 & Images Docker & Scanner avec Trivy ou Snyk & \badge{warning}{Requis} \\
+3 & Registre Docker & ghcr.io avec authentification & \badge{success}{OK} \\
+4 & HTTPS/TLS & cert-manager + Let's Encrypt & \badge{warning}{Requis} \\
+5 & RBAC & Limiter permissions par namespace & \badge{warning}{Requis} \\
+6 & Network Policies & Restreindre trafic entre pods & \badge{secondary}{Recommandé} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Scanner les images avec Trivy}
+
+\begin{lstlisting}[language=bash,caption={Scan de sécurité des images Docker}]
+# Installer Trivy
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+# Scanner une image
+trivy image ghcr.io/cnss/auth-service:latest
+
+# Scanner avec seuil de severite
+trivy image --severity HIGH,CRITICAL ghcr.io/cnss/auth-service:latest
+\end{lstlisting}
+
+\newpage
+
+% ============================================
+\section{Solutions Cloud}
+% ============================================
+
+\subsection{Comparatif des options}
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|l|l|p{4cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Solution}} & \textcolor{white}{\textbf{Coût mensuel}} & \textcolor{white}{\textbf{Complexité}} & \textcolor{white}{\textbf{Idéal pour}} \\
+\hline
+\textbf{On-Premise (k3s)} \badge{primary}{Recommandé} & Coût serveurs & Moyen & Budget limité, contrôle total \\
+AWS EKS & ~150-500\$/mois & Faible & Scalabilité, intégrations AWS \\
+Azure AKS & ~100-400\$/mois & Faible & Environnement Microsoft \\
+Google GKE & ~100-400\$/mois & Faible & Performance, ML/IA \\
+OVHcloud Managed K8s & ~80-300\$/mois & Faible & Souveraineté données (EU) \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{infobox}
+\textbf{Recommandation pour CNSS (Tunisie)}
+
+\textbf{Option 1 :} Infrastructure locale avec 3 serveurs (16 Go RAM, 4 vCPU) + k3s + Portainer
+
+\textbf{Option 2 :} Cloud hybride avec OVHcloud/Scaleway + Oracle DB on-premise + VPN
+\end{infobox}
+
+\newpage
+
+% ============================================
+\section{Résumé des outils recommandés}
+% ============================================
+
+\begin{center}
+\rowcolors{2}{light}{white}
+\begin{tabular}{|l|l|l|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Catégorie}} & \textcolor{white}{\textbf{Outil principal}} & \textcolor{white}{\textbf{Alternative}} \\
+\hline
+CI/CD & \badge{primary}{GitHub Actions} & Jenkins \\
+Qualité code & \badge{secondary}{SonarQube} & --- \\
+Registre Docker & \badge{success}{ghcr.io} & Docker Hub / Harbor \\
+Orchestration & \badge{primary}{Kubernetes (k3s)} & Docker Swarm \\
+Gestion K8s & \badge{secondary}{Portainer} & Rancher \\
+Déploiement & \badge{success}{Helm + ArgoCD} & kubectl apply \\
+Monitoring & \badge{warning}{Prometheus + Grafana} & Datadog (payant) \\
+Logs & \badge{secondary}{Loki + Grafana} & ELK Stack \\
+Sécurité images & \badge{primary}{Trivy} & Snyk \\
+Certificats SSL & \badge{success}{cert-manager + Let's Encrypt} & --- \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{1cm}
+
+\begin{successbox}
+\textbf{Stack recommandée pour CNSS}
+
+\texttt{GitHub Actions + k3s + Portainer + Helm + Prometheus/Grafana + Loki}
+
+Cette stack est \textbf{gratuite}, \textbf{robuste}, et adaptée à une administration publique.
+\end{successbox}
+
+\vfill
+
+\begin{center}
+\textcolor{gray}{\rule{0.5\textwidth}{0.4pt}}
+
+\textbf{Guide DevOps --- Mise en Production CNSS}
+
+Coopération Technique ATCT + Mise en Disponibilité Spéciale
+
+Version 1.0 --- Mars 2026
+\end{center}
+
+\end{document}
