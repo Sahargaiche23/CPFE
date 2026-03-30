@@ -139,15 +139,41 @@ import { AgentService, AgentPublic } from '../../services/agent.service';
           </div>
 
           <!-- Stats -->
-          <div class="mt-6 grid grid-cols-2 gap-4 text-center">
+          <div class="mt-6 grid grid-cols-3 gap-4 text-center">
             <div class="bg-white p-4 rounded-lg border">
-              <p class="text-2xl font-bold text-rose-700">{{ generatedCount }}</p>
-              <p class="text-xs text-gray-500">المحدثة / Mises à jour</p>
+              <p class="text-2xl font-bold text-green-700">{{ generatedCount }}</p>
+              <p class="text-xs text-gray-500">تم التنزيل / Générées</p>
             </div>
             <div class="bg-white p-4 rounded-lg border">
-              <p class="text-2xl font-bold text-green-700">{{ totalFiles }}</p>
-              <p class="text-xs text-gray-500">ملفات من أصل / Fichiers sur</p>
+              <p class="text-2xl font-bold text-orange-600">{{ skippedAgents.length }}</p>
+              <p class="text-xs text-gray-500">تم التجاوز / Ignorées</p>
             </div>
+            <div class="bg-white p-4 rounded-lg border">
+              <p class="text-2xl font-bold text-rose-700">{{ totalFiles }}</p>
+              <p class="text-xs text-gray-500">إجمالي الأعوان / Total agents</p>
+            </div>
+          </div>
+
+          <!-- Skipped Agents -->
+          <div *ngIf="skippedAgents.length > 0" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div class="flex items-center gap-2 text-orange-700 mb-2">
+              <span class="material-icons text-sm">warning</span>
+              <strong>أعوان تم تجاوزهم ({{ skippedAgents.length }}):</strong>
+            </div>
+            <ul class="text-sm text-orange-600 space-y-1 mr-6">
+              <li *ngFor="let s of skippedAgents">• {{ s }}</li>
+            </ul>
+          </div>
+
+          <!-- Generation Errors -->
+          <div *ngIf="generationErrors.length > 0" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center gap-2 text-red-700 mb-2">
+              <span class="material-icons text-sm">error</span>
+              <strong>أخطاء ({{ generationErrors.length }}):</strong>
+            </div>
+            <ul class="text-sm text-red-600 space-y-1 mr-6">
+              <li *ngFor="let e of generationErrors">• {{ e }}</li>
+            </ul>
           </div>
 
           <!-- Print Button -->
@@ -233,6 +259,8 @@ export class CotisationGenerationComponent {
   generatedCount = 0;
   totalFiles = 0;
   generatedCotisations: Cotisation[] = [];
+  skippedAgents: string[] = [];
+  generationErrors: string[] = [];
   printData = { institutionName: '', numAffiliation: '', trimestre: '', annee: '' };
   today = new Date().toLocaleDateString('ar-TN');
   selectedAgent: AgentPublic | null = null;
@@ -276,6 +304,8 @@ export class CotisationGenerationComponent {
     this.result = '';
     this.error = '';
     this.generatedCotisations = [];
+    this.skippedAgents = [];
+    this.generationErrors = [];
 
     const modeMap: { [key: string]: 'TOUTES' | 'INSTITUTION' | 'AGENT' } = {
       'ALL': 'TOUTES',
@@ -324,31 +354,39 @@ export class CotisationGenerationComponent {
     this.cotisationService.generer(request).subscribe({
       next: (response) => {
         this.generatedCount = response.count || 0;
-        this.totalFiles = response.count || 0;
-        this.generatedCotisations = response.cotisations || [];
-        this.result = `تم تنزيل ${this.generatedCount} مساهمات بنجاح - ${response.message}`;
+        this.totalFiles = response.totalAgents || response.count || 0;
+        this.skippedAgents = response.skipped || [];
+        this.generationErrors = response.errors || [];
+        this.result = response.message || `تم تنزيل ${this.generatedCount} مساهمات بنجاح`;
         this.generating = false;
 
-        if (this.generatedCotisations.length > 0) {
-          // In AGENT mode, use selectedAgent's institution for print header
-          if (this.mode === 'AGENT' && this.selectedAgent?.institution) {
-            this.printData = {
-              institutionName: this.selectedAgent.institution.raisonSociale || '',
-              numAffiliation: this.selectedAgent.institution.numAffiliation || '',
-              trimestre: `T${this.trimestre}`,
-              annee: this.annee.toString()
-            };
-          } else {
-            // For other modes, use the first cotisation's institution
-            const first = this.generatedCotisations[0];
-            this.printData = {
-              institutionName: first.institution?.raisonSociale || '',
-              numAffiliation: first.institution?.numAffiliation || '',
-              trimestre: `T${this.trimestre}`,
-              annee: this.annee.toString()
-            };
+        // Load ALL cotisations for this period (including previously generated ones)
+        this.cotisationService.findAll(this.annee, this.trimestre).subscribe({
+          next: (allCotisations) => {
+            this.generatedCotisations = allCotisations;
+            if (this.generatedCotisations.length > 0) {
+              if (this.mode === 'AGENT' && this.selectedAgent?.institution) {
+                this.printData = {
+                  institutionName: this.selectedAgent.institution.raisonSociale || '',
+                  numAffiliation: this.selectedAgent.institution.numAffiliation || '',
+                  trimestre: `T${this.trimestre}`,
+                  annee: this.annee.toString()
+                };
+              } else {
+                this.printData = {
+                  institutionName: 'كافة المؤسسات',
+                  numAffiliation: '',
+                  trimestre: `T${this.trimestre}`,
+                  annee: this.annee.toString()
+                };
+              }
+            }
+          },
+          error: () => {
+            // Fallback: use only generated cotisations
+            this.generatedCotisations = response.cotisations || [];
           }
-        }
+        });
       },
       error: (err) => {
         this.error = err.error?.error || 'خطأ في التنزيل - Erreur de génération';

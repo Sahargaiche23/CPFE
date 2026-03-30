@@ -363,35 +363,35 @@ export class AvisAgentsComponent implements OnInit {
   }
 
   getTotal137(): number {
-    return this.cotisations.filter(c => c.code === '137').reduce((s, c) => s + c.montantDu, 0);
+    return this.cotisations.filter(c => String(c.code) === '137').reduce((s, c) => s + c.montantDu, 0);
   }
 
   getTotal138(): number {
-    return this.cotisations.filter(c => c.code === '138').reduce((s, c) => s + c.montantDu, 0);
+    return this.cotisations.filter(c => String(c.code) === '138').reduce((s, c) => s + c.montantDu, 0);
   }
 
   getTotal197(): number {
-    return this.cotisations.filter(c => c.code === '197').reduce((s, c) => s + c.montantDu, 0);
+    return this.cotisations.filter(c => String(c.code) === '197').reduce((s, c) => s + c.montantDu, 0);
   }
 
   getTotal198(): number {
-    return this.cotisations.filter(c => c.code === '198').reduce((s, c) => s + c.montantDu, 0);
+    return this.cotisations.filter(c => String(c.code) === '198').reduce((s, c) => s + c.montantDu, 0);
   }
 
   getTotalComplementary(): number {
-    return this.cotisations.filter(c => c.code === '197' || c.code === '198').reduce((s, c) => s + c.montantDu, 0);
+    return this.cotisations.filter(c => String(c.code) === '197' || String(c.code) === '198').reduce((s, c) => s + c.montantDu, 0);
   }
 
   getAssureCotisations(): CotisationRow[] {
-    return this.cotisations.filter(c => c.code === '138' || c.code === '198');
+    return this.cotisations.filter(c => String(c.code) === '138' || String(c.code) === '198');
   }
 
   getEmployerCotisations(): CotisationRow[] {
-    return this.cotisations.filter(c => c.code === '137' || c.code === '197');
+    return this.cotisations.filter(c => String(c.code) === '137' || String(c.code) === '197');
   }
 
   getCotisations137(): CotisationRow[] {
-    return this.cotisations.filter(c => c.code === '137');
+    return this.cotisations.filter(c => String(c.code) === '137');
   }
 
   getComplementaryRate198(): string {

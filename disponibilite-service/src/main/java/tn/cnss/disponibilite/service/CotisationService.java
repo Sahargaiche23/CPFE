@@ -12,7 +12,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -64,14 +66,15 @@ public class CotisationService {
      * Génère les cotisations trimestrielles selon le mode choisi.
      * Modes: TOUTES (toutes institutions), INSTITUTION (une institution), AGENT (un agent)
      */
-    public List<Cotisation> generer(CotisationGenerationRequest request) {
+    public Map<String, Object> generer(CotisationGenerationRequest request) {
         List<Cotisation> generated = new ArrayList<>();
+        List<String> skipped = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
         List<AgentPublic> agents;
         boolean forceRecalcul = Boolean.TRUE.equals(request.getForceRecalcul());
 
         switch (request.getMode()) {
             case TOUTES:
-                // Get all agents with dateDebutIlhaq set
                 agents = agentPublicRepository.findAll().stream()
                         .filter(a -> a.getDateDebutIlhaq() != null)
                         .toList();
@@ -82,7 +85,6 @@ public class CotisationService {
                 agents = agentPublicRepository.findByInstitutionId(request.getInstitutionId());
                 break;
             case AGENT:
-                // Support search by numInscription
                 if (request.getNumInscription() != null && !request.getNumInscription().isEmpty()) {
                     agents = agentPublicRepository.findByNumInscription(request.getNumInscription())
                             .map(List::of).orElse(List.of());
@@ -97,47 +99,67 @@ public class CotisationService {
                 throw new RuntimeException("Mode de génération inconnu");
         }
 
+        System.out.println("Génération: " + agents.size() + " agent(s) trouvé(s) pour T" + request.getTrimestre() + "/" + request.getAnnee());
+
         for (AgentPublic agent : agents) {
             try {
-                Cotisation c = genererPourAgent(agent, request.getTrimestre(), request.getAnnee(), forceRecalcul);
+                Cotisation c = genererPourAgent(agent, request.getTrimestre(), request.getAnnee(), forceRecalcul, skipped);
                 if (c != null) generated.add(c);
             } catch (Exception e) {
-                // Log and continue with next agent
-                System.err.println("Erreur génération cotisation agent " + agent.getNumInscription() + ": " + e.getMessage());
+                String errMsg = agent.getNumInscription() + " (" + agent.getPrenom() + " " + agent.getNom() + "): " + e.getMessage();
+                errors.add(errMsg);
+                System.err.println("Erreur génération cotisation " + errMsg);
             }
         }
-        return generated;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", generated.size());
+        result.put("cotisations", generated);
+        result.put("totalAgents", agents.size());
+        result.put("skipped", skipped);
+        result.put("errors", errors);
+        String msg = generated.size() + " cotisation(s) générée(s) sur " + agents.size() + " agent(s)";
+        if (!skipped.isEmpty()) msg += " | " + skipped.size() + " ignoré(s)";
+        if (!errors.isEmpty()) msg += " | " + errors.size() + " erreur(s)";
+        result.put("message", msg);
+        return result;
     }
 
-    private Cotisation genererPourAgent(AgentPublic agent, int trimestre, int annee, boolean forceRecalcul) {
+    private Cotisation genererPourAgent(AgentPublic agent, int trimestre, int annee, boolean forceRecalcul, List<String> skipped) {
+        String agentLabel = agent.getNumInscription() + " (" + agent.getPrenom() + " " + agent.getNom() + ")";
+
         // Vérifier si cotisation existe déjà
         Optional<Cotisation> existing = cotisationRepository
                 .findByAgentPublicIdAndTrimestreAndAnnee(agent.getId(), trimestre, annee);
-        if (existing.isPresent()) {
-            if (forceRecalcul) {
-                // Supprimer l'ancienne et recalculer
-                cotisationRepository.delete(existing.get());
-            } else {
-                return null; // Pas de duplication
-            }
+        if (existing.isPresent() && !forceRecalcul) {
+            skipped.add(agentLabel + ": cotisation existe déjà (cocher إعادة حساب pour recalculer)");
+            return null;
         }
 
         // Déterminer début du trimestre
         LocalDate debutTrimestre = getDebutTrimestre(trimestre, annee);
         LocalDate finTrimestre = getFinTrimestre(trimestre, annee);
 
-        // Vérifier si agent a une période d'ilhaq couvrant le trimestre (using agent dates)
+        // Vérifier si agent a une période d'ilhaq couvrant le trimestre
         LocalDate dateDebutIlhaq = agent.getDateDebutIlhaq();
         LocalDate dateFinIlhaq = agent.getDateFinIlhaq();
         
-        if (dateDebutIlhaq == null) return null; // Pas de date ilhaq
-        if (dateDebutIlhaq.isAfter(finTrimestre)) return null; // Ilhaq commence après le trimestre
-        if (dateFinIlhaq != null && dateFinIlhaq.isBefore(debutTrimestre)) return null; // Ilhaq terminé avant
+        if (dateDebutIlhaq == null) {
+            skipped.add(agentLabel + ": pas de date début ilhaq");
+            return null;
+        }
+        if (dateDebutIlhaq.isAfter(finTrimestre)) {
+            skipped.add(agentLabel + ": ilhaq commence après le trimestre (" + dateDebutIlhaq + " > " + finTrimestre + ")");
+            return null;
+        }
+        if (dateFinIlhaq != null && dateFinIlhaq.isBefore(debutTrimestre)) {
+            skipped.add(agentLabel + ": ilhaq terminé avant le trimestre (" + dateFinIlhaq + " < " + debutTrimestre + ")");
+            return null;
+        }
 
-        // Récupérer le salaire applicable (utiliser fin du trimestre pour trouver le salaire)
+        // Récupérer le salaire applicable
         Optional<Salaire> salaireOpt = salaireRepository.findSalaireApplicable(agent.getId(), finTrimestre);
         if (salaireOpt.isEmpty()) {
-            // Fallback: get the latest salaire for the agent (regardless of date)
             List<Salaire> allSalaires = salaireRepository.findByAgentPublicIdOrderByDateEffetDesc(agent.getId());
             if (!allSalaires.isEmpty()) {
                 salaireOpt = Optional.of(allSalaires.get(0));
@@ -145,8 +167,7 @@ public class CotisationService {
         }
         BigDecimal salaireMensuel;
         if (salaireOpt.isEmpty()) {
-            // Skip agent if no salaire found at all
-            System.err.println("Aucun salaire pour agent " + agent.getNumInscription() + ", ignoré");
+            skipped.add(agentLabel + ": aucun salaire trouvé");
             return null;
         } else {
             salaireMensuel = salaireOpt.get().getSalaireMensuel();
@@ -180,19 +201,28 @@ public class CotisationService {
 
         BigDecimal total = montant137.add(montant138).add(montant197).add(montant198);
 
-        Cotisation cotisation = new Cotisation();
-        cotisation.setAgentPublic(agent);
-        cotisation.setInstitution(agent.getInstitution());
-        cotisation.setIlhaq(null); // Will use agent dates instead
-        cotisation.setTrimestre(trimestre);
-        cotisation.setAnnee(annee);
+        // Mise à jour de la cotisation existante ou création d'une nouvelle
+        Cotisation cotisation;
+        if (existing.isPresent()) {
+            // forceRecalcul: mettre à jour les montants sans supprimer (préserve les paiements)
+            cotisation = existing.get();
+        } else {
+            cotisation = new Cotisation();
+            cotisation.setAgentPublic(agent);
+            cotisation.setInstitution(agent.getInstitution());
+            cotisation.setIlhaq(null);
+            cotisation.setTrimestre(trimestre);
+            cotisation.setAnnee(annee);
+        }
         cotisation.setSalaireMensuelApplique(salaireMensuel);
         cotisation.setMontantCode137(montant137);
         cotisation.setMontantCode138(montant138);
         cotisation.setMontantCode197(montant197);
         cotisation.setMontantCode198(montant198);
         cotisation.setMontantTotal(total);
-        cotisation.setStatut(Cotisation.StatutCotisation.EN_ATTENTE);
+        if (!existing.isPresent()) {
+            cotisation.setStatut(Cotisation.StatutCotisation.EN_ATTENTE);
+        }
 
         return cotisationRepository.save(cotisation);
     }

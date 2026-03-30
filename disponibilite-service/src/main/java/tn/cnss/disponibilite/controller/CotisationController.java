@@ -53,12 +53,8 @@ public class CotisationController {
     @PostMapping("/generer")
     public ResponseEntity<?> generer(@RequestBody CotisationGenerationRequest request) {
         try {
-            List<Cotisation> generated = service.generer(request);
-            return ResponseEntity.ok(Map.of(
-                    "count", generated.size(),
-                    "cotisations", generated,
-                    "message", generated.size() + " cotisation(s) générée(s)"
-            ));
+            Map<String, Object> result = service.generer(request);
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
